@@ -1,17 +1,29 @@
 /* Citizen intake — four channels, one pipeline.
 
-   Voice uses the browser's SpeechRecognition where available. That is the
-   demo stand-in for XVoice, the production intake layer: the browser API
-   covers a few dozen major languages and needs a network round-trip, whereas
-   XVoice runs on-device across a far wider set including low-resource
-   languages that no browser ships. The contract is identical either way —
-   audio in, text plus a language tag out — so everything downstream of this
-   file is unchanged when the real engine is swapped in.
+   VOICE HAS TWO PATHS, and the server decides which one this browser gets.
+
+   1. RECORD AND UPLOAD (preferred). MediaRecorder captures audio, we POST it
+      to /api/voice/transcribe, and the server transcribes it. This works in
+      every browser, and the model is a deployment decision rather than
+      whatever the citizen's browser happens to ship.
+
+   2. BROWSER RECOGNITION (fallback). window.SpeechRecognition, used only when
+      no server transcription is configured. It is genuinely weak for this
+      project: Chrome/Safari only, secure-origin only — so it dies the moment
+      you open the app from a phone at http://192.168.x.x:8000 — and its
+      language coverage is worst exactly where this platform needs it most.
+
+   When neither is usable we say so, specifically, instead of leaving a dead
+   microphone button on the screen. Every failure below names its own cause.
 */
 import { api, apiPost, fmt, themeToggle, urgencyChip } from './viz.js';
 
 const $ = (id) => document.getElementById(id);
-const state = { pack: null, country: 'IN', district: null, lang: '', recognizing: false };
+const state = {
+  pack: null, country: 'IN', district: null, lang: '',
+  recognizing: false, serverSTT: false, voiceInfo: null,
+  recorder: null, chunks: [],
+};
 
 const EXAMPLES = [
   ['hi', 'हमारे गांव में तीन महीने से पीने का पानी नहीं आ रहा है, बच्चे बीमार हो रहे हैं'],
@@ -70,7 +82,8 @@ async function boot() {
     $('voicelen').textContent = n ? `${n} characters` : '';
   };
 
-  setupMic();
+  // Awaited: the mic must not be clickable before we know which path it takes.
+  await setupMic();
   loadRecent();
 }
 
@@ -96,28 +109,152 @@ function fillDistricts() {
 }
 
 /* ----------------------------------------------------------------- voice */
-function setupMic() {
+/* Diagnose precisely why voice is unavailable, instead of a dead button. */
+function browserVoiceDiagnosis() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const mic = $('mic');
+  const secure = window.isSecureContext;
+  const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+                       && window.MediaRecorder);
+  if (!secure) {
+    return { ok: false, reason:
+      `This page is on an insecure origin (${location.protocol}//${location.host}), ` +
+      'so browsers block microphone access entirely. Use https://, or open it as ' +
+      'http://localhost. This is the usual reason voice fails when testing from a phone.' };
+  }
+  if (!canRecord && !SR) {
+    return { ok: false, reason: 'This browser exposes neither MediaRecorder nor a speech engine.' };
+  }
   if (!SR) {
-    $('micstatus').textContent = 'Live speech input is not available in this browser.';
+    return { ok: false, reason:
+      'This browser has no built-in speech engine (Firefox does not ship one). ' +
+      'Configure server-side transcription and voice works here too.' };
+  }
+  return { ok: true, reason: null };
+}
+
+async function setupMic() {
+  const mic = $('mic');
+
+  // Ask the server which path this browser should take.
+  try {
+    state.voiceInfo = await api('/api/voice/status');
+    state.serverSTT = !!state.voiceInfo.server_transcription;
+  } catch {
+    state.serverSTT = false;
+  }
+
+  if (state.serverSTT) {
+    const p = state.voiceInfo.provider || {};
     $('micnote').innerHTML =
-      'Type below instead — the pipeline is identical. In production this is handled by ' +
-      '<b>XVoice</b>, which runs on-device and covers languages no browser supports.';
+      `Recording in your browser and transcribing on the server via <b>${p.provider}</b>` +
+      (p.model ? ` (${p.model})` : '') +
+      '. Works in any browser, in any of the supported languages.';
+    return setupRecorder(mic);
+  }
+
+  const diag = browserVoiceDiagnosis();
+  if (!diag.ok) {
+    $('micstatus').textContent = 'Voice input is unavailable in this browser.';
+    $('micnote').innerHTML =
+      `${diag.reason}<br><br>Type below instead — the pipeline is identical. ` +
+      'To enable voice everywhere, configure server-side transcription ' +
+      '(<code>GROQ_API_KEY</code>, or <code>XVOICE_STT_URL</code> for XVoice).';
     mic.disabled = true; mic.style.opacity = .5; mic.style.cursor = 'not-allowed';
     return;
   }
   $('micnote').innerHTML =
-    'Browser speech input — the demo stand-in for <b>XVoice</b>, which adds on-device ' +
-    'recognition and far wider language coverage.';
+    'Using this browser’s own speech engine — Chrome/Safari only, and weak on ' +
+    'Indic languages. Configure server-side transcription for reliable multilingual voice.';
+  setupBrowserRecognition(mic);
+}
 
+/* ---- path 1: record in the browser, transcribe on the server ---------- */
+function setupRecorder(mic) {
+  mic.onclick = async () => {
+    if (state.recognizing) {                       // stop and submit
+      try { state.recorder && state.recorder.stop(); } catch { /* already stopped */ }
+      return;
+    }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      $('micstatus').textContent = e && e.name === 'NotAllowedError'
+        ? 'Microphone permission denied — allow it, or type below instead.'
+        : `Could not open the microphone (${e && e.name}) — type below instead.`;
+      return;
+    }
+    // Pick a container the browser actually supports: Chrome/Firefox do webm,
+    // Safari does mp4. Both are accepted by the transcription services.
+    const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg']
+      .find(t => window.MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+    const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    state.recorder = rec; state.chunks = [];
+
+    rec.ondataavailable = (e) => { if (e.data && e.data.size) state.chunks.push(e.data); };
+    rec.onstart = () => {
+      state.recognizing = true; mic.classList.add('rec');
+      mic.setAttribute('aria-label', 'Stop recording');
+      $('micstatus').textContent = 'Recording… tap again when you have finished.';
+    };
+    rec.onstop = async () => {
+      state.recognizing = false; mic.classList.remove('rec');
+      mic.setAttribute('aria-label', 'Start voice recording');
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(state.chunks, { type: rec.mimeType || 'audio/webm' });
+      if (!blob.size) { $('micstatus').textContent = 'Nothing was recorded — try again.'; return; }
+
+      $('micstatus').innerHTML = '<span class="spinner"></span> Transcribing…';
+      try {
+        const b64 = await blobToBase64(blob);
+        const ext = (rec.mimeType || 'audio/webm').includes('mp4') ? 'mp4'
+                  : (rec.mimeType || '').includes('ogg') ? 'ogg' : 'webm';
+        const r = await apiPost('/api/voice/transcribe', {
+          audio_base64: b64, filename: `audio.${ext}`,
+          language: state.lang || null,          // omit → let the model detect
+        });
+        if (!r.text) { $('micstatus').textContent = 'No speech detected — try again.'; return; }
+        const box = $('voicetext');
+        box.value = (box.value ? box.value.trim() + ' ' : '') + r.text;
+        box.dispatchEvent(new Event('input'));
+        $('micstatus').textContent =
+          `Captured${r.language ? ` (${r.language})` : ''}. Review the text, then submit.`;
+      } catch (e) {
+        $('micstatus').textContent = `Transcription failed: ${e.message}`;
+      }
+    };
+    try { rec.start(); } catch (e) {
+      $('micstatus').textContent = `Could not start recording (${e.message}).`;
+    }
+  };
+}
+
+const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+  const fr = new FileReader();
+  fr.onerror = () => reject(new Error('Could not read the recording'));
+  fr.onload = () => resolve(String(fr.result).split(',')[1]);   // strip data: prefix
+  fr.readAsDataURL(blob);
+});
+
+/* ---- path 2: the browser's own engine (fallback) ---------------------- */
+function setupBrowserRecognition(mic) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec = null;
   mic.onclick = () => {
     if (state.recognizing) { rec && rec.stop(); return; }
-    rec = new SR();
+    // Never silently transcribe one language as another: if the citizen has
+    // not chosen a language, say so rather than defaulting to English and
+    // returning confident nonsense.
     const chosen = state.lang &&
       state.pack.languages.find(l => l.code === state.lang)?.bcp47;
-    rec.lang = chosen || (state.country === 'BR' ? 'pt-BR' : 'en-IN');
+    if (!chosen) {
+      $('micstatus').textContent =
+        'Choose your language above first — this browser engine cannot detect it, ' +
+        'and will otherwise transcribe your speech as English.';
+      return;
+    }
+    rec = new SR();
+    rec.lang = chosen;
     rec.continuous = true; rec.interimResults = true;
 
     let settled = '';
@@ -136,15 +273,22 @@ function setupMic() {
       $('voicetext').dispatchEvent(new Event('input'));
     };
     rec.onerror = (e) => {
-      $('micstatus').textContent =
-        e.error === 'not-allowed' ? 'Microphone permission denied — type below instead.'
-                                  : `Speech input error (${e.error}) — type below instead.`;
+      const why = {
+        'not-allowed': 'Microphone permission denied.',
+        'service-not-allowed': 'The browser blocked its speech service.',
+        'no-speech': 'No speech detected.',
+        'network': 'This browser sends audio to its vendor for recognition, and that '
+                 + 'call failed. Server-side transcription avoids this entirely.',
+        'language-not-supported': `This browser cannot recognise ${rec.lang}. `
+                 + 'Server-side transcription covers far more languages.',
+      }[e.error] || `Speech input error (${e.error}).`;
+      $('micstatus').textContent = `${why} Type below instead.`;
     };
     rec.onend = () => {
       state.recognizing = false; mic.classList.remove('rec');
       mic.setAttribute('aria-label', 'Start voice recording');
-      if (!$('micstatus').textContent.includes('error') &&
-          !$('micstatus').textContent.includes('denied')) {
+      const msg = $('micstatus').textContent;
+      if (!/error|denied|blocked|cannot|failed|detected/i.test(msg)) {
         $('micstatus').textContent = $('voicetext').value.trim()
           ? 'Captured. Review the text, then submit.' : 'Tap and speak in your own language.';
       }

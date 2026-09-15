@@ -84,3 +84,16 @@ class WeightsIn(BaseModel):
     discount_lambda: float = Field(default=0.60, ge=0, le=1,
                                    description="How strongly committed investment "
                                                "suppresses priority")
+
+
+class TranscribeIn(BaseModel):
+    """Audio submitted for server-side transcription.
+
+    Base64 in a JSON body rather than a multipart upload, so the project keeps
+    its three-package dependency list — clips are seconds long.
+    """
+    audio_base64: str = Field(description="Base64-encoded audio (webm/ogg/mp4/wav/m4a)")
+    filename: str = Field(default="audio.webm",
+                          description="Used only for the content-type the STT service sees")
+    language: Optional[str] = Field(default=None,
+                                    description="ISO-639-1 hint. Omit to let the model detect.")

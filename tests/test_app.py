@@ -194,6 +194,66 @@ def test_engine_disagreement_escalates_to_human_review():
         os.environ.pop("GROQ_API_KEY", None)
 
 
+# ------------------------------------------------------------------ voice
+def test_speech_provider_is_none_until_configured():
+    """No STT config must mean a clear 'not configured', never a crash."""
+    from app.ai.speech import get_speech_provider, SpeechError
+    for var in ("XVOICE_STT_URL", "GROQ_API_KEY", "SPEECH_PROVIDER"):
+        os.environ.pop(var, None)
+    p = get_speech_provider()
+    assert p.name == "none" and p.available() is False
+    try:
+        p.transcribe(b"x", "a.webm")
+        assert False, "should have raised"
+    except SpeechError:
+        pass
+
+
+def test_xvoice_wins_over_groq_when_both_configured():
+    """XVoice is the intended production path; Groq is the stand-in."""
+    from app.ai.speech import get_speech_provider
+    os.environ["GROQ_API_KEY"] = "k"
+    os.environ["XVOICE_STT_URL"] = "https://example.invalid/stt"
+    try:
+        assert get_speech_provider().name == "xvoice"
+        os.environ.pop("XVOICE_STT_URL")
+        assert get_speech_provider().name == "groq"
+    finally:
+        for var in ("GROQ_API_KEY", "XVOICE_STT_URL"):
+            os.environ.pop(var, None)
+
+
+def test_multipart_body_is_well_formed():
+    """Hand-rolled because the project refuses a dependency for one upload —
+    so it has to be tested rather than assumed."""
+    from app.ai.speech import _multipart
+    body, ctype = _multipart({"model": "m", "language": "ta", "skipme": None},
+                             "audio.webm", b"AUDIOBYTES")
+    assert ctype.startswith("multipart/form-data; boundary=")
+    boundary = ctype.split("boundary=")[1]
+    assert body.count(boundary.encode()) >= 3     # two fields + file + closing
+    assert b'name="model"' in body and b'name="language"' in body
+    assert b'name="skipme"' not in body           # None fields are dropped
+    assert b'filename="audio.webm"' in body
+    assert b"Content-Type: video/webm" in body or b"Content-Type: audio/webm" in body
+    assert b"AUDIOBYTES" in body
+    assert body.endswith(f"--{boundary}--\r\n".encode())
+
+
+def test_transcription_failure_is_reported_not_swallowed():
+    """A citizen who just spoke must get a real error, not silence."""
+    from app.ai.speech import GroqWhisper, SpeechError
+    os.environ["GROQ_API_KEY"] = "k"
+    try:
+        g = GroqWhisper()
+        g.transcribe(b"audio", "a.webm")          # unreachable host in tests
+        assert False, "should have raised"
+    except SpeechError as exc:
+        assert str(exc)                            # carries a showable message
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
 # ------------------------------------------------------------- data packs
 def test_every_country_pack_loads_and_is_well_formed():
     for code in ("IN", "BR", "ZA"):

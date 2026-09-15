@@ -6,7 +6,8 @@ document in this repo, read this one.*
 > For the full scoring mathematics, see [`docs/PRIORITIZATION.md`](docs/PRIORITIZATION.md).
 > For a terser, implementation-focused version of this document, see
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). For the demo script, see
-> [`docs/PITCH.md`](docs/PITCH.md).
+> [`docs/PITCH.md`](docs/PITCH.md). For how voice input works and what XVoice
+> integration still needs, see [`docs/VOICE.md`](docs/VOICE.md).
 
 ---
 
@@ -70,7 +71,7 @@ behind every recommendation so it can be challenged, not just trusted.
 ```
  CHANNELS                     UNDERSTANDING                    STORAGE
 ┌──────────────┐   text    ┌──────────────────────┐   record  ┌───────────────┐
-│ Voice (XVoice)│──────────▶│  AI Analysis Engine   │──────────▶│  SQLite        │
+│ Voice (STT)   │──────────▶│  AI Analysis Engine   │──────────▶│  SQLite        │
 │ Text / Web    │           │                       │           │  requests +    │
 │ WhatsApp      │           │  1. redact PII        │           │  audit_log     │
 │ SMS / IVR     │           │  2. detect language   │           │  (append-only) │
@@ -361,7 +362,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_app.py       24 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       28 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it
@@ -376,7 +377,7 @@ Open `http://127.0.0.1:8000`. The database seeds itself on first run with
 Every number quoted in this document reproduces exactly from that seed.
 
 ```bash
-python3 tests/test_app.py     # 24/24 — no test runner required
+python3 tests/test_app.py     # 28/28 — no test runner required
 ```
 
 ---

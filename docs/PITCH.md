@@ -31,9 +31,11 @@ On `/citizen`:
 > literacy requirement either. It's how you reach the people the dashboard is
 > about to flag as silent."
 
-Mention XVoice once: *the browser's recogniser is the stand-in; XVoice is the
-production layer — on-device, far wider language coverage. Same contract, so
-nothing downstream changes.*
+On voice, say what is actually true: *audio is recorded in the browser and
+transcribed server-side — so it works in any browser, on a phone, over a LAN, in
+~99 languages. XVoice is the intended provider and the adapter slot is wired and
+tested, but it is not connected yet; today that slot runs Whisper.* Do not claim
+XVoice is integrated — a judge who asks one follow-up will find it isn't.
 
 ## 2:00 — The map (45s)
 

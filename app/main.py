@@ -26,7 +26,8 @@ from .analysis.budget import STRATEGIES, allocate, compare_strategies
 from .analysis.fusion import available_countries, build_matrix, load_pack
 from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
-from .schemas import ReviewIn, RequestIn
+from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
+from .schemas import ReviewIn, RequestIn, TranscribeIn
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app")
@@ -144,6 +145,60 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
 def health():
     return {"status": "ok", "ai_engine": ENGINE.health(),
             "data": db.counts(), "countries": available_countries()}
+
+
+@app.post("/api/voice/transcribe", tags=["intake"])
+def transcribe(body: TranscribeIn):
+    """Turn recorded audio into text, server-side.
+
+    Audio arrives base64-encoded in JSON rather than as a multipart upload so
+    the project keeps its three-package dependency list; clips are seconds
+    long, so the ~33% encoding overhead is irrelevant.
+
+    Transcribing on the server rather than in the browser is the point: it
+    works in every browser, over plain HTTP on a LAN, and on whatever model the
+    deployment chooses — none of which is true of the browser's own engine.
+    """
+    import base64
+    from .ai.speech import SpeechError, get_speech_provider
+
+    provider = get_speech_provider()
+    if not provider.available():
+        raise HTTPException(503, "No server-side transcription is configured. "
+                                 "Set XVOICE_STT_URL or GROQ_API_KEY.")
+    try:
+        audio = base64.b64decode(body.audio_base64, validate=True)
+    except Exception:                                     # noqa: BLE001
+        raise HTTPException(400, "audio_base64 is not valid base64.")
+    if not audio:
+        raise HTTPException(400, "Empty audio.")
+    if len(audio) > SPEECH_MAX_BYTES:
+        raise HTTPException(413, f"Audio exceeds {SPEECH_MAX_BYTES // (1024 * 1024)}MB.")
+    try:
+        result = provider.transcribe(audio, body.filename, body.language)
+    except SpeechError as exc:
+        # A failed transcription must not look like a crash to a citizen who
+        # just spoke into their phone.
+        raise HTTPException(502, str(exc))
+    return {**result, "bytes": len(audio)}
+
+
+@app.get("/api/voice/status", tags=["intake"])
+def voice_status():
+    """What the browser should do for voice input, decided server-side."""
+    from .ai.speech import get_speech_provider
+    provider = get_speech_provider()
+    return {
+        "server_transcription": provider.available(),
+        "provider": provider.health(),
+        "hint": ("Server-side transcription is active — the browser records "
+                 "audio and uploads it, which works in every browser."
+                 if provider.available() else
+                 "No server transcription configured. The browser falls back to "
+                 "its own speech engine, which needs Chrome/Safari on a secure "
+                 "origin (https:// or localhost) and covers few Indic languages. "
+                 "Set GROQ_API_KEY, or XVOICE_STT_URL for XVoice."),
+    }
 
 
 @app.get("/api/ai/models", tags=["meta"])

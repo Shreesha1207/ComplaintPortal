@@ -14,7 +14,7 @@
 
 ```
 ┌── CHANNELS ────────────────────────────────────────────────────────────┐
-│  Web/PWA · Voice (XVoice) · WhatsApp · SMS · IVR · field worker · API   │
+│  Web/PWA · Voice (server STT) · WhatsApp · SMS · IVR · worker · API    │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼  POST /api/requests
 ┌── UNDERSTANDING ── app/ai/ ──────────────────────────────────────────┐
@@ -132,5 +132,5 @@ app/
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_app.py  (24 tests, runs with or without pytest)
+tests/       test_app.py  (28 tests, runs with or without pytest)
 ```

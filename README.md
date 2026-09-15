@@ -48,7 +48,7 @@ synthetic multilingual requests across India, Brazil and South Africa (~8s).
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 24 tests, no test runner required
+python3 tests/test_app.py   # 28 tests, no test runner required
 ```
 
 ---
@@ -149,14 +149,28 @@ hierarchy, languages, sectors, hex-map layout, demographic and infrastructure
 indices, and the public investment pipeline. India, Brazil and South Africa ship
 as worked examples; `build_packs.py` regenerates them reproducibly.
 
-## Where XVoice fits
+## Voice input
 
 Voice is the channel that reaches the populations this platform flags as silent —
-low literacy, low smartphone penetration, languages no mainstream ASR covers.
-The demo uses the browser's `SpeechRecognition` as a stand-in. **XVoice** is the
-production intake layer: on-device recognition across a far wider language set.
-The contract is identical — audio in, text plus a language tag out — so nothing
-downstream changes when it is swapped in.
+low literacy, low smartphone penetration, languages no mainstream ASR covers. So
+it has to actually work, which means transcribing **server-side** rather than
+relying on the browser's own engine (Chrome/Safari only, secure-origin only, and
+weakest on exactly the languages that matter here).
+
+```bash
+export GROQ_API_KEY=gsk_...    # Whisper large v3, ~99 languages — works today
+./run.sh
+```
+
+`GET /api/voice/status` reports which path a browser will take and why; when
+voice cannot work, the UI names the specific reason instead of showing a dead
+microphone.
+
+**XVoice (xvoicekeyboard.com) is not yet integrated.** There is a configured,
+tested adapter slot for it, but its real API contract has not been verified —
+see [`docs/VOICE.md`](docs/VOICE.md) for exactly what is needed to finish it,
+including the case where XVoice is an on-device keyboard, in which case no
+server adapter is wanted at all.
 
 ---
 
@@ -183,6 +197,7 @@ spots the platform is built to find.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Terser, implementation-focused version — data sources, scaling path |
 | [`docs/PRIORITIZATION.md`](docs/PRIORITIZATION.md) | The scoring maths, in full, with worked examples |
 | [`docs/DPG_COMPLIANCE.md`](docs/DPG_COMPLIANCE.md) | Digital Public Good standard, indicator by indicator |
+| [`docs/VOICE.md`](docs/VOICE.md) | Voice input: how it works, why it used to fail, and what XVoice integration needs |
 | [`docs/PITCH.md`](docs/PITCH.md) | Six-minute demo script |
 
 ## Licence
