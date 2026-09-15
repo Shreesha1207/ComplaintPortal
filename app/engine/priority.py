@@ -2,7 +2,7 @@
 """
 Explainable prioritisation engine.
 
-This is the part that makes AGORA a decision-support system rather than a
+This is the part that makes this a decision-support system rather than a
 complaint tracker, so the reasoning is written out in full.
 
 THE SCORE

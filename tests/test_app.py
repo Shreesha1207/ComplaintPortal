@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-AGORA test suite.
+Test suite.
 
-Runs under pytest if installed, and standalone via `python3 tests/test_agora.py`
+Runs under pytest if installed, and standalone via `python3 tests/test_app.py`
 otherwise — a prototype that has to be runnable on a fresh machine should not
 require a test runner to prove it works.
 
@@ -18,13 +18,13 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault("AGORA_DB", os.path.join(tempfile.gettempdir(), "agora_test.db"))
+os.environ.setdefault("APP_DB", os.path.join(tempfile.gettempdir(), "app_test.db"))
 
-from agora.ai.heuristic import HeuristicEngine
-from agora.ai.llm import LLMEngine, get_engine
-from agora.engine.budget import allocate, compare_strategies
-from agora.engine.fusion import build_matrix, load_pack
-from agora.engine.priority import (DEFAULT_WEIGHTS, rollup_districts,
+from app.ai.heuristic import HeuristicEngine
+from app.ai.llm import LLMEngine, get_engine
+from app.engine.budget import allocate, compare_strategies
+from app.engine.fusion import build_matrix, load_pack
+from app.engine.priority import (DEFAULT_WEIGHTS, rollup_districts,
                                    rollup_regions, score_cells)
 
 ENGINE = HeuristicEngine()
@@ -146,7 +146,7 @@ def test_investment_coverage_discounts_priority_but_never_to_zero_by_default():
 def test_equity_correction_inverts_participation_bias():
     """The core claim. Raw demand favours districts that can complain; after
     correction that advantage must be removed, not merely reduced."""
-    from agora import db
+    from app import db
     db.init_db()
     rows = db.list_requests(country="IN", limit=10 ** 6)
     if len(rows) < 200:

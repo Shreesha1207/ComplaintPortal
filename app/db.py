@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path(os.getenv("AGORA_DB", Path(__file__).resolve().parent.parent / "agora.db"))
+DB_PATH = Path(os.getenv("APP_DB", Path(__file__).resolve().parent.parent / "data.db"))
 _local = threading.local()
 
 SCHEMA = """

@@ -17,28 +17,28 @@
 │  Web/PWA · Voice (XVoice) · WhatsApp · SMS · IVR · field worker · API   │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼  POST /api/requests
-┌── UNDERSTANDING ── agora/ai/ ──────────────────────────────────────────┐
+┌── UNDERSTANDING ── app/ai/ ──────────────────────────────────────────┐
 │  AnalysisEngine (base.py) — one contract, swappable implementations     │
 │    HeuristicEngine   offline, deterministic, 19 languages  [default]    │
 │    LLMEngine         Claude; real translation, messy text  [optional]   │
 │  redact → identify language → classify → extract → score confidence     │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼  Unified Request Envelope
-┌── STORE ── agora/db.py ────────────────────────────────────────────────┐
+┌── STORE ── app/db.py ────────────────────────────────────────────────┐
 │  SQLite (WAL). requests + append-only audit_log.                        │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── FUSION ── agora/engine/fusion.py ────────────────────────────────────┐
+┌── FUSION ── app/engine/fusion.py ────────────────────────────────────┐
 │  requests ⋈ demographics ⋈ infrastructure ⋈ investment pipeline        │
 │  → exhaustive (district × sector) matrix                               │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── PRIORITISATION ── agora/engine/priority.py, budget.py ───────────────┐
+┌── PRIORITISATION ── app/engine/priority.py, budget.py ───────────────┐
 │  equity correction → weighted need → investment discount → flags       │
 │  → per-factor contributions, counterfactual, confidence, rollups       │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── DELIVERY ── agora/main.py, agora/web/ ───────────────────────────────┐
+┌── DELIVERY ── app/main.py, app/web/ ───────────────────────────────┐
 │  FastAPI + OpenAPI · dashboard · review queue · CSV export             │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -57,7 +57,7 @@
 
 Every channel produces one shape; everything downstream consumes it. It carries
 the AI's uncertainty alongside its conclusions, so consumers can decide how much
-to trust any single record. See `agora/schemas.py`.
+to trust any single record. See `app/schemas.py`.
 
 Key fields: `language` + `language_confidence`, `text_original` /
 `text_redacted` / `text_en`, `sector` + `sector_confidence`, `urgency` +
@@ -122,7 +122,7 @@ coordinated-campaign detection, encryption at rest, and data-retention policy.
 ## Repository layout
 
 ```
-agora/
+app/
   ai/        base.py · lexicon.py · heuristic.py · llm.py
   engine/    fusion.py · priority.py · budget.py
   packs/     build_packs.py · IN.json · BR.json · ZA.json
@@ -132,5 +132,5 @@ agora/
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_agora.py  (20 tests, runs with or without pytest)
+tests/       test_app.py  (20 tests, runs with or without pytest)
 ```

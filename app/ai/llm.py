@@ -44,12 +44,12 @@ from pydantic import BaseModel, Field
 from .base import Analysis, AnalysisEngine
 from .heuristic import HeuristicEngine
 
-log = logging.getLogger("agora.ai.llm")
+log = logging.getLogger("app.ai.llm")
 
-# Opus 5 is the default. Override with AGORA_LLM_MODEL if a deployment chooses
+# Opus 5 is the default. Override with APP_LLM_MODEL if a deployment chooses
 # to trade capability for unit cost at national volume -- that is a policy
 # decision for the operator, not a default we make for them.
-DEFAULT_MODEL = os.getenv("AGORA_LLM_MODEL", "claude-opus-5")
+DEFAULT_MODEL = os.getenv("APP_LLM_MODEL", "claude-opus-5")
 
 SECTOR_CODES = ["water", "roads", "health", "education", "power", "transport",
                 "housing", "digital", "agriculture", "jobs", "other"]

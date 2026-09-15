@@ -35,7 +35,7 @@ Countermeasures, all implemented and tested:
 | Hidden politics presented as arithmetic | Weights and λ are API parameters, returned in every response, live-adjustable | `test_weights_actually_move_the_ranking` |
 | AI error becomes a funding decision | Confidence threshold → human review; ensemble disagreement escalates; rejected requests carry zero weight | `test_unclassifiable_text_is_routed_to_review` |
 | Personal data exposure | Deterministic redaction before storage and before any model call | `test_pii_is_always_redacted` |
-| Profiling by protected attribute | Never inferred; explicitly forbidden in the LLM prompt | Prompt in `agora/ai/llm.py` |
+| Profiling by protected attribute | Never inferred; explicitly forbidden in the LLM prompt | Prompt in `app/ai/llm.py` |
 | Vendor/model lock-in | Adapter interface; offline engine is the default and always sufficient | `test_llm_engine_degrades_to_heuristic_without_credentials` |
 
 ## Reusability across BRICS

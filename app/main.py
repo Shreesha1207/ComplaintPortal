@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-AGORA — API server.
+API server.
 
 Every analytical result the dashboard shows is available over this documented
 REST API at /api/docs. That is a deliberate Digital Public Good property, not a
@@ -29,13 +29,13 @@ from .engine.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
 from .schemas import ReviewIn, RequestIn
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-log = logging.getLogger("agora")
+log = logging.getLogger("app")
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 ENGINE = get_engine()
 
 app = FastAPI(
-    title="AGORA",
+    title="Citizen Development Priority API",
     description=(
         "Citizen development requests → national investment priorities.\n\n"
         "A multilingual, multi-channel platform that turns fragmented citizen "
@@ -90,9 +90,9 @@ def _weights_from_query(demand, gap, people, severity, vulnerability) -> dict | 
 @app.on_event("startup")
 def startup() -> None:
     db.init_db()
-    if db.counts()["total"] == 0 and os.getenv("AGORA_NO_SEED") != "1":
+    if db.counts()["total"] == 0 and os.getenv("APP_NO_SEED") != "1":
         seed_all()
-    log.info("AGORA ready — engine=%s, requests=%d", ENGINE.name, db.counts()["total"])
+    log.info("Ready — engine=%s, requests=%d", ENGINE.name, db.counts()["total"])
 
 
 def seed_all() -> None:
@@ -362,7 +362,7 @@ def export_csv(country: str = "IN", limit: int = Query(2000, le=20000)):
     buf.seek(0)
     return StreamingResponse(
         iter([buf.getvalue()]), media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="agora-priorities-{country}.csv"'})
+        headers={"Content-Disposition": f'attachment; filename="priorities-{country}.csv"'})
 
 
 # ==========================================================================

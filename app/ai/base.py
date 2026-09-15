@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Adapter contract for AGORA's request-understanding layer.
+"""Adapter contract for the request-understanding layer.
 
 Every engine -- offline heuristic, hosted LLM, or a national language lab's own
 model -- returns the same `Analysis`. That is what lets a country swap the

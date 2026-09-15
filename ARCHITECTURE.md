@@ -1,4 +1,4 @@
-# AGORA — Architecture
+# Architecture
 
 *A plain-language walkthrough of what we built and why. If you only read one
 document in this repo, read this one.*
@@ -17,7 +17,7 @@ and nobody ends up smarter about **where to build next**. That's because a
 complaint count answers the wrong question — it tells you who was loud, not
 who was underserved.
 
-AGORA is not a complaint portal. It's a pipeline that turns citizen voices,
+This is not a complaint portal. It's a pipeline that turns citizen voices,
 in any language, through any channel, into a ranked, explainable, budget-aware
 list of *what a government should fund next and why* — and it goes out of its
 way to surface the places that **never show up in complaint data at all**,
@@ -29,7 +29,7 @@ If you rank public investment by how many complaints a district files, you are
 really ranking by **who has a smartphone, can read, and lives in a city** —
 because those are the people who *can* file a complaint. Fund the loudest
 districts and you fund the ones already best served, and you get to call it
-"data-driven." AGORA corrects for this: it divides citizen demand by an
+"data-driven." This platform corrects for it: it divides citizen demand by an
 *expected-participation index*, scores infrastructure deficit and vulnerability
 straight from administrative data (which needs nobody to speak), discounts
 priority where money is already committed (but never to zero, because an
@@ -48,7 +48,7 @@ behind every recommendation so it can be challenged, not just trusted.
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  AGORA                                                                │
+│  SYSTEM                                                               │
 │  Understands the request, strips personal information, classifies    │
 │  it, fuses it with population/infrastructure/budget data for that    │
 │  exact district, and scores it against every other unmet need in     │
@@ -120,8 +120,8 @@ from speech, or relayed through WhatsApp/SMS. Whatever the channel, it lands
 at one API endpoint (`POST /api/requests`) and becomes one shape: the
 **Unified Request Envelope**. That's the interoperability seam of the whole
 system — a government's existing grievance system, a field worker's app, or a
-messaging gateway can all plug into this one endpoint without AGORA caring how
-the text arrived.
+messaging gateway can all plug into this one endpoint without the pipeline
+caring how the text arrived.
 
 ### Stage 2 — Understanding (the AI layer)
 
@@ -171,7 +171,7 @@ back to who changed what and when.
 ### Stage 4 — Fusion
 
 This is where a citizen's request stops being an isolated data point. For the
-country it belongs to, AGORA loads a **country pack** — one JSON file per
+country it belongs to, the system loads a **country pack** — one JSON file per
 nation containing its administrative hierarchy (states/districts, or
 provinces/municipalities), demographic indices (literacy, urbanisation,
 poverty, smartphone penetration), per-sector infrastructure indices, and the
@@ -239,7 +239,7 @@ with signal. A volume-based system funds District A first and calls it
 data-driven decision-making. It isn't — it's measuring who could complain,
 not who needs help.
 
-AGORA divides each district's demand by an **expected-participation index**
+Each district's demand is divided by an **expected-participation index**
 built from smartphone penetration, literacy, and urbanisation. That 3-person
 signal from District B is worth far more per request than the 200-person
 signal from District A, because it represents a much larger population that
@@ -308,7 +308,7 @@ These are listed in full, with what a production fix looks like for each, in
 ## 10. Repository map
 
 ```
-agora/
+app/
 ├── ai/                   Language understanding
 │   ├── base.py             the shared engine interface
 │   ├── lexicon.py          sector/urgency terms across 19 languages
@@ -335,7 +335,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_agora.py       20 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       20 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it
@@ -350,7 +350,7 @@ Open `http://127.0.0.1:8000`. The database seeds itself on first run with
 Every number quoted in this document reproduces exactly from that seed.
 
 ```bash
-python3 tests/test_agora.py     # 20/20 — no test runner required
+python3 tests/test_app.py     # 20/20 — no test runner required
 ```
 
 ---

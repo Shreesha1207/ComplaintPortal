@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AGORA visualisation primitives — hand-rolled SVG, zero external libraries.
+   Visualisation primitives — hand-rolled SVG, zero external libraries.
 
    No CDN on purpose. The dashboard has to render in a ministry office behind a
    restrictive proxy and in a demo room with no uplink, so every mark is drawn
@@ -306,7 +306,7 @@ export async function apiPost(path, body) {
   return data;
 }
 export function themeToggle(btn) {
-  const KEY = 'agora-theme';
+  const KEY = 'theme';
   const apply = (t) => {
     if (t) document.documentElement.setAttribute('data-theme', t);
     else document.documentElement.removeAttribute('data-theme');

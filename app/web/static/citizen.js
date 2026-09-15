@@ -219,7 +219,7 @@ const waBub = (who, text) => {
 };
 function waStart() {
   $('wathread').innerHTML = '';
-  waBub('them', 'AGORA: Namaste 🙏 Tell us what your community needs. ' +
+  waBub('them', 'Helpline: Namaste 🙏 Tell us what your community needs. ' +
                 'Write in any language — voice notes also work.');
 }
 async function waSend() {
@@ -228,9 +228,9 @@ async function waSend() {
   waBub('me', v);
   $('wainput').value = '';
   const r = await submit(v, 'whatsapp');
-  if (!r) { waBub('them', 'AGORA: Sorry, something went wrong. Please try again.'); return; }
+  if (!r) { waBub('them', 'Helpline: Sorry, something went wrong. Please try again.'); return; }
   waBub('them',
-    `AGORA: Thank you. Logged as ${r.id}.\n` +
+    `Helpline: Thank you. Logged as ${r.id}.\n` +
     `Category: ${r.sector} · Urgency: ${r.urgency}\n` +
     `Area: ${r.district_name}\n` +
     (r.status === 'review'
@@ -244,7 +244,7 @@ const smsLine = (t) => { $('smsout').textContent += t + '\n'; };
 function smsStart() {
   smsStep = 0;
   $('smsout').textContent = '';
-  smsLine('> AGORA SMS GATEWAY  (short code 1800)');
+  smsLine('> DEVELOPMENT REQUEST SMS GATEWAY  (short code 1800)');
   smsLine('');
   smsLine('IN : Reply with your request in any language.');
   smsLine('     Example: PANI NAHI AA RAHA 3 MAHINE SE');

@@ -1,8 +1,8 @@
 """
-Country Pack builder for AGORA.
+Country Pack builder.
 
-A Country Pack is the single pluggable unit that makes AGORA portable across
-BRICS nations. It declares a country's administrative hierarchy, languages,
+A Country Pack is the single pluggable unit that makes this platform portable
+across BRICS nations. It declares a country's administrative hierarchy, languages,
 map layout, demographic indicators, infrastructure indices and public
 investment pipeline. Adding a country == adding one JSON file. No code change.
 
@@ -25,7 +25,7 @@ MODELLING ASSUMPTION WORTH NAMING
 Investment allocation here is generated as a function of urbanisation and
 literacy -- i.e. of political salience -- NOT of need. That is a deliberate,
 documented model of a well-observed phenomenon: public capital tends to follow
-organised voice. It is what produces the "blind spots" AGORA is built to find.
+organised voice. It is what produces the "blind spots" this platform is built to find.
 """
 from __future__ import annotations
 

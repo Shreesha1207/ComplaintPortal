@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Multilingual lexicon powering AGORA's offline classification engine.
+Multilingual lexicon powering the offline classification engine.
 
 Why a lexicon at all, when an LLM is available?
 -----------------------------------------------
