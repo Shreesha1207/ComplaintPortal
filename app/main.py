@@ -120,7 +120,9 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
     rec = {
         "country": country, "region_code": region["code"], "district_code": district["code"],
         "channel": channel, "language": a.language, "language_confidence": a.language_confidence,
-        "text_original": a.text_original, "text_redacted": a.text_redacted, "text_en": a.text_en,
+        "text_original": a.text_original, "text_redacted": a.text_redacted,
+        "text_en": a.text_en, "text_local": a.text_local,
+        "translated": 1 if a.translated else 0,
         "sector": a.sector, "sector_confidence": a.sector_confidence,
         "urgency": a.urgency, "urgency_score": a.urgency_score,
         "affected_population": a.affected_population, "ai_confidence": a.confidence,
@@ -199,6 +201,38 @@ def voice_status():
                  "origin (https:// or localhost) and covers few Indic languages. "
                  "Set GROQ_API_KEY, or XVOICE_STT_URL for XVoice."),
     }
+
+
+@app.post("/api/translate/backfill", tags=["intake"])
+def translate_backfill(country: str | None = None, limit: int = Query(25, le=200)):
+    """Translate stored requests that only carry the offline gloss.
+
+    Requests classified offline have a category gloss in `text_en`, not a
+    translation. This re-runs those through the configured model so a
+    policymaker can read what the citizen actually said — without wiping and
+    re-seeding the database.
+    """
+    from .ai.groq_engine import GroqEngine
+    engine = ENGINE if isinstance(ENGINE, GroqEngine) else GroqEngine()
+    if not engine.available():
+        raise HTTPException(503, "No translation model configured. Set GROQ_API_KEY.")
+
+    rows = db.untranslated(country=country.upper() if country else None, limit=limit)
+    done, failed = [], []
+    for row in rows:
+        a = engine.analyse(row["text_redacted"], hint_language=row["language"],
+                           country=row["country"])
+        if not a.translated:
+            failed.append(row["id"])
+            continue
+        db.set_translation(row["id"], a.text_en, a.text_local, actor="backfill")
+        done.append(row["id"])
+    if done:
+        bump_version()
+    return {"translated": len(done), "failed": len(failed),
+            "remaining": len(db.untranslated(country=country.upper() if country else None,
+                                             limit=100000)),
+            "ids": done[:50]}
 
 
 @app.get("/api/ai/models", tags=["meta"])

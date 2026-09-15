@@ -99,6 +99,7 @@ vulnerable groups directly affected
 
 Return exactly this JSON shape:
 {"language": "ISO-639-1 code", "text_en": "faithful plain English translation",
+ "text_local": "faithful translation into the LINK LANGUAGE named below",
  "sector": "one sector code", "urgency": "critical|high|medium|low",
  "affected_population": 0, "population_basis": "how you reached that number",
  "entities": ["place names, may be empty"], "confidence": 0.0,
@@ -108,14 +109,37 @@ RULES:
 - affected_population: use an explicit number if the citizen states one \
 (multiply households/families by 5). Otherwise infer from stated scale: \
 village 1800, block 9000, ward 900, street 300. If nothing is stated, use 250.
-- text_en: faithful translation. Do not summarise, do not add detail the \
-citizen did not give, do not editorialise.
+- text_en / text_local: faithful translations, not summaries. Do not add \
+detail the citizen did not give, do not editorialise, do not soften. Keep \
+numbers and place names exactly. If the request is ALREADY in that language, \
+repeat it unchanged rather than paraphrasing it.
 - confidence: your genuine calibrated confidence that sector AND urgency are \
 both correct. Be honest. A low score routes this to a human, which is the \
 correct outcome when the request is ambiguous -- it is not a failure.
 - Text may already contain [PHONE-REDACTED] style markers. Leave them as-is.
 - Never infer caste, religion, ethnicity or political affiliation. Never let \
 the perceived social group of the requester influence urgency or population."""
+
+
+LANGUAGE_NAMES = {
+    "en": "English", "hi": "Hindi", "bn": "Bengali", "mr": "Marathi",
+    "te": "Telugu", "ta": "Tamil", "gu": "Gujarati", "kn": "Kannada",
+    "ml": "Malayalam", "or": "Odia", "pa": "Punjabi", "as": "Assamese",
+    "ur": "Urdu", "pt": "Portuguese", "es": "Spanish", "zu": "isiZulu",
+    "xh": "isiXhosa", "af": "Afrikaans", "st": "Sesotho", "ru": "Russian",
+    "zh": "Chinese",
+}
+
+
+def link_language_for(country: str) -> str:
+    """The language this country's own officials read. Translating only to
+    English would make the platform legible to donors and illegible to the
+    ministry actually using it."""
+    try:
+        from ..analysis.fusion import load_pack
+        return load_pack(country).raw.get("link_language", "en")
+    except Exception:                                     # noqa: BLE001
+        return "en"
 
 
 class GroqEngine(AnalysisEngine):
@@ -186,14 +210,17 @@ class GroqEngine(AnalysisEngine):
         if not self.available() or not text.strip():
             return base
 
+        link = link_language_for(country)
         try:
             data = self._post("/chat/completions", {
                 "model": self.model,
                 "temperature": 0,
-                "max_tokens": 700,
+                "max_tokens": 1100,
                 "response_format": {"type": "json_object"},
                 "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system",
+                     "content": f"{SYSTEM_PROMPT}\n\nLINK LANGUAGE for text_local: "
+                                f"{LANGUAGE_NAMES.get(link, link)} ({link})."},
                     # Send the redacted text, never the raw text.
                     {"role": "user",
                      "content": f"Citizen request:\n\n{base.text_redacted}"},
@@ -240,6 +267,8 @@ class GroqEngine(AnalysisEngine):
             language_confidence=0.95,
             text_original=text,
             text_en=str(r.get("text_en") or base.text_en),
+            text_local=str(r.get("text_local") or ""),
+            translated=bool(r.get("text_en")),
             sector=sector,
             sector_confidence=round(confidence, 3),
             sector_scores=base.sector_scores,

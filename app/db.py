@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS requests (
   text_original        TEXT NOT NULL,
   text_redacted        TEXT NOT NULL,
   text_en              TEXT NOT NULL,
+  text_local           TEXT NOT NULL DEFAULT '',
+  translated           INTEGER NOT NULL DEFAULT 0,
   sector               TEXT NOT NULL,
   sector_confidence    REAL NOT NULL,
   urgency              TEXT NOT NULL,
@@ -87,6 +89,13 @@ def connect() -> sqlite3.Connection:
 def init_db() -> None:
     conn = connect()
     conn.executescript(SCHEMA)
+    # Additive migration for databases created before translation existed.
+    # SQLite has no "ADD COLUMN IF NOT EXISTS", so check the table first.
+    have = {r["name"] for r in conn.execute("PRAGMA table_info(requests)")}
+    for col, ddl in (("text_local", "TEXT NOT NULL DEFAULT ''"),
+                     ("translated", "INTEGER NOT NULL DEFAULT 0")):
+        if col not in have:
+            conn.execute(f"ALTER TABLE requests ADD COLUMN {col} {ddl}")
     conn.commit()
 
 
@@ -103,12 +112,15 @@ def insert_request(rec: dict, actor: str = "system") -> str:
     rec.setdefault("id", f"REQ-{uuid.uuid4().hex[:12].upper()}")
     rec.setdefault("created_at", now())
     rec["updated_at"] = rec.get("created_at")
+    rec.setdefault("text_local", "")
+    rec.setdefault("translated", 0)
     rec["pii_types"] = json.dumps(rec.get("pii_types", []), ensure_ascii=False)
     rec["entities"] = json.dumps(rec.get("entities", []), ensure_ascii=False)
 
     cols = ["id", "created_at", "updated_at", "country", "region_code", "district_code",
             "channel", "language", "language_confidence", "text_original", "text_redacted",
-            "text_en", "sector", "sector_confidence", "urgency", "urgency_score",
+            "text_en", "text_local", "translated",
+            "sector", "sector_confidence", "urgency", "urgency_score",
             "affected_population", "ai_confidence", "ai_engine", "ai_rationale",
             "pii_types", "entities", "status", "reviewer_note"]
     conn = connect()
@@ -179,6 +191,29 @@ def update_review(rid: str, patch: dict, reviewer: str) -> dict | None:
           {"changed": {k: [before.get(k), v] for k, v in fields.items()
                        if k != "updated_at" and before.get(k) != v}})
     return get_request(rid)
+
+
+def set_translation(rid: str, text_en: str, text_local: str, actor: str) -> dict | None:
+    """Store a real translation over the offline gloss."""
+    if get_request(rid) is None:
+        return None
+    conn = connect()
+    conn.execute("UPDATE requests SET text_en=?, text_local=?, translated=1, updated_at=? "
+                 "WHERE id=?", (text_en, text_local, now(), rid))
+    conn.commit()
+    audit(rid, actor, "translated", {"chars_en": len(text_en), "chars_local": len(text_local)})
+    return get_request(rid)
+
+
+def untranslated(country: str | None = None, limit: int = 100) -> list[dict]:
+    q = "SELECT * FROM requests WHERE translated=0"
+    args: list = []
+    if country:
+        q += " AND country=?"
+        args.append(country)
+    q += " ORDER BY created_at DESC LIMIT ?"
+    args.append(limit)
+    return [_row_to_dict(r) for r in connect().execute(q, args)]
 
 
 def get_audit(rid: str) -> list[dict]:

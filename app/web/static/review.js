@@ -61,6 +61,19 @@ async function open(id) {
   $('rpanel').innerHTML = `
     <div style="font-size:16px;line-height:1.65;padding:12px;background:var(--surface-3);
                 border-radius:var(--radius-sm)">${esc(r.text_redacted)}</div>
+    ${r.translated && r.text_en ? `
+      <div class="small sec" style="margin-top:8px;padding:9px 12px;
+           background:var(--surface-3);border-radius:var(--radius-sm);
+           border-left:3px solid var(--accent)">
+        <div class="xs muted" style="margin-bottom:3px">Translation</div>
+        ${esc(r.text_en)}
+        ${r.text_local && r.text_local !== r.text_en
+          ? `<div style="margin-top:4px">${esc(r.text_local)}</div>` : ''}
+      </div>` : `
+      <p class="xs muted" style="margin:8px 0 0">No translation stored — this
+        request was classified by the offline engine, which categorises but does
+        not translate. Configure a model and run
+        <code>POST /api/translate/backfill</code>.</p>`}
     <p class="xs muted" style="margin:8px 0 0">
       Stored text only. Any phone number or identifier was removed at intake
       ${r.pii_types.length ? `(<b>${r.pii_types.join(', ')}</b> redacted)` : '(none detected)'}.</p>

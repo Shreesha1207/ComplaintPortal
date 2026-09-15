@@ -14,6 +14,7 @@
   "Municipality"
  ],
  "pivot_language": "en",
+ "link_language": "pt",
  "languages": [
   {
    "code": "pt",
@@ -141,7 +142,7 @@
    },
    "districts": [
     {
-     "code": "RR-4118",
+     "code": "RR-9196",
      "name": "Boa Vista",
      "population": 420000,
      "deprivation": 0.34,
@@ -165,7 +166,7 @@
      }
     },
     {
-     "code": "RR-2233",
+     "code": "RR-6787",
      "name": "Rorainopolis",
      "population": 30000,
      "deprivation": 0.78,
@@ -218,7 +219,7 @@
    },
    "districts": [
     {
-     "code": "AP-6779",
+     "code": "AP-6782",
      "name": "Macapa",
      "population": 510000,
      "deprivation": 0.38,
@@ -242,7 +243,7 @@
      }
     },
     {
-     "code": "AP-6774",
+     "code": "AP-5355",
      "name": "Santana",
      "population": 120000,
      "deprivation": 0.66,
@@ -295,7 +296,7 @@
    },
    "districts": [
     {
-     "code": "AM-5310",
+     "code": "AM-0328",
      "name": "Manaus",
      "population": 2250000,
      "deprivation": 0.3,
@@ -319,7 +320,7 @@
      }
     },
     {
-     "code": "AM-2687",
+     "code": "AM-1085",
      "name": "Tabatinga",
      "population": 70000,
      "deprivation": 0.84,
@@ -372,7 +373,7 @@
    },
    "districts": [
     {
-     "code": "PA-5271",
+     "code": "PA-5133",
      "name": "Belem",
      "population": 1500000,
      "deprivation": 0.34,
@@ -396,7 +397,7 @@
      }
     },
     {
-     "code": "PA-2922",
+     "code": "PA-5621",
      "name": "Maraba",
      "population": 280000,
      "deprivation": 0.7,
@@ -420,7 +421,7 @@
      }
     },
     {
-     "code": "PA-6967",
+     "code": "PA-9285",
      "name": "Altamira",
      "population": 120000,
      "deprivation": 0.8,
@@ -473,7 +474,7 @@
    },
    "districts": [
     {
-     "code": "MA-9786",
+     "code": "MA-8387",
      "name": "Sao Luis",
      "population": 1110000,
      "deprivation": 0.36,
@@ -497,7 +498,7 @@
      }
     },
     {
-     "code": "MA-6920",
+     "code": "MA-8872",
      "name": "Imperatriz",
      "population": 260000,
      "deprivation": 0.62,
@@ -521,7 +522,7 @@
      }
     },
     {
-     "code": "MA-0507",
+     "code": "MA-9331",
      "name": "Codo",
      "population": 120000,
      "deprivation": 0.88,
@@ -574,7 +575,7 @@
    },
    "districts": [
     {
-     "code": "CE-9377",
+     "code": "CE-1967",
      "name": "Fortaleza",
      "population": 2700000,
      "deprivation": 0.3,
@@ -598,7 +599,7 @@
      }
     },
     {
-     "code": "CE-6144",
+     "code": "CE-4010",
      "name": "Sobral",
      "population": 210000,
      "deprivation": 0.62,
@@ -622,7 +623,7 @@
      }
     },
     {
-     "code": "CE-8175",
+     "code": "CE-1359",
      "name": "Crateus",
      "population": 75000,
      "deprivation": 0.82,
@@ -675,7 +676,7 @@
    },
    "districts": [
     {
-     "code": "RN-0848",
+     "code": "RN-9917",
      "name": "Natal",
      "population": 890000,
      "deprivation": 0.32,
@@ -699,7 +700,7 @@
      }
     },
     {
-     "code": "RN-4501",
+     "code": "RN-7580",
      "name": "Mossoro",
      "population": 300000,
      "deprivation": 0.58,
@@ -752,7 +753,7 @@
    },
    "districts": [
     {
-     "code": "AC-7465",
+     "code": "AC-5344",
      "name": "Rio Branco",
      "population": 410000,
      "deprivation": 0.4,
@@ -776,7 +777,7 @@
      }
     },
     {
-     "code": "AC-4075",
+     "code": "AC-6862",
      "name": "Cruzeiro do Sul",
      "population": 90000,
      "deprivation": 0.82,
@@ -829,7 +830,7 @@
    },
    "districts": [
     {
-     "code": "RO-0658",
+     "code": "RO-0862",
      "name": "Porto Velho",
      "population": 540000,
      "deprivation": 0.4,
@@ -853,7 +854,7 @@
      }
     },
     {
-     "code": "RO-6819",
+     "code": "RO-5807",
      "name": "Ji-Parana",
      "population": 130000,
      "deprivation": 0.62,
@@ -906,7 +907,7 @@
    },
    "districts": [
     {
-     "code": "TO-8517",
+     "code": "TO-1891",
      "name": "Palmas",
      "population": 310000,
      "deprivation": 0.34,
@@ -930,7 +931,7 @@
      }
     },
     {
-     "code": "TO-0841",
+     "code": "TO-4992",
      "name": "Araguaina",
      "population": 180000,
      "deprivation": 0.6,
@@ -983,7 +984,7 @@
    },
    "districts": [
     {
-     "code": "PI-4455",
+     "code": "PI-8950",
      "name": "Teresina",
      "population": 870000,
      "deprivation": 0.38,
@@ -1007,7 +1008,7 @@
      }
     },
     {
-     "code": "PI-8149",
+     "code": "PI-7562",
      "name": "Parnaiba",
      "population": 150000,
      "deprivation": 0.68,
@@ -1060,7 +1061,7 @@
    },
    "districts": [
     {
-     "code": "PB-1410",
+     "code": "PB-5423",
      "name": "Joao Pessoa",
      "population": 830000,
      "deprivation": 0.32,
@@ -1084,7 +1085,7 @@
      }
     },
     {
-     "code": "PB-6522",
+     "code": "PB-1029",
      "name": "Campina Grande",
      "population": 410000,
      "deprivation": 0.48,
@@ -1137,7 +1138,7 @@
    },
    "districts": [
     {
-     "code": "PE-7329",
+     "code": "PE-8897",
      "name": "Recife",
      "population": 1650000,
      "deprivation": 0.3,
@@ -1161,7 +1162,7 @@
      }
     },
     {
-     "code": "PE-4124",
+     "code": "PE-9918",
      "name": "Caruaru",
      "population": 370000,
      "deprivation": 0.56,
@@ -1185,7 +1186,7 @@
      }
     },
     {
-     "code": "PE-8848",
+     "code": "PE-7995",
      "name": "Petrolina",
      "population": 360000,
      "deprivation": 0.68,
@@ -1238,7 +1239,7 @@
    },
    "districts": [
     {
-     "code": "AL-7896",
+     "code": "AL-5799",
      "name": "Maceio",
      "population": 1030000,
      "deprivation": 0.36,
@@ -1262,7 +1263,7 @@
      }
     },
     {
-     "code": "AL-7934",
+     "code": "AL-3472",
      "name": "Arapiraca",
      "population": 240000,
      "deprivation": 0.7,
@@ -1315,7 +1316,7 @@
    },
    "districts": [
     {
-     "code": "SE-4264",
+     "code": "SE-1140",
      "name": "Aracaju",
      "population": 670000,
      "deprivation": 0.32,
@@ -1339,7 +1340,7 @@
      }
     },
     {
-     "code": "SE-6235",
+     "code": "SE-2193",
      "name": "Nossa Senhora do Socorro",
      "population": 180000,
      "deprivation": 0.64,
@@ -1392,7 +1393,7 @@
    },
    "districts": [
     {
-     "code": "MT-4064",
+     "code": "MT-4926",
      "name": "Cuiaba",
      "population": 650000,
      "deprivation": 0.34,
@@ -1416,7 +1417,7 @@
      }
     },
     {
-     "code": "MT-2101",
+     "code": "MT-3557",
      "name": "Sinop",
      "population": 190000,
      "deprivation": 0.52,
@@ -1469,7 +1470,7 @@
    },
    "districts": [
     {
-     "code": "BA-1217",
+     "code": "BA-2566",
      "name": "Salvador",
      "population": 2420000,
      "deprivation": 0.3,
@@ -1493,7 +1494,7 @@
      }
     },
     {
-     "code": "BA-3796",
+     "code": "BA-7226",
      "name": "Feira de Santana",
      "population": 620000,
      "deprivation": 0.52,
@@ -1517,7 +1518,7 @@
      }
     },
     {
-     "code": "BA-3481",
+     "code": "BA-8701",
      "name": "Juazeiro",
      "population": 220000,
      "deprivation": 0.76,
@@ -1570,7 +1571,7 @@
    },
    "districts": [
     {
-     "code": "GO-5355",
+     "code": "GO-9546",
      "name": "Goiania",
      "population": 1540000,
      "deprivation": 0.26,
@@ -1594,7 +1595,7 @@
      }
     },
     {
-     "code": "GO-3217",
+     "code": "GO-9330",
      "name": "Aparecida de Goiania",
      "population": 600000,
      "deprivation": 0.46,
@@ -1647,7 +1648,7 @@
    },
    "districts": [
     {
-     "code": "DF-7639",
+     "code": "DF-6310",
      "name": "Brasilia",
      "population": 2920000,
      "deprivation": 0.2,
@@ -1700,7 +1701,7 @@
    },
    "districts": [
     {
-     "code": "MS-5573",
+     "code": "MS-4118",
      "name": "Campo Grande",
      "population": 900000,
      "deprivation": 0.3,
@@ -1724,7 +1725,7 @@
      }
     },
     {
-     "code": "MS-5732",
+     "code": "MS-1439",
      "name": "Dourados",
      "population": 230000,
      "deprivation": 0.54,
@@ -1777,7 +1778,7 @@
    },
    "districts": [
     {
-     "code": "MG-1402",
+     "code": "MG-9584",
      "name": "Belo Horizonte",
      "population": 2320000,
      "deprivation": 0.24,
@@ -1801,7 +1802,7 @@
      }
     },
     {
-     "code": "MG-8250",
+     "code": "MG-6820",
      "name": "Uberlandia",
      "population": 700000,
      "deprivation": 0.34,
@@ -1825,7 +1826,7 @@
      }
     },
     {
-     "code": "MG-0671",
+     "code": "MG-4674",
      "name": "Teofilo Otoni",
      "population": 140000,
      "deprivation": 0.74,
@@ -1878,7 +1879,7 @@
    },
    "districts": [
     {
-     "code": "ES-3628",
+     "code": "ES-5886",
      "name": "Vitoria",
      "population": 360000,
      "deprivation": 0.24,
@@ -1902,7 +1903,7 @@
      }
     },
     {
-     "code": "ES-9850",
+     "code": "ES-0855",
      "name": "Serra",
      "population": 520000,
      "deprivation": 0.48,
@@ -1955,7 +1956,7 @@
    },
    "districts": [
     {
-     "code": "SP-6809",
+     "code": "SP-9205",
      "name": "Sao Paulo",
      "population": 11450000,
      "deprivation": 0.2,
@@ -1979,7 +1980,7 @@
      }
     },
     {
-     "code": "SP-7025",
+     "code": "SP-5363",
      "name": "Campinas",
      "population": 1140000,
      "deprivation": 0.28,
@@ -2003,7 +2004,7 @@
      }
     },
     {
-     "code": "SP-8931",
+     "code": "SP-4301",
      "name": "Guarulhos",
      "population": 1290000,
      "deprivation": 0.46,
@@ -2056,7 +2057,7 @@
    },
    "districts": [
     {
-     "code": "RJ-1426",
+     "code": "RJ-5192",
      "name": "Rio de Janeiro",
      "population": 6210000,
      "deprivation": 0.26,
@@ -2080,7 +2081,7 @@
      }
     },
     {
-     "code": "RJ-2426",
+     "code": "RJ-2208",
      "name": "Duque de Caxias",
      "population": 920000,
      "deprivation": 0.62,
@@ -2104,7 +2105,7 @@
      }
     },
     {
-     "code": "RJ-4291",
+     "code": "RJ-1690",
      "name": "Nova Iguacu",
      "population": 820000,
      "deprivation": 0.58,
@@ -2157,7 +2158,7 @@
    },
    "districts": [
     {
-     "code": "PR-9003",
+     "code": "PR-6454",
      "name": "Curitiba",
      "population": 1770000,
      "deprivation": 0.22,
@@ -2181,7 +2182,7 @@
      }
     },
     {
-     "code": "PR-1811",
+     "code": "PR-3081",
      "name": "Londrina",
      "population": 560000,
      "deprivation": 0.36,
@@ -2234,7 +2235,7 @@
    },
    "districts": [
     {
-     "code": "SC-8395",
+     "code": "SC-8826",
      "name": "Florianopolis",
      "population": 500000,
      "deprivation": 0.22,
@@ -2258,7 +2259,7 @@
      }
     },
     {
-     "code": "SC-7177",
+     "code": "SC-5592",
      "name": "Joinville",
      "population": 590000,
      "deprivation": 0.32,
@@ -2311,7 +2312,7 @@
    },
    "districts": [
     {
-     "code": "RS-8475",
+     "code": "RS-1609",
      "name": "Porto Alegre",
      "population": 1330000,
      "deprivation": 0.24,
@@ -2335,7 +2336,7 @@
      }
     },
     {
-     "code": "RS-8135",
+     "code": "RS-7050",
      "name": "Caxias do Sul",
      "population": 500000,
      "deprivation": 0.34,
@@ -2365,7 +2366,7 @@
   {
    "id": "BR-INV-00001",
    "region": "RR",
-   "district": "RR-2233",
+   "district": "RR-6787",
    "sector": "water",
    "title": "Water & Sanitation programme — Rorainopolis",
    "budget": 9.59,
@@ -2376,7 +2377,7 @@
   {
    "id": "BR-INV-00002",
    "region": "RR",
-   "district": "RR-4118",
+   "district": "RR-9196",
    "sector": "health",
    "title": "Healthcare programme — Boa Vista",
    "budget": 148.21,
@@ -2387,7 +2388,7 @@
   {
    "id": "BR-INV-00003",
    "region": "RR",
-   "district": "RR-2233",
+   "district": "RR-6787",
    "sector": "education",
    "title": "Education programme — Rorainopolis",
    "budget": 16.12,
@@ -2398,7 +2399,7 @@
   {
    "id": "BR-INV-00004",
    "region": "RR",
-   "district": "RR-4118",
+   "district": "RR-9196",
    "sector": "power",
    "title": "Electricity & Energy programme — Boa Vista",
    "budget": 417.35,
@@ -2409,7 +2410,7 @@
   {
    "id": "BR-INV-00005",
    "region": "RR",
-   "district": "RR-4118",
+   "district": "RR-9196",
    "sector": "transport",
    "title": "Public Transport programme — Boa Vista",
    "budget": 261.16,
@@ -2420,7 +2421,7 @@
   {
    "id": "BR-INV-00006",
    "region": "RR",
-   "district": "RR-2233",
+   "district": "RR-6787",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Rorainopolis",
    "budget": 6.74,
@@ -2431,7 +2432,7 @@
   {
    "id": "BR-INV-00007",
    "region": "RR",
-   "district": "RR-2233",
+   "district": "RR-6787",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Rorainopolis",
    "budget": 19.05,
@@ -2442,7 +2443,7 @@
   {
    "id": "BR-INV-00008",
    "region": "AP",
-   "district": "AP-6779",
+   "district": "AP-6782",
    "sector": "water",
    "title": "Water & Sanitation programme — Macapa",
    "budget": 299.82,
@@ -2453,7 +2454,7 @@
   {
    "id": "BR-INV-00009",
    "region": "AP",
-   "district": "AP-6779",
+   "district": "AP-6782",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Macapa",
    "budget": 481.21,
@@ -2464,7 +2465,7 @@
   {
    "id": "BR-INV-00010",
    "region": "AP",
-   "district": "AP-6779",
+   "district": "AP-6782",
    "sector": "education",
    "title": "Education programme — Macapa",
    "budget": 270.01,
@@ -2475,7 +2476,7 @@
   {
    "id": "BR-INV-00011",
    "region": "AP",
-   "district": "AP-6774",
+   "district": "AP-5355",
    "sector": "power",
    "title": "Electricity & Energy programme — Santana",
    "budget": 45.03,
@@ -2486,7 +2487,7 @@
   {
    "id": "BR-INV-00012",
    "region": "AP",
-   "district": "AP-6779",
+   "district": "AP-6782",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Macapa",
    "budget": 351.37,
@@ -2497,7 +2498,7 @@
   {
    "id": "BR-INV-00013",
    "region": "AP",
-   "district": "AP-6774",
+   "district": "AP-5355",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Santana",
    "budget": 89.32,
@@ -2508,7 +2509,7 @@
   {
    "id": "BR-INV-00014",
    "region": "AP",
-   "district": "AP-6779",
+   "district": "AP-6782",
    "sector": "digital",
    "title": "Digital & Telecom programme — Macapa",
    "budget": 224.17,
@@ -2519,7 +2520,7 @@
   {
    "id": "BR-INV-00015",
    "region": "AP",
-   "district": "AP-6774",
+   "district": "AP-5355",
    "sector": "digital",
    "title": "Digital & Telecom programme — Santana",
    "budget": 73.98,
@@ -2530,7 +2531,7 @@
   {
    "id": "BR-INV-00016",
    "region": "AM",
-   "district": "AM-5310",
+   "district": "AM-0328",
    "sector": "water",
    "title": "Water & Sanitation programme — Manaus",
    "budget": 1046.48,
@@ -2541,7 +2542,7 @@
   {
    "id": "BR-INV-00017",
    "region": "AM",
-   "district": "AM-5310",
+   "district": "AM-0328",
    "sector": "health",
    "title": "Healthcare programme — Manaus",
    "budget": 595.41,
@@ -2552,7 +2553,7 @@
   {
    "id": "BR-INV-00018",
    "region": "AM",
-   "district": "AM-5310",
+   "district": "AM-0328",
    "sector": "education",
    "title": "Education programme — Manaus",
    "budget": 1936.93,
@@ -2563,7 +2564,7 @@
   {
    "id": "BR-INV-00019",
    "region": "AM",
-   "district": "AM-5310",
+   "district": "AM-0328",
    "sector": "digital",
    "title": "Digital & Telecom programme — Manaus",
    "budget": 1914.58,
@@ -2574,7 +2575,7 @@
   {
    "id": "BR-INV-00020",
    "region": "AM",
-   "district": "AM-2687",
+   "district": "AM-1085",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Tabatinga",
    "budget": 14.18,
@@ -2585,7 +2586,7 @@
   {
    "id": "BR-INV-00021",
    "region": "AM",
-   "district": "AM-5310",
+   "district": "AM-0328",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Manaus",
    "budget": 1936.84,
@@ -2596,7 +2597,7 @@
   {
    "id": "BR-INV-00022",
    "region": "PA",
-   "district": "PA-2922",
+   "district": "PA-5621",
    "sector": "power",
    "title": "Electricity & Energy programme — Maraba",
    "budget": 196.26,
@@ -2607,7 +2608,7 @@
   {
    "id": "BR-INV-00023",
    "region": "PA",
-   "district": "PA-6967",
+   "district": "PA-9285",
    "sector": "power",
    "title": "Electricity & Energy programme — Altamira",
    "budget": 44.02,
@@ -2618,7 +2619,7 @@
   {
    "id": "BR-INV-00024",
    "region": "PA",
-   "district": "PA-5271",
+   "district": "PA-5133",
    "sector": "transport",
    "title": "Public Transport programme — Belem",
    "budget": 841.52,
@@ -2629,7 +2630,7 @@
   {
    "id": "BR-INV-00025",
    "region": "PA",
-   "district": "PA-2922",
+   "district": "PA-5621",
    "sector": "transport",
    "title": "Public Transport programme — Maraba",
    "budget": 150.8,
@@ -2640,7 +2641,7 @@
   {
    "id": "BR-INV-00026",
    "region": "PA",
-   "district": "PA-6967",
+   "district": "PA-9285",
    "sector": "digital",
    "title": "Digital & Telecom programme — Altamira",
    "budget": 79.93,
@@ -2651,7 +2652,7 @@
   {
    "id": "BR-INV-00027",
    "region": "PA",
-   "district": "PA-5271",
+   "district": "PA-5133",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Belem",
    "budget": 1099.17,
@@ -2662,7 +2663,7 @@
   {
    "id": "BR-INV-00028",
    "region": "PA",
-   "district": "PA-6967",
+   "district": "PA-9285",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Altamira",
    "budget": 25.55,
@@ -2673,7 +2674,7 @@
   {
    "id": "BR-INV-00029",
    "region": "MA",
-   "district": "MA-0507",
+   "district": "MA-9331",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Codo",
    "budget": 54.88,
@@ -2684,7 +2685,7 @@
   {
    "id": "BR-INV-00030",
    "region": "MA",
-   "district": "MA-9786",
+   "district": "MA-8387",
    "sector": "health",
    "title": "Healthcare programme — Sao Luis",
    "budget": 1045.46,
@@ -2695,7 +2696,7 @@
   {
    "id": "BR-INV-00031",
    "region": "MA",
-   "district": "MA-9786",
+   "district": "MA-8387",
    "sector": "digital",
    "title": "Digital & Telecom programme — Sao Luis",
    "budget": 651.21,
@@ -2706,7 +2707,7 @@
   {
    "id": "BR-INV-00032",
    "region": "MA",
-   "district": "MA-6920",
+   "district": "MA-8872",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Imperatriz",
    "budget": 56.74,
@@ -2717,7 +2718,7 @@
   {
    "id": "BR-INV-00033",
    "region": "CE",
-   "district": "CE-6144",
+   "district": "CE-4010",
    "sector": "education",
    "title": "Education programme — Sobral",
    "budget": 174.13,
@@ -2728,7 +2729,7 @@
   {
    "id": "BR-INV-00034",
    "region": "CE",
-   "district": "CE-9377",
+   "district": "CE-1967",
    "sector": "power",
    "title": "Electricity & Energy programme — Fortaleza",
    "budget": 1548.34,
@@ -2739,7 +2740,7 @@
   {
    "id": "BR-INV-00035",
    "region": "CE",
-   "district": "CE-8175",
+   "district": "CE-1359",
    "sector": "power",
    "title": "Electricity & Energy programme — Crateus",
    "budget": 22.43,
@@ -2750,7 +2751,7 @@
   {
    "id": "BR-INV-00036",
    "region": "CE",
-   "district": "CE-9377",
+   "district": "CE-1967",
    "sector": "transport",
    "title": "Public Transport programme — Fortaleza",
    "budget": 1775.08,
@@ -2761,7 +2762,7 @@
   {
    "id": "BR-INV-00037",
    "region": "CE",
-   "district": "CE-9377",
+   "district": "CE-1967",
    "sector": "digital",
    "title": "Digital & Telecom programme — Fortaleza",
    "budget": 3195.96,
@@ -2772,7 +2773,7 @@
   {
    "id": "BR-INV-00038",
    "region": "CE",
-   "district": "CE-6144",
+   "district": "CE-4010",
    "sector": "digital",
    "title": "Digital & Telecom programme — Sobral",
    "budget": 66.84,
@@ -2783,7 +2784,7 @@
   {
    "id": "BR-INV-00039",
    "region": "CE",
-   "district": "CE-6144",
+   "district": "CE-4010",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Sobral",
    "budget": 81.03,
@@ -2794,7 +2795,7 @@
   {
    "id": "BR-INV-00040",
    "region": "CE",
-   "district": "CE-9377",
+   "district": "CE-1967",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Fortaleza",
    "budget": 2551.96,
@@ -2805,7 +2806,7 @@
   {
    "id": "BR-INV-00041",
    "region": "RN",
-   "district": "RN-0848",
+   "district": "RN-9917",
    "sector": "water",
    "title": "Water & Sanitation programme — Natal",
    "budget": 792.68,
@@ -2816,7 +2817,7 @@
   {
    "id": "BR-INV-00042",
    "region": "RN",
-   "district": "RN-0848",
+   "district": "RN-9917",
    "sector": "power",
    "title": "Electricity & Energy programme — Natal",
    "budget": 888.21,
@@ -2827,7 +2828,7 @@
   {
    "id": "BR-INV-00043",
    "region": "RN",
-   "district": "RN-4501",
+   "district": "RN-7580",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Mossoro",
    "budget": 84.89,
@@ -2838,7 +2839,7 @@
   {
    "id": "BR-INV-00044",
    "region": "RN",
-   "district": "RN-0848",
+   "district": "RN-9917",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Natal",
    "budget": 922.66,
@@ -2849,7 +2850,7 @@
   {
    "id": "BR-INV-00045",
    "region": "RN",
-   "district": "RN-0848",
+   "district": "RN-9917",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Natal",
    "budget": 707.1,
@@ -2860,7 +2861,7 @@
   {
    "id": "BR-INV-00046",
    "region": "AC",
-   "district": "AC-7465",
+   "district": "AC-5344",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Rio Branco",
    "budget": 267.92,
@@ -2871,7 +2872,7 @@
   {
    "id": "BR-INV-00047",
    "region": "AC",
-   "district": "AC-7465",
+   "district": "AC-5344",
    "sector": "education",
    "title": "Education programme — Rio Branco",
    "budget": 129.98,
@@ -2882,7 +2883,7 @@
   {
    "id": "BR-INV-00048",
    "region": "AC",
-   "district": "AC-4075",
+   "district": "AC-6862",
    "sector": "power",
    "title": "Electricity & Energy programme — Cruzeiro do Sul",
    "budget": 54.23,
@@ -2893,7 +2894,7 @@
   {
    "id": "BR-INV-00049",
    "region": "AC",
-   "district": "AC-7465",
+   "district": "AC-5344",
    "sector": "transport",
    "title": "Public Transport programme — Rio Branco",
    "budget": 337.42,
@@ -2904,7 +2905,7 @@
   {
    "id": "BR-INV-00050",
    "region": "AC",
-   "district": "AC-4075",
+   "district": "AC-6862",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Cruzeiro do Sul",
    "budget": 20.7,
@@ -2915,7 +2916,7 @@
   {
    "id": "BR-INV-00051",
    "region": "RO",
-   "district": "RO-0658",
+   "district": "RO-0862",
    "sector": "water",
    "title": "Water & Sanitation programme — Porto Velho",
    "budget": 231.22,
@@ -2926,7 +2927,7 @@
   {
    "id": "BR-INV-00052",
    "region": "RO",
-   "district": "RO-0658",
+   "district": "RO-0862",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Porto Velho",
    "budget": 416.03,
@@ -2937,7 +2938,7 @@
   {
    "id": "BR-INV-00053",
    "region": "RO",
-   "district": "RO-6819",
+   "district": "RO-5807",
    "sector": "digital",
    "title": "Digital & Telecom programme — Ji-Parana",
    "budget": 48.11,
@@ -2948,7 +2949,7 @@
   {
    "id": "BR-INV-00054",
    "region": "TO",
-   "district": "TO-8517",
+   "district": "TO-1891",
    "sector": "water",
    "title": "Water & Sanitation programme — Palmas",
    "budget": 175.1,
@@ -2959,7 +2960,7 @@
   {
    "id": "BR-INV-00055",
    "region": "TO",
-   "district": "TO-0841",
+   "district": "TO-4992",
    "sector": "water",
    "title": "Water & Sanitation programme — Araguaina",
    "budget": 60.89,
@@ -2970,7 +2971,7 @@
   {
    "id": "BR-INV-00056",
    "region": "TO",
-   "district": "TO-0841",
+   "district": "TO-4992",
    "sector": "education",
    "title": "Education programme — Araguaina",
    "budget": 120.02,
@@ -2981,7 +2982,7 @@
   {
    "id": "BR-INV-00057",
    "region": "TO",
-   "district": "TO-8517",
+   "district": "TO-1891",
    "sector": "power",
    "title": "Electricity & Energy programme — Palmas",
    "budget": 202.66,
@@ -2992,7 +2993,7 @@
   {
    "id": "BR-INV-00058",
    "region": "TO",
-   "district": "TO-8517",
+   "district": "TO-1891",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Palmas",
    "budget": 312.96,
@@ -3003,7 +3004,7 @@
   {
    "id": "BR-INV-00059",
    "region": "TO",
-   "district": "TO-8517",
+   "district": "TO-1891",
    "sector": "digital",
    "title": "Digital & Telecom programme — Palmas",
    "budget": 318.12,
@@ -3014,7 +3015,7 @@
   {
    "id": "BR-INV-00060",
    "region": "TO",
-   "district": "TO-0841",
+   "district": "TO-4992",
    "sector": "digital",
    "title": "Digital & Telecom programme — Araguaina",
    "budget": 72.28,
@@ -3025,7 +3026,7 @@
   {
    "id": "BR-INV-00061",
    "region": "TO",
-   "district": "TO-8517",
+   "district": "TO-1891",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Palmas",
    "budget": 340.59,
@@ -3036,7 +3037,7 @@
   {
    "id": "BR-INV-00062",
    "region": "PI",
-   "district": "PI-4455",
+   "district": "PI-8950",
    "sector": "education",
    "title": "Education programme — Teresina",
    "budget": 611.94,
@@ -3047,7 +3048,7 @@
   {
    "id": "BR-INV-00063",
    "region": "PB",
-   "district": "PB-6522",
+   "district": "PB-1029",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Campina Grande",
    "budget": 195.01,
@@ -3058,7 +3059,7 @@
   {
    "id": "BR-INV-00064",
    "region": "PB",
-   "district": "PB-1410",
+   "district": "PB-5423",
    "sector": "health",
    "title": "Healthcare programme — Joao Pessoa",
    "budget": 547.28,
@@ -3069,7 +3070,7 @@
   {
    "id": "BR-INV-00065",
    "region": "PB",
-   "district": "PB-6522",
+   "district": "PB-1029",
    "sector": "health",
    "title": "Healthcare programme — Campina Grande",
    "budget": 176.45,
@@ -3080,7 +3081,7 @@
   {
    "id": "BR-INV-00066",
    "region": "PB",
-   "district": "PB-6522",
+   "district": "PB-1029",
    "sector": "power",
    "title": "Electricity & Energy programme — Campina Grande",
    "budget": 366.46,
@@ -3091,7 +3092,7 @@
   {
    "id": "BR-INV-00067",
    "region": "PB",
-   "district": "PB-1410",
+   "district": "PB-5423",
    "sector": "transport",
    "title": "Public Transport programme — Joao Pessoa",
    "budget": 379.95,
@@ -3102,7 +3103,7 @@
   {
    "id": "BR-INV-00068",
    "region": "PB",
-   "district": "PB-6522",
+   "district": "PB-1029",
    "sector": "transport",
    "title": "Public Transport programme — Campina Grande",
    "budget": 409.61,
@@ -3113,7 +3114,7 @@
   {
    "id": "BR-INV-00069",
    "region": "PB",
-   "district": "PB-1410",
+   "district": "PB-5423",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Joao Pessoa",
    "budget": 265.03,
@@ -3124,7 +3125,7 @@
   {
    "id": "BR-INV-00070",
    "region": "PE",
-   "district": "PE-4124",
+   "district": "PE-9918",
    "sector": "health",
    "title": "Healthcare programme — Caruaru",
    "budget": 256.17,
@@ -3135,7 +3136,7 @@
   {
    "id": "BR-INV-00071",
    "region": "PE",
-   "district": "PE-7329",
+   "district": "PE-8897",
    "sector": "transport",
    "title": "Public Transport programme — Recife",
    "budget": 701.69,
@@ -3146,7 +3147,7 @@
   {
    "id": "BR-INV-00072",
    "region": "PE",
-   "district": "PE-8848",
+   "district": "PE-7995",
    "sector": "transport",
    "title": "Public Transport programme — Petrolina",
    "budget": 245.39,
@@ -3157,7 +3158,7 @@
   {
    "id": "BR-INV-00073",
    "region": "AL",
-   "district": "AL-7934",
+   "district": "AL-3472",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Arapiraca",
    "budget": 147.93,
@@ -3168,7 +3169,7 @@
   {
    "id": "BR-INV-00074",
    "region": "AL",
-   "district": "AL-7896",
+   "district": "AL-5799",
    "sector": "health",
    "title": "Healthcare programme — Maceio",
    "budget": 585.62,
@@ -3179,7 +3180,7 @@
   {
    "id": "BR-INV-00075",
    "region": "AL",
-   "district": "AL-7896",
+   "district": "AL-5799",
    "sector": "education",
    "title": "Education programme — Maceio",
    "budget": 497.41,
@@ -3190,7 +3191,7 @@
   {
    "id": "BR-INV-00076",
    "region": "AL",
-   "district": "AL-7934",
+   "district": "AL-3472",
    "sector": "power",
    "title": "Electricity & Energy programme — Arapiraca",
    "budget": 79.4,
@@ -3201,7 +3202,7 @@
   {
    "id": "BR-INV-00077",
    "region": "AL",
-   "district": "AL-7896",
+   "district": "AL-5799",
    "sector": "transport",
    "title": "Public Transport programme — Maceio",
    "budget": 632.26,
@@ -3212,7 +3213,7 @@
   {
    "id": "BR-INV-00078",
    "region": "AL",
-   "district": "AL-7934",
+   "district": "AL-3472",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Arapiraca",
    "budget": 71.03,
@@ -3223,7 +3224,7 @@
   {
    "id": "BR-INV-00079",
    "region": "AL",
-   "district": "AL-7896",
+   "district": "AL-5799",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Maceio",
    "budget": 362.65,
@@ -3234,7 +3235,7 @@
   {
    "id": "BR-INV-00080",
    "region": "AL",
-   "district": "AL-7934",
+   "district": "AL-3472",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Arapiraca",
    "budget": 71.79,
@@ -3245,7 +3246,7 @@
   {
    "id": "BR-INV-00081",
    "region": "SE",
-   "district": "SE-4264",
+   "district": "SE-1140",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Aracaju",
    "budget": 599.86,
@@ -3256,7 +3257,7 @@
   {
    "id": "BR-INV-00082",
    "region": "SE",
-   "district": "SE-4264",
+   "district": "SE-1140",
    "sector": "education",
    "title": "Education programme — Aracaju",
    "budget": 623.55,
@@ -3267,7 +3268,7 @@
   {
    "id": "BR-INV-00083",
    "region": "SE",
-   "district": "SE-4264",
+   "district": "SE-1140",
    "sector": "power",
    "title": "Electricity & Energy programme — Aracaju",
    "budget": 763.34,
@@ -3278,7 +3279,7 @@
   {
    "id": "BR-INV-00084",
    "region": "SE",
-   "district": "SE-6235",
+   "district": "SE-2193",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Nossa Senhora do Socorro",
    "budget": 138.28,
@@ -3289,7 +3290,7 @@
   {
    "id": "BR-INV-00085",
    "region": "SE",
-   "district": "SE-4264",
+   "district": "SE-1140",
    "sector": "digital",
    "title": "Digital & Telecom programme — Aracaju",
    "budget": 722.25,
@@ -3300,7 +3301,7 @@
   {
    "id": "BR-INV-00086",
    "region": "SE",
-   "district": "SE-6235",
+   "district": "SE-2193",
    "sector": "digital",
    "title": "Digital & Telecom programme — Nossa Senhora do Socorro",
    "budget": 106.66,
@@ -3311,7 +3312,7 @@
   {
    "id": "BR-INV-00087",
    "region": "SE",
-   "district": "SE-6235",
+   "district": "SE-2193",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Nossa Senhora do Socorro",
    "budget": 47.77,
@@ -3322,7 +3323,7 @@
   {
    "id": "BR-INV-00088",
    "region": "SE",
-   "district": "SE-4264",
+   "district": "SE-1140",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Aracaju",
    "budget": 300.05,
@@ -3333,7 +3334,7 @@
   {
    "id": "BR-INV-00089",
    "region": "SE",
-   "district": "SE-6235",
+   "district": "SE-2193",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Nossa Senhora do Socorro",
    "budget": 100.86,
@@ -3344,7 +3345,7 @@
   {
    "id": "BR-INV-00090",
    "region": "MT",
-   "district": "MT-4064",
+   "district": "MT-4926",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Cuiaba",
    "budget": 462.59,
@@ -3355,7 +3356,7 @@
   {
    "id": "BR-INV-00091",
    "region": "MT",
-   "district": "MT-4064",
+   "district": "MT-4926",
    "sector": "health",
    "title": "Healthcare programme — Cuiaba",
    "budget": 664.22,
@@ -3366,7 +3367,7 @@
   {
    "id": "BR-INV-00092",
    "region": "MT",
-   "district": "MT-2101",
+   "district": "MT-3557",
    "sector": "health",
    "title": "Healthcare programme — Sinop",
    "budget": 141.41,
@@ -3377,7 +3378,7 @@
   {
    "id": "BR-INV-00093",
    "region": "MT",
-   "district": "MT-2101",
+   "district": "MT-3557",
    "sector": "education",
    "title": "Education programme — Sinop",
    "budget": 97.91,
@@ -3388,7 +3389,7 @@
   {
    "id": "BR-INV-00094",
    "region": "MT",
-   "district": "MT-2101",
+   "district": "MT-3557",
    "sector": "transport",
    "title": "Public Transport programme — Sinop",
    "budget": 160.42,
@@ -3399,7 +3400,7 @@
   {
    "id": "BR-INV-00095",
    "region": "MT",
-   "district": "MT-4064",
+   "district": "MT-4926",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Cuiaba",
    "budget": 557.62,
@@ -3410,7 +3411,7 @@
   {
    "id": "BR-INV-00096",
    "region": "BA",
-   "district": "BA-1217",
+   "district": "BA-2566",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Salvador",
    "budget": 2221.51,
@@ -3421,7 +3422,7 @@
   {
    "id": "BR-INV-00097",
    "region": "BA",
-   "district": "BA-1217",
+   "district": "BA-2566",
    "sector": "health",
    "title": "Healthcare programme — Salvador",
    "budget": 1740.53,
@@ -3432,7 +3433,7 @@
   {
    "id": "BR-INV-00098",
    "region": "BA",
-   "district": "BA-3481",
+   "district": "BA-8701",
    "sector": "health",
    "title": "Healthcare programme — Juazeiro",
    "budget": 84.79,
@@ -3443,7 +3444,7 @@
   {
    "id": "BR-INV-00099",
    "region": "BA",
-   "district": "BA-1217",
+   "district": "BA-2566",
    "sector": "education",
    "title": "Education programme — Salvador",
    "budget": 2860.48,
@@ -3454,7 +3455,7 @@
   {
    "id": "BR-INV-00100",
    "region": "BA",
-   "district": "BA-3481",
+   "district": "BA-8701",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Juazeiro",
    "budget": 104.18,
@@ -3465,7 +3466,7 @@
   {
    "id": "BR-INV-00101",
    "region": "GO",
-   "district": "GO-5355",
+   "district": "GO-9546",
    "sector": "water",
    "title": "Water & Sanitation programme — Goiania",
    "budget": 647.49,
@@ -3476,7 +3477,7 @@
   {
    "id": "BR-INV-00102",
    "region": "GO",
-   "district": "GO-5355",
+   "district": "GO-9546",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Goiania",
    "budget": 1210.82,
@@ -3487,7 +3488,7 @@
   {
    "id": "BR-INV-00103",
    "region": "GO",
-   "district": "GO-3217",
+   "district": "GO-9330",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Aparecida de Goiania",
    "budget": 307.89,
@@ -3498,7 +3499,7 @@
   {
    "id": "BR-INV-00104",
    "region": "GO",
-   "district": "GO-3217",
+   "district": "GO-9330",
    "sector": "transport",
    "title": "Public Transport programme — Aparecida de Goiania",
    "budget": 558.74,
@@ -3509,7 +3510,7 @@
   {
    "id": "BR-INV-00105",
    "region": "GO",
-   "district": "GO-5355",
+   "district": "GO-9546",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Goiania",
    "budget": 414.8,
@@ -3520,7 +3521,7 @@
   {
    "id": "BR-INV-00106",
    "region": "GO",
-   "district": "GO-5355",
+   "district": "GO-9546",
    "sector": "digital",
    "title": "Digital & Telecom programme — Goiania",
    "budget": 538.46,
@@ -3531,7 +3532,7 @@
   {
    "id": "BR-INV-00107",
    "region": "GO",
-   "district": "GO-3217",
+   "district": "GO-9330",
    "sector": "digital",
    "title": "Digital & Telecom programme — Aparecida de Goiania",
    "budget": 321.51,
@@ -3542,7 +3543,7 @@
   {
    "id": "BR-INV-00108",
    "region": "GO",
-   "district": "GO-3217",
+   "district": "GO-9330",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Aparecida de Goiania",
    "budget": 476.24,
@@ -3553,7 +3554,7 @@
   {
    "id": "BR-INV-00109",
    "region": "DF",
-   "district": "DF-7639",
+   "district": "DF-6310",
    "sector": "education",
    "title": "Education programme — Brasilia",
    "budget": 3079.33,
@@ -3564,7 +3565,7 @@
   {
    "id": "BR-INV-00110",
    "region": "DF",
-   "district": "DF-7639",
+   "district": "DF-6310",
    "sector": "digital",
    "title": "Digital & Telecom programme — Brasilia",
    "budget": 3673.7,
@@ -3575,7 +3576,7 @@
   {
    "id": "BR-INV-00111",
    "region": "DF",
-   "district": "DF-7639",
+   "district": "DF-6310",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Brasilia",
    "budget": 3279.61,
@@ -3586,7 +3587,7 @@
   {
    "id": "BR-INV-00112",
    "region": "DF",
-   "district": "DF-7639",
+   "district": "DF-6310",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Brasilia",
    "budget": 3668.82,
@@ -3597,7 +3598,7 @@
   {
    "id": "BR-INV-00113",
    "region": "MS",
-   "district": "MS-5732",
+   "district": "MS-1439",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Dourados",
    "budget": 117.85,
@@ -3608,7 +3609,7 @@
   {
    "id": "BR-INV-00114",
    "region": "MS",
-   "district": "MS-5732",
+   "district": "MS-1439",
    "sector": "health",
    "title": "Healthcare programme — Dourados",
    "budget": 74.81,
@@ -3619,7 +3620,7 @@
   {
    "id": "BR-INV-00115",
    "region": "MS",
-   "district": "MS-5573",
+   "district": "MS-4118",
    "sector": "transport",
    "title": "Public Transport programme — Campo Grande",
    "budget": 609.67,
@@ -3630,7 +3631,7 @@
   {
    "id": "BR-INV-00116",
    "region": "MS",
-   "district": "MS-5573",
+   "district": "MS-4118",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Campo Grande",
    "budget": 1009.25,
@@ -3641,7 +3642,7 @@
   {
    "id": "BR-INV-00117",
    "region": "MS",
-   "district": "MS-5732",
+   "district": "MS-1439",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Dourados",
    "budget": 198.86,
@@ -3652,7 +3653,7 @@
   {
    "id": "BR-INV-00118",
    "region": "MS",
-   "district": "MS-5573",
+   "district": "MS-4118",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Campo Grande",
    "budget": 519.99,
@@ -3663,7 +3664,7 @@
   {
    "id": "BR-INV-00119",
    "region": "MS",
-   "district": "MS-5732",
+   "district": "MS-1439",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Dourados",
    "budget": 193.55,
@@ -3674,7 +3675,7 @@
   {
    "id": "BR-INV-00120",
    "region": "MS",
-   "district": "MS-5732",
+   "district": "MS-1439",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Dourados",
    "budget": 187.96,
@@ -3685,7 +3686,7 @@
   {
    "id": "BR-INV-00121",
    "region": "MG",
-   "district": "MG-8250",
+   "district": "MG-6820",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Uberlandia",
    "budget": 725.44,
@@ -3696,7 +3697,7 @@
   {
    "id": "BR-INV-00122",
    "region": "MG",
-   "district": "MG-8250",
+   "district": "MG-6820",
    "sector": "education",
    "title": "Education programme — Uberlandia",
    "budget": 799.26,
@@ -3707,7 +3708,7 @@
   {
    "id": "BR-INV-00123",
    "region": "MG",
-   "district": "MG-8250",
+   "district": "MG-6820",
    "sector": "power",
    "title": "Electricity & Energy programme — Uberlandia",
    "budget": 470.08,
@@ -3718,7 +3719,7 @@
   {
    "id": "BR-INV-00124",
    "region": "MG",
-   "district": "MG-1402",
+   "district": "MG-9584",
    "sector": "transport",
    "title": "Public Transport programme — Belo Horizonte",
    "budget": 1722.49,
@@ -3729,7 +3730,7 @@
   {
    "id": "BR-INV-00125",
    "region": "MG",
-   "district": "MG-8250",
+   "district": "MG-6820",
    "sector": "transport",
    "title": "Public Transport programme — Uberlandia",
    "budget": 767.72,
@@ -3740,7 +3741,7 @@
   {
    "id": "BR-INV-00126",
    "region": "MG",
-   "district": "MG-1402",
+   "district": "MG-9584",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Belo Horizonte",
    "budget": 1629.11,
@@ -3751,7 +3752,7 @@
   {
    "id": "BR-INV-00127",
    "region": "MG",
-   "district": "MG-1402",
+   "district": "MG-9584",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Belo Horizonte",
    "budget": 2226.58,
@@ -3762,7 +3763,7 @@
   {
    "id": "BR-INV-00128",
    "region": "MG",
-   "district": "MG-0671",
+   "district": "MG-4674",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Teofilo Otoni",
    "budget": 72.03,
@@ -3773,7 +3774,7 @@
   {
    "id": "BR-INV-00129",
    "region": "ES",
-   "district": "ES-9850",
+   "district": "ES-0855",
    "sector": "health",
    "title": "Healthcare programme — Serra",
    "budget": 228.94,
@@ -3784,7 +3785,7 @@
   {
    "id": "BR-INV-00130",
    "region": "ES",
-   "district": "ES-9850",
+   "district": "ES-0855",
    "sector": "transport",
    "title": "Public Transport programme — Serra",
    "budget": 191.37,
@@ -3795,7 +3796,7 @@
   {
    "id": "BR-INV-00131",
    "region": "ES",
-   "district": "ES-3628",
+   "district": "ES-5886",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Vitoria",
    "budget": 324.15,
@@ -3806,7 +3807,7 @@
   {
    "id": "BR-INV-00132",
    "region": "ES",
-   "district": "ES-9850",
+   "district": "ES-0855",
    "sector": "digital",
    "title": "Digital & Telecom programme — Serra",
    "budget": 434.29,
@@ -3817,7 +3818,7 @@
   {
    "id": "BR-INV-00133",
    "region": "SP",
-   "district": "SP-7025",
+   "district": "SP-5363",
    "sector": "water",
    "title": "Water & Sanitation programme — Campinas",
    "budget": 676.04,
@@ -3828,7 +3829,7 @@
   {
    "id": "BR-INV-00134",
    "region": "SP",
-   "district": "SP-6809",
+   "district": "SP-9205",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Sao Paulo",
    "budget": 4581.69,
@@ -3839,7 +3840,7 @@
   {
    "id": "BR-INV-00135",
    "region": "SP",
-   "district": "SP-7025",
+   "district": "SP-5363",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Campinas",
    "budget": 890.24,
@@ -3850,7 +3851,7 @@
   {
    "id": "BR-INV-00136",
    "region": "SP",
-   "district": "SP-8931",
+   "district": "SP-4301",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Guarulhos",
    "budget": 1279.44,
@@ -3861,7 +3862,7 @@
   {
    "id": "BR-INV-00137",
    "region": "SP",
-   "district": "SP-6809",
+   "district": "SP-9205",
    "sector": "health",
    "title": "Healthcare programme — Sao Paulo",
    "budget": 12079.35,
@@ -3872,7 +3873,7 @@
   {
    "id": "BR-INV-00138",
    "region": "SP",
-   "district": "SP-6809",
+   "district": "SP-9205",
    "sector": "power",
    "title": "Electricity & Energy programme — Sao Paulo",
    "budget": 7331.07,
@@ -3883,7 +3884,7 @@
   {
    "id": "BR-INV-00139",
    "region": "SP",
-   "district": "SP-6809",
+   "district": "SP-9205",
    "sector": "digital",
    "title": "Digital & Telecom programme — Sao Paulo",
    "budget": 6951.93,
@@ -3894,7 +3895,7 @@
   {
    "id": "BR-INV-00140",
    "region": "SP",
-   "district": "SP-8931",
+   "district": "SP-4301",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Guarulhos",
    "budget": 827.53,
@@ -3905,7 +3906,7 @@
   {
    "id": "BR-INV-00141",
    "region": "SP",
-   "district": "SP-6809",
+   "district": "SP-9205",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Sao Paulo",
    "budget": 12379.68,
@@ -3916,7 +3917,7 @@
   {
    "id": "BR-INV-00142",
    "region": "SP",
-   "district": "SP-7025",
+   "district": "SP-5363",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Campinas",
    "budget": 536.2,
@@ -3927,7 +3928,7 @@
   {
    "id": "BR-INV-00143",
    "region": "RJ",
-   "district": "RJ-4291",
+   "district": "RJ-1690",
    "sector": "water",
    "title": "Water & Sanitation programme — Nova Iguacu",
    "budget": 736.85,
@@ -3938,7 +3939,7 @@
   {
    "id": "BR-INV-00144",
    "region": "RJ",
-   "district": "RJ-1426",
+   "district": "RJ-5192",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Rio de Janeiro",
    "budget": 6576.77,
@@ -3949,7 +3950,7 @@
   {
    "id": "BR-INV-00145",
    "region": "RJ",
-   "district": "RJ-4291",
+   "district": "RJ-1690",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Nova Iguacu",
    "budget": 390.91,
@@ -3960,7 +3961,7 @@
   {
    "id": "BR-INV-00146",
    "region": "RJ",
-   "district": "RJ-4291",
+   "district": "RJ-1690",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Nova Iguacu",
    "budget": 235.84,
@@ -3971,7 +3972,7 @@
   {
    "id": "BR-INV-00147",
    "region": "RJ",
-   "district": "RJ-1426",
+   "district": "RJ-5192",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Rio de Janeiro",
    "budget": 5355.4,
@@ -3982,7 +3983,7 @@
   {
    "id": "BR-INV-00148",
    "region": "PR",
-   "district": "PR-9003",
+   "district": "PR-6454",
    "sector": "water",
    "title": "Water & Sanitation programme — Curitiba",
    "budget": 2093.84,
@@ -3993,7 +3994,7 @@
   {
    "id": "BR-INV-00149",
    "region": "PR",
-   "district": "PR-1811",
+   "district": "PR-3081",
    "sector": "water",
    "title": "Water & Sanitation programme — Londrina",
    "budget": 472.1,
@@ -4004,7 +4005,7 @@
   {
    "id": "BR-INV-00150",
    "region": "PR",
-   "district": "PR-1811",
+   "district": "PR-3081",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Londrina",
    "budget": 438.36,
@@ -4015,7 +4016,7 @@
   {
    "id": "BR-INV-00151",
    "region": "PR",
-   "district": "PR-9003",
+   "district": "PR-6454",
    "sector": "education",
    "title": "Education programme — Curitiba",
    "budget": 1676.38,
@@ -4026,7 +4027,7 @@
   {
    "id": "BR-INV-00152",
    "region": "PR",
-   "district": "PR-1811",
+   "district": "PR-3081",
    "sector": "education",
    "title": "Education programme — Londrina",
    "budget": 632.51,
@@ -4037,7 +4038,7 @@
   {
    "id": "BR-INV-00153",
    "region": "PR",
-   "district": "PR-1811",
+   "district": "PR-3081",
    "sector": "transport",
    "title": "Public Transport programme — Londrina",
    "budget": 440.95,
@@ -4048,7 +4049,7 @@
   {
    "id": "BR-INV-00154",
    "region": "PR",
-   "district": "PR-1811",
+   "district": "PR-3081",
    "sector": "digital",
    "title": "Digital & Telecom programme — Londrina",
    "budget": 622.6,
@@ -4059,7 +4060,7 @@
   {
    "id": "BR-INV-00155",
    "region": "SC",
-   "district": "SC-8395",
+   "district": "SC-8826",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Florianopolis",
    "budget": 226.4,
@@ -4070,7 +4071,7 @@
   {
    "id": "BR-INV-00156",
    "region": "SC",
-   "district": "SC-7177",
+   "district": "SC-5592",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Joinville",
    "budget": 348.88,
@@ -4081,7 +4082,7 @@
   {
    "id": "BR-INV-00157",
    "region": "SC",
-   "district": "SC-8395",
+   "district": "SC-8826",
    "sector": "health",
    "title": "Healthcare programme — Florianopolis",
    "budget": 449.5,
@@ -4092,7 +4093,7 @@
   {
    "id": "BR-INV-00158",
    "region": "SC",
-   "district": "SC-7177",
+   "district": "SC-5592",
    "sector": "education",
    "title": "Education programme — Joinville",
    "budget": 342.2,
@@ -4103,7 +4104,7 @@
   {
    "id": "BR-INV-00159",
    "region": "SC",
-   "district": "SC-8395",
+   "district": "SC-8826",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Florianopolis",
    "budget": 250.77,
@@ -4114,7 +4115,7 @@
   {
    "id": "BR-INV-00160",
    "region": "SC",
-   "district": "SC-7177",
+   "district": "SC-5592",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Joinville",
    "budget": 580.7,
@@ -4125,7 +4126,7 @@
   {
    "id": "BR-INV-00161",
    "region": "SC",
-   "district": "SC-7177",
+   "district": "SC-5592",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Joinville",
    "budget": 433.21,
@@ -4136,7 +4137,7 @@
   {
    "id": "BR-INV-00162",
    "region": "RS",
-   "district": "RS-8475",
+   "district": "RS-1609",
    "sector": "water",
    "title": "Water & Sanitation programme — Porto Alegre",
    "budget": 780.63,
@@ -4147,7 +4148,7 @@
   {
    "id": "BR-INV-00163",
    "region": "RS",
-   "district": "RS-8135",
+   "district": "RS-7050",
    "sector": "water",
    "title": "Water & Sanitation programme — Caxias do Sul",
    "budget": 452.11,
@@ -4158,7 +4159,7 @@
   {
    "id": "BR-INV-00164",
    "region": "RS",
-   "district": "RS-8135",
+   "district": "RS-7050",
    "sector": "digital",
    "title": "Digital & Telecom programme — Caxias do Sul",
    "budget": 410.57,
@@ -4169,7 +4170,7 @@
   {
    "id": "BR-INV-00165",
    "region": "RS",
-   "district": "RS-8475",
+   "district": "RS-1609",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Porto Alegre",
    "budget": 678.7,
@@ -4180,7 +4181,7 @@
   {
    "id": "BR-INV-00166",
    "region": "RS",
-   "district": "RS-8475",
+   "district": "RS-1609",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Porto Alegre",
    "budget": 1530.88,

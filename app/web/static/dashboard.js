@@ -230,6 +230,13 @@ async function selectCell(key) {
         ${r.status === 'review' ? '<span class="flag silent">in review</span>' : ''}
       </div>
       <div style="font-size:13.5px">${escapeHtml(r.text_redacted)}</div>
+      ${r.translated && r.text_en ? `
+        <div class="xs sec" style="margin-top:4px;padding-left:9px;
+             border-left:2px solid var(--border-strong)">
+          ${escapeHtml(r.text_en)}
+          ${r.text_local && r.text_local !== r.text_en
+            ? `<div style="margin-top:2px">${escapeHtml(r.text_local)}</div>` : ''}
+        </div>` : ''}
     </div>`).join('') ||
     '<div class="empty">No citizen requests received for this district and sector.</div>';
 

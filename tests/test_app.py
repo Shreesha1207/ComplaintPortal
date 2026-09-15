@@ -194,6 +194,89 @@ def test_engine_disagreement_escalates_to_human_review():
         os.environ.pop("GROQ_API_KEY", None)
 
 
+# ------------------------------------------------------------ translation
+def test_offline_engine_does_not_claim_to_translate():
+    """The offline engine categorises; it does not translate. Saying otherwise
+    would put a category label in front of a policymaker as if it were the
+    citizen's words."""
+    a = ENGINE.analyse("எங்கள் கிராமத்தில் மருத்துவமனை இல்லை")
+    assert a.translated is False
+    assert a.text_local == ""
+    assert a.text_en.startswith("[ta]")        # a labelled gloss, not prose
+
+
+def test_model_translates_into_english_and_the_country_link_language():
+    """A Tamil request must be readable by an official who reads Hindi or
+    English — translating only to English serves donors, not the ministry."""
+    engine = GroqEngine()
+    os.environ["GROQ_API_KEY"] = "test-key-not-used"
+    try:
+        engine._post = lambda path, payload: {"choices": [{"message": {"content": json.dumps({
+            "language": "ta",
+            "text_en": "There is no hospital in our village.",
+            "text_local": "हमारे गाँव में कोई अस्पताल नहीं है।",
+            "sector": "health", "urgency": "critical", "affected_population": 1800,
+            "confidence": 0.93, "entities": [], "rationale": "r",
+        })}}]}
+        a = engine.analyse("எங்கள் கிராமத்தில் மருத்துவமனை இல்லை", country="IN")
+        assert a.translated is True
+        assert a.text_en == "There is no hospital in our village."
+        assert a.text_local == "हमारे गाँव में कोई अस्पताल नहीं है।"
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
+def test_link_language_is_per_country():
+    from app.ai.groq_engine import link_language_for
+    assert link_language_for("IN") == "hi"
+    assert link_language_for("BR") == "pt"
+    assert link_language_for("ZA") == "en"
+    assert link_language_for("ZZ") == "en"     # unknown country must not crash
+
+
+def test_translation_columns_migrate_onto_an_existing_database():
+    """Adding translation must not require wiping a deployed database."""
+    import sqlite3, tempfile, importlib
+    from app import db as _db
+    path = os.path.join(tempfile.gettempdir(), "migrate_check.db")
+    if os.path.exists(path):
+        os.remove(path)
+    c = sqlite3.connect(path)
+    c.executescript("""CREATE TABLE requests (id TEXT PRIMARY KEY, created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL, country TEXT NOT NULL, region_code TEXT NOT NULL,
+      district_code TEXT NOT NULL, channel TEXT NOT NULL, language TEXT NOT NULL,
+      language_confidence REAL NOT NULL, text_original TEXT NOT NULL,
+      text_redacted TEXT NOT NULL, text_en TEXT NOT NULL, sector TEXT NOT NULL,
+      sector_confidence REAL NOT NULL, urgency TEXT NOT NULL, urgency_score REAL NOT NULL,
+      affected_population INTEGER NOT NULL, ai_confidence REAL NOT NULL,
+      ai_engine TEXT NOT NULL, ai_rationale TEXT NOT NULL,
+      pii_types TEXT NOT NULL DEFAULT '[]', entities TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'new', reviewer_note TEXT);
+      CREATE TABLE audit_log (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL,
+      request_id TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
+      detail TEXT NOT NULL DEFAULT '{}');""")
+    c.execute("INSERT INTO requests VALUES ('R1','t','t','IN','TN','TN-1','voice','ta',0.9,"
+              "'x','x','[ta] gloss','water',0.8,'high',0.7,1800,0.8,'heuristic','r',"
+              "'[]','[]','new',NULL)")
+    c.commit(); c.close()
+
+    saved = os.environ.get("APP_DB")
+    os.environ["APP_DB"] = path
+    try:
+        importlib.reload(_db)
+        _db.init_db()
+        row = _db.get_request("R1")
+        assert row is not None and row["text_original"] == "x"   # nothing lost
+        assert row["text_local"] == "" and row["translated"] == 0
+        assert len(_db.untranslated(country="IN")) == 1
+    finally:
+        if saved is not None:
+            os.environ["APP_DB"] = saved
+        else:
+            os.environ.pop("APP_DB", None)
+        importlib.reload(_db)
+
+
 # ------------------------------------------------------------------ voice
 def test_speech_provider_is_none_until_configured():
     """No STT config must mean a clear 'not configured', never a crash."""

@@ -14,6 +14,7 @@
   "District"
  ],
  "pivot_language": "en",
+ "link_language": "hi",
  "languages": [
   {
    "code": "hi",
@@ -201,7 +202,7 @@
    },
    "districts": [
     {
-     "code": "LA-1848",
+     "code": "LA-7219",
      "name": "Leh",
      "population": 160000,
      "deprivation": 0.3,
@@ -225,7 +226,7 @@
      }
     },
     {
-     "code": "LA-1655",
+     "code": "LA-9331",
      "name": "Kargil",
      "population": 130000,
      "deprivation": 0.55,
@@ -278,7 +279,7 @@
    },
    "districts": [
     {
-     "code": "JK-1013",
+     "code": "JK-3348",
      "name": "Srinagar",
      "population": 1270000,
      "deprivation": 0.22,
@@ -302,7 +303,7 @@
      }
     },
     {
-     "code": "JK-0411",
+     "code": "JK-6386",
      "name": "Jammu",
      "population": 1530000,
      "deprivation": 0.2,
@@ -326,7 +327,7 @@
      }
     },
     {
-     "code": "JK-5989",
+     "code": "JK-4985",
      "name": "Anantnag",
      "population": 1080000,
      "deprivation": 0.48,
@@ -350,7 +351,7 @@
      }
     },
     {
-     "code": "JK-3682",
+     "code": "JK-3016",
      "name": "Baramulla",
      "population": 1010000,
      "deprivation": 0.5,
@@ -403,7 +404,7 @@
    },
    "districts": [
     {
-     "code": "HP-4649",
+     "code": "HP-9153",
      "name": "Shimla",
      "population": 810000,
      "deprivation": 0.2,
@@ -427,7 +428,7 @@
      }
     },
     {
-     "code": "HP-6132",
+     "code": "HP-0182",
      "name": "Kangra",
      "population": 1510000,
      "deprivation": 0.34,
@@ -451,7 +452,7 @@
      }
     },
     {
-     "code": "HP-0106",
+     "code": "HP-9474",
      "name": "Mandi",
      "population": 999000,
      "deprivation": 0.4,
@@ -475,7 +476,7 @@
      }
     },
     {
-     "code": "HP-1499",
+     "code": "HP-7738",
      "name": "Solan",
      "population": 580000,
      "deprivation": 0.28,
@@ -528,7 +529,7 @@
    },
    "districts": [
     {
-     "code": "PB-9949",
+     "code": "PB-0471",
      "name": "Ludhiana",
      "population": 3500000,
      "deprivation": 0.18,
@@ -552,7 +553,7 @@
      }
     },
     {
-     "code": "PB-1843",
+     "code": "PB-5306",
      "name": "Amritsar",
      "population": 2490000,
      "deprivation": 0.3,
@@ -576,7 +577,7 @@
      }
     },
     {
-     "code": "PB-4211",
+     "code": "PB-3183",
      "name": "Jalandhar",
      "population": 2190000,
      "deprivation": 0.26,
@@ -600,7 +601,7 @@
      }
     },
     {
-     "code": "PB-8017",
+     "code": "PB-6803",
      "name": "Patiala",
      "population": 1900000,
      "deprivation": 0.32,
@@ -624,7 +625,7 @@
      }
     },
     {
-     "code": "PB-6019",
+     "code": "PB-6815",
      "name": "Bathinda",
      "population": 1390000,
      "deprivation": 0.44,
@@ -677,7 +678,7 @@
    },
    "districts": [
     {
-     "code": "CH-0338",
+     "code": "CH-5380",
      "name": "Chandigarh",
      "population": 1160000,
      "deprivation": 0.12,
@@ -730,7 +731,7 @@
    },
    "districts": [
     {
-     "code": "UK-5486",
+     "code": "UK-1833",
      "name": "Dehradun",
      "population": 1900000,
      "deprivation": 0.2,
@@ -754,7 +755,7 @@
      }
     },
     {
-     "code": "UK-9225",
+     "code": "UK-3939",
      "name": "Haridwar",
      "population": 2060000,
      "deprivation": 0.38,
@@ -778,7 +779,7 @@
      }
     },
     {
-     "code": "UK-3790",
+     "code": "UK-0454",
      "name": "Nainital",
      "population": 1010000,
      "deprivation": 0.34,
@@ -802,7 +803,7 @@
      }
     },
     {
-     "code": "UK-1600",
+     "code": "UK-4670",
      "name": "Pithoragarh",
      "population": 500000,
      "deprivation": 0.62,
@@ -855,7 +856,7 @@
    },
    "districts": [
     {
-     "code": "HR-0201",
+     "code": "HR-7792",
      "name": "Gurugram",
      "population": 1800000,
      "deprivation": 0.12,
@@ -879,7 +880,7 @@
      }
     },
     {
-     "code": "HR-5429",
+     "code": "HR-1137",
      "name": "Faridabad",
      "population": 2020000,
      "deprivation": 0.24,
@@ -903,7 +904,7 @@
      }
     },
     {
-     "code": "HR-5371",
+     "code": "HR-3851",
      "name": "Hisar",
      "population": 1840000,
      "deprivation": 0.42,
@@ -927,7 +928,7 @@
      }
     },
     {
-     "code": "HR-6184",
+     "code": "HR-1292",
      "name": "Karnal",
      "population": 1570000,
      "deprivation": 0.36,
@@ -951,7 +952,7 @@
      }
     },
     {
-     "code": "HR-5185",
+     "code": "HR-7795",
      "name": "Nuh (Mewat)",
      "population": 1280000,
      "deprivation": 0.86,
@@ -1004,7 +1005,7 @@
    },
    "districts": [
     {
-     "code": "DL-5251",
+     "code": "DL-2010",
      "name": "New Delhi",
      "population": 260000,
      "deprivation": 0.1,
@@ -1028,7 +1029,7 @@
      }
     },
     {
-     "code": "DL-5209",
+     "code": "DL-6323",
      "name": "North East Delhi",
      "population": 2660000,
      "deprivation": 0.52,
@@ -1052,7 +1053,7 @@
      }
     },
     {
-     "code": "DL-4526",
+     "code": "DL-7906",
      "name": "South West Delhi",
      "population": 2370000,
      "deprivation": 0.24,
@@ -1076,7 +1077,7 @@
      }
     },
     {
-     "code": "DL-9370",
+     "code": "DL-7242",
      "name": "Shahdara",
      "population": 1900000,
      "deprivation": 0.44,
@@ -1129,7 +1130,7 @@
    },
    "districts": [
     {
-     "code": "RJ-8091",
+     "code": "RJ-6116",
      "name": "Jaipur",
      "population": 7100000,
      "deprivation": 0.2,
@@ -1153,7 +1154,7 @@
      }
     },
     {
-     "code": "RJ-7543",
+     "code": "RJ-3728",
      "name": "Jodhpur",
      "population": 3960000,
      "deprivation": 0.38,
@@ -1177,7 +1178,7 @@
      }
     },
     {
-     "code": "RJ-3356",
+     "code": "RJ-2453",
      "name": "Barmer",
      "population": 2850000,
      "deprivation": 0.78,
@@ -1201,7 +1202,7 @@
      }
     },
     {
-     "code": "RJ-5556",
+     "code": "RJ-5144",
      "name": "Udaipur",
      "population": 3400000,
      "deprivation": 0.5,
@@ -1225,7 +1226,7 @@
      }
     },
     {
-     "code": "RJ-1173",
+     "code": "RJ-6874",
      "name": "Bharatpur",
      "population": 2800000,
      "deprivation": 0.54,
@@ -1249,7 +1250,7 @@
      }
     },
     {
-     "code": "RJ-3808",
+     "code": "RJ-2006",
      "name": "Banswara",
      "population": 1960000,
      "deprivation": 0.82,
@@ -1302,7 +1303,7 @@
    },
    "districts": [
     {
-     "code": "UP-5509",
+     "code": "UP-1225",
      "name": "Lucknow",
      "population": 4990000,
      "deprivation": 0.22,
@@ -1326,7 +1327,7 @@
      }
     },
     {
-     "code": "UP-4758",
+     "code": "UP-0361",
      "name": "Kanpur Nagar",
      "population": 4950000,
      "deprivation": 0.32,
@@ -1350,7 +1351,7 @@
      }
     },
     {
-     "code": "UP-6374",
+     "code": "UP-7915",
      "name": "Varanasi",
      "population": 4010000,
      "deprivation": 0.44,
@@ -1374,7 +1375,7 @@
      }
     },
     {
-     "code": "UP-0337",
+     "code": "UP-7598",
      "name": "Gorakhpur",
      "population": 4800000,
      "deprivation": 0.56,
@@ -1398,7 +1399,7 @@
      }
     },
     {
-     "code": "UP-0347",
+     "code": "UP-6218",
      "name": "Bahraich",
      "population": 3800000,
      "deprivation": 0.84,
@@ -1422,7 +1423,7 @@
      }
     },
     {
-     "code": "UP-0365",
+     "code": "UP-9279",
      "name": "Shrawasti",
      "population": 1270000,
      "deprivation": 0.92,
@@ -1475,7 +1476,7 @@
    },
    "districts": [
     {
-     "code": "SK-6707",
+     "code": "SK-0669",
      "name": "Gangtok (East)",
      "population": 300000,
      "deprivation": 0.24,
@@ -1499,7 +1500,7 @@
      }
     },
     {
-     "code": "SK-1248",
+     "code": "SK-4780",
      "name": "West Sikkim",
      "population": 140000,
      "deprivation": 0.56,
@@ -1523,7 +1524,7 @@
      }
     },
     {
-     "code": "SK-3380",
+     "code": "SK-1615",
      "name": "North Sikkim",
      "population": 45000,
      "deprivation": 0.66,
@@ -1576,7 +1577,7 @@
    },
    "districts": [
     {
-     "code": "AR-0715",
+     "code": "AR-6084",
      "name": "Papum Pare (Itanagar)",
      "population": 260000,
      "deprivation": 0.34,
@@ -1600,7 +1601,7 @@
      }
     },
     {
-     "code": "AR-1826",
+     "code": "AR-2801",
      "name": "Tawang",
      "population": 55000,
      "deprivation": 0.68,
@@ -1624,7 +1625,7 @@
      }
     },
     {
-     "code": "AR-8338",
+     "code": "AR-5916",
      "name": "Changlang",
      "population": 160000,
      "deprivation": 0.74,
@@ -1677,7 +1678,7 @@
    },
    "districts": [
     {
-     "code": "GJ-1094",
+     "code": "GJ-0398",
      "name": "Ahmedabad",
      "population": 8200000,
      "deprivation": 0.16,
@@ -1701,7 +1702,7 @@
      }
     },
     {
-     "code": "GJ-1910",
+     "code": "GJ-2012",
      "name": "Surat",
      "population": 7100000,
      "deprivation": 0.22,
@@ -1725,7 +1726,7 @@
      }
     },
     {
-     "code": "GJ-5939",
+     "code": "GJ-8644",
      "name": "Rajkot",
      "population": 4200000,
      "deprivation": 0.32,
@@ -1749,7 +1750,7 @@
      }
     },
     {
-     "code": "GJ-6527",
+     "code": "GJ-0258",
      "name": "Kachchh",
      "population": 2300000,
      "deprivation": 0.62,
@@ -1773,7 +1774,7 @@
      }
     },
     {
-     "code": "GJ-3481",
+     "code": "GJ-4565",
      "name": "Dahod",
      "population": 2500000,
      "deprivation": 0.86,
@@ -1826,7 +1827,7 @@
    },
    "districts": [
     {
-     "code": "MP-0390",
+     "code": "MP-8504",
      "name": "Bhopal",
      "population": 2600000,
      "deprivation": 0.22,
@@ -1850,7 +1851,7 @@
      }
     },
     {
-     "code": "MP-6159",
+     "code": "MP-9038",
      "name": "Indore",
      "population": 3600000,
      "deprivation": 0.2,
@@ -1874,7 +1875,7 @@
      }
     },
     {
-     "code": "MP-8289",
+     "code": "MP-0271",
      "name": "Jabalpur",
      "population": 2800000,
      "deprivation": 0.4,
@@ -1898,7 +1899,7 @@
      }
     },
     {
-     "code": "MP-0300",
+     "code": "MP-9747",
      "name": "Jhabua",
      "population": 1200000,
      "deprivation": 0.9,
@@ -1922,7 +1923,7 @@
      }
     },
     {
-     "code": "MP-6215",
+     "code": "MP-1612",
      "name": "Rewa",
      "population": 2600000,
      "deprivation": 0.64,
@@ -1946,7 +1947,7 @@
      }
     },
     {
-     "code": "MP-7174",
+     "code": "MP-5089",
      "name": "Sheopur",
      "population": 790000,
      "deprivation": 0.88,
@@ -1999,7 +2000,7 @@
    },
    "districts": [
     {
-     "code": "BR-9300",
+     "code": "BR-3133",
      "name": "Patna",
      "population": 6300000,
      "deprivation": 0.28,
@@ -2023,7 +2024,7 @@
      }
     },
     {
-     "code": "BR-7339",
+     "code": "BR-9186",
      "name": "Muzaffarpur",
      "population": 5200000,
      "deprivation": 0.62,
@@ -2047,7 +2048,7 @@
      }
     },
     {
-     "code": "BR-5644",
+     "code": "BR-8889",
      "name": "Gaya",
      "population": 4900000,
      "deprivation": 0.68,
@@ -2071,7 +2072,7 @@
      }
     },
     {
-     "code": "BR-2008",
+     "code": "BR-8024",
      "name": "Araria",
      "population": 3200000,
      "deprivation": 0.92,
@@ -2095,7 +2096,7 @@
      }
     },
     {
-     "code": "BR-9613",
+     "code": "BR-8961",
      "name": "Sitamarhi",
      "population": 3700000,
      "deprivation": 0.88,
@@ -2119,7 +2120,7 @@
      }
     },
     {
-     "code": "BR-5005",
+     "code": "BR-7026",
      "name": "Purnia",
      "population": 3600000,
      "deprivation": 0.8,
@@ -2172,7 +2173,7 @@
    },
    "districts": [
     {
-     "code": "AS-3846",
+     "code": "AS-8168",
      "name": "Kamrup Metro (Guwahati)",
      "population": 1300000,
      "deprivation": 0.22,
@@ -2196,7 +2197,7 @@
      }
     },
     {
-     "code": "AS-3303",
+     "code": "AS-1293",
      "name": "Dhubri",
      "population": 2100000,
      "deprivation": 0.86,
@@ -2220,7 +2221,7 @@
      }
     },
     {
-     "code": "AS-9964",
+     "code": "AS-3183",
      "name": "Barpeta",
      "population": 1900000,
      "deprivation": 0.74,
@@ -2244,7 +2245,7 @@
      }
     },
     {
-     "code": "AS-0484",
+     "code": "AS-4932",
      "name": "Dibrugarh",
      "population": 1400000,
      "deprivation": 0.46,
@@ -2297,7 +2298,7 @@
    },
    "districts": [
     {
-     "code": "NL-7517",
+     "code": "NL-7061",
      "name": "Kohima",
      "population": 300000,
      "deprivation": 0.34,
@@ -2321,7 +2322,7 @@
      }
     },
     {
-     "code": "NL-5301",
+     "code": "NL-7749",
      "name": "Dimapur",
      "population": 420000,
      "deprivation": 0.3,
@@ -2345,7 +2346,7 @@
      }
     },
     {
-     "code": "NL-6168",
+     "code": "NL-1848",
      "name": "Mon",
      "population": 280000,
      "deprivation": 0.8,
@@ -2398,7 +2399,7 @@
    },
    "districts": [
     {
-     "code": "DD-0717",
+     "code": "DD-9226",
      "name": "Dadra & Nagar Haveli",
      "population": 390000,
      "deprivation": 0.46,
@@ -2422,7 +2423,7 @@
      }
     },
     {
-     "code": "DD-6285",
+     "code": "DD-0950",
      "name": "Daman",
      "population": 190000,
      "deprivation": 0.32,
@@ -2446,7 +2447,7 @@
      }
     },
     {
-     "code": "DD-8991",
+     "code": "DD-0165",
      "name": "Diu",
      "population": 55000,
      "deprivation": 0.36,
@@ -2499,7 +2500,7 @@
    },
    "districts": [
     {
-     "code": "MH-6014",
+     "code": "MH-9918",
      "name": "Mumbai Suburban",
      "population": 9400000,
      "deprivation": 0.18,
@@ -2523,7 +2524,7 @@
      }
     },
     {
-     "code": "MH-1942",
+     "code": "MH-7504",
      "name": "Pune",
      "population": 10500000,
      "deprivation": 0.16,
@@ -2547,7 +2548,7 @@
      }
     },
     {
-     "code": "MH-4664",
+     "code": "MH-4168",
      "name": "Nagpur",
      "population": 5000000,
      "deprivation": 0.28,
@@ -2571,7 +2572,7 @@
      }
     },
     {
-     "code": "MH-9633",
+     "code": "MH-0341",
      "name": "Nandurbar",
      "population": 1800000,
      "deprivation": 0.88,
@@ -2595,7 +2596,7 @@
      }
     },
     {
-     "code": "MH-2543",
+     "code": "MH-5222",
      "name": "Gadchiroli",
      "population": 1200000,
      "deprivation": 0.9,
@@ -2619,7 +2620,7 @@
      }
     },
     {
-     "code": "MH-2538",
+     "code": "MH-3367",
      "name": "Chh. Sambhajinagar",
      "population": 4100000,
      "deprivation": 0.48,
@@ -2672,7 +2673,7 @@
    },
    "districts": [
     {
-     "code": "CG-0469",
+     "code": "CG-9818",
      "name": "Raipur",
      "population": 2700000,
      "deprivation": 0.26,
@@ -2696,7 +2697,7 @@
      }
     },
     {
-     "code": "CG-9605",
+     "code": "CG-1908",
      "name": "Bilaspur",
      "population": 2100000,
      "deprivation": 0.44,
@@ -2720,7 +2721,7 @@
      }
     },
     {
-     "code": "CG-4124",
+     "code": "CG-8268",
      "name": "Korba",
      "population": 1300000,
      "deprivation": 0.52,
@@ -2744,7 +2745,7 @@
      }
     },
     {
-     "code": "CG-6028",
+     "code": "CG-7385",
      "name": "Bastar",
      "population": 1500000,
      "deprivation": 0.86,
@@ -2768,7 +2769,7 @@
      }
     },
     {
-     "code": "CG-0259",
+     "code": "CG-6112",
      "name": "Sukma",
      "population": 300000,
      "deprivation": 0.94,
@@ -2821,7 +2822,7 @@
    },
    "districts": [
     {
-     "code": "JH-0106",
+     "code": "JH-7798",
      "name": "Ranchi",
      "population": 3400000,
      "deprivation": 0.3,
@@ -2845,7 +2846,7 @@
      }
     },
     {
-     "code": "JH-3357",
+     "code": "JH-3753",
      "name": "Dhanbad",
      "population": 3000000,
      "deprivation": 0.42,
@@ -2869,7 +2870,7 @@
      }
     },
     {
-     "code": "JH-4341",
+     "code": "JH-5334",
      "name": "Pakur",
      "population": 1100000,
      "deprivation": 0.9,
@@ -2893,7 +2894,7 @@
      }
     },
     {
-     "code": "JH-9836",
+     "code": "JH-3969",
      "name": "West Singhbhum",
      "population": 1700000,
      "deprivation": 0.82,
@@ -2917,7 +2918,7 @@
      }
     },
     {
-     "code": "JH-8493",
+     "code": "JH-6081",
      "name": "Sahibganj",
      "population": 1300000,
      "deprivation": 0.88,
@@ -2970,7 +2971,7 @@
    },
    "districts": [
     {
-     "code": "WB-8885",
+     "code": "WB-2602",
      "name": "Kolkata",
      "population": 4600000,
      "deprivation": 0.2,
@@ -2994,7 +2995,7 @@
      }
     },
     {
-     "code": "WB-5880",
+     "code": "WB-7600",
      "name": "North 24 Parganas",
      "population": 11100000,
      "deprivation": 0.36,
@@ -3018,7 +3019,7 @@
      }
     },
     {
-     "code": "WB-5367",
+     "code": "WB-0721",
      "name": "Murshidabad",
      "population": 8100000,
      "deprivation": 0.78,
@@ -3042,7 +3043,7 @@
      }
     },
     {
-     "code": "WB-6717",
+     "code": "WB-5910",
      "name": "Purulia",
      "population": 3200000,
      "deprivation": 0.84,
@@ -3066,7 +3067,7 @@
      }
     },
     {
-     "code": "WB-0862",
+     "code": "WB-4794",
      "name": "Darjeeling",
      "population": 1900000,
      "deprivation": 0.5,
@@ -3119,7 +3120,7 @@
    },
    "districts": [
     {
-     "code": "ML-7170",
+     "code": "ML-1164",
      "name": "East Khasi Hills (Shillong)",
      "population": 880000,
      "deprivation": 0.32,
@@ -3143,7 +3144,7 @@
      }
     },
     {
-     "code": "ML-7719",
+     "code": "ML-0017",
      "name": "West Garo Hills",
      "population": 650000,
      "deprivation": 0.8,
@@ -3167,7 +3168,7 @@
      }
     },
     {
-     "code": "ML-0820",
+     "code": "ML-9470",
      "name": "Ri Bhoi",
      "population": 300000,
      "deprivation": 0.7,
@@ -3220,7 +3221,7 @@
    },
    "districts": [
     {
-     "code": "MN-8725",
+     "code": "MN-0014",
      "name": "Imphal West",
      "population": 520000,
      "deprivation": 0.3,
@@ -3244,7 +3245,7 @@
      }
     },
     {
-     "code": "MN-1112",
+     "code": "MN-6834",
      "name": "Churachandpur",
      "population": 300000,
      "deprivation": 0.76,
@@ -3268,7 +3269,7 @@
      }
     },
     {
-     "code": "MN-3538",
+     "code": "MN-2859",
      "name": "Ukhrul",
      "population": 190000,
      "deprivation": 0.78,
@@ -3321,7 +3322,7 @@
    },
    "districts": [
     {
-     "code": "GA-5211",
+     "code": "GA-0985",
      "name": "North Goa",
      "population": 830000,
      "deprivation": 0.18,
@@ -3345,7 +3346,7 @@
      }
     },
     {
-     "code": "GA-0758",
+     "code": "GA-0886",
      "name": "South Goa",
      "population": 760000,
      "deprivation": 0.24,
@@ -3398,7 +3399,7 @@
    },
    "districts": [
     {
-     "code": "TG-3964",
+     "code": "TG-4386",
      "name": "Hyderabad",
      "population": 4400000,
      "deprivation": 0.18,
@@ -3422,7 +3423,7 @@
      }
     },
     {
-     "code": "TG-4210",
+     "code": "TG-2711",
      "name": "Rangareddy",
      "population": 5800000,
      "deprivation": 0.3,
@@ -3446,7 +3447,7 @@
      }
     },
     {
-     "code": "TG-0499",
+     "code": "TG-5309",
      "name": "Warangal",
      "population": 1600000,
      "deprivation": 0.5,
@@ -3470,7 +3471,7 @@
      }
     },
     {
-     "code": "TG-0856",
+     "code": "TG-2517",
      "name": "Adilabad",
      "population": 1000000,
      "deprivation": 0.82,
@@ -3494,7 +3495,7 @@
      }
     },
     {
-     "code": "TG-3573",
+     "code": "TG-4705",
      "name": "Nalgonda",
      "population": 1800000,
      "deprivation": 0.6,
@@ -3547,7 +3548,7 @@
    },
    "districts": [
     {
-     "code": "OD-9971",
+     "code": "OD-9809",
      "name": "Khordha (Bhubaneswar)",
      "population": 2600000,
      "deprivation": 0.26,
@@ -3571,7 +3572,7 @@
      }
     },
     {
-     "code": "OD-6528",
+     "code": "OD-0555",
      "name": "Ganjam",
      "population": 3800000,
      "deprivation": 0.6,
@@ -3595,7 +3596,7 @@
      }
     },
     {
-     "code": "OD-8010",
+     "code": "OD-1603",
      "name": "Kalahandi",
      "population": 1700000,
      "deprivation": 0.9,
@@ -3619,7 +3620,7 @@
      }
     },
     {
-     "code": "OD-5391",
+     "code": "OD-3949",
      "name": "Koraput",
      "population": 1500000,
      "deprivation": 0.88,
@@ -3643,7 +3644,7 @@
      }
     },
     {
-     "code": "OD-2660",
+     "code": "OD-3170",
      "name": "Mayurbhanj",
      "population": 2700000,
      "deprivation": 0.8,
@@ -3696,7 +3697,7 @@
    },
    "districts": [
     {
-     "code": "TR-1635",
+     "code": "TR-7020",
      "name": "West Tripura (Agartala)",
      "population": 950000,
      "deprivation": 0.3,
@@ -3720,7 +3721,7 @@
      }
     },
     {
-     "code": "TR-6798",
+     "code": "TR-4541",
      "name": "Dhalai",
      "population": 400000,
      "deprivation": 0.82,
@@ -3744,7 +3745,7 @@
      }
     },
     {
-     "code": "TR-5245",
+     "code": "TR-7732",
      "name": "South Tripura",
      "population": 480000,
      "deprivation": 0.64,
@@ -3797,7 +3798,7 @@
    },
    "districts": [
     {
-     "code": "MZ-4280",
+     "code": "MZ-4598",
      "name": "Aizawl",
      "population": 420000,
      "deprivation": 0.28,
@@ -3821,7 +3822,7 @@
      }
     },
     {
-     "code": "MZ-3354",
+     "code": "MZ-2030",
      "name": "Lunglei",
      "population": 170000,
      "deprivation": 0.66,
@@ -3845,7 +3846,7 @@
      }
     },
     {
-     "code": "MZ-1518",
+     "code": "MZ-1220",
      "name": "Lawngtlai",
      "population": 120000,
      "deprivation": 0.86,
@@ -3898,7 +3899,7 @@
    },
    "districts": [
     {
-     "code": "KA-6811",
+     "code": "KA-5926",
      "name": "Bengaluru Urban",
      "population": 12800000,
      "deprivation": 0.14,
@@ -3922,7 +3923,7 @@
      }
     },
     {
-     "code": "KA-1942",
+     "code": "KA-5108",
      "name": "Mysuru",
      "population": 3200000,
      "deprivation": 0.34,
@@ -3946,7 +3947,7 @@
      }
     },
     {
-     "code": "KA-1340",
+     "code": "KA-7491",
      "name": "Belagavi",
      "population": 5100000,
      "deprivation": 0.56,
@@ -3970,7 +3971,7 @@
      }
     },
     {
-     "code": "KA-6542",
+     "code": "KA-2968",
      "name": "Kalaburagi",
      "population": 2900000,
      "deprivation": 0.8,
@@ -3994,7 +3995,7 @@
      }
     },
     {
-     "code": "KA-6142",
+     "code": "KA-7459",
      "name": "Raichur",
      "population": 2100000,
      "deprivation": 0.86,
@@ -4018,7 +4019,7 @@
      }
     },
     {
-     "code": "KA-7681",
+     "code": "KA-6829",
      "name": "Yadgir",
      "population": 1400000,
      "deprivation": 0.92,
@@ -4071,7 +4072,7 @@
    },
    "districts": [
     {
-     "code": "AP-0519",
+     "code": "AP-0265",
      "name": "Visakhapatnam",
      "population": 4600000,
      "deprivation": 0.26,
@@ -4095,7 +4096,7 @@
      }
     },
     {
-     "code": "AP-3552",
+     "code": "AP-3346",
      "name": "Guntur",
      "population": 4900000,
      "deprivation": 0.42,
@@ -4119,7 +4120,7 @@
      }
     },
     {
-     "code": "AP-3539",
+     "code": "AP-0117",
      "name": "Kurnool",
      "population": 4300000,
      "deprivation": 0.7,
@@ -4143,7 +4144,7 @@
      }
     },
     {
-     "code": "AP-2986",
+     "code": "AP-9687",
      "name": "Anantapur",
      "population": 4200000,
      "deprivation": 0.76,
@@ -4167,7 +4168,7 @@
      }
     },
     {
-     "code": "AP-4634",
+     "code": "AP-9870",
      "name": "Srikakulam",
      "population": 2800000,
      "deprivation": 0.78,
@@ -4220,7 +4221,7 @@
    },
    "districts": [
     {
-     "code": "KL-7873",
+     "code": "KL-8456",
      "name": "Thiruvananthapuram",
      "population": 3500000,
      "deprivation": 0.2,
@@ -4244,7 +4245,7 @@
      }
     },
     {
-     "code": "KL-2948",
+     "code": "KL-9525",
      "name": "Ernakulam",
      "population": 3400000,
      "deprivation": 0.16,
@@ -4268,7 +4269,7 @@
      }
     },
     {
-     "code": "KL-3578",
+     "code": "KL-3480",
      "name": "Malappuram",
      "population": 4500000,
      "deprivation": 0.4,
@@ -4292,7 +4293,7 @@
      }
     },
     {
-     "code": "KL-5129",
+     "code": "KL-8142",
      "name": "Wayanad",
      "population": 850000,
      "deprivation": 0.58,
@@ -4316,7 +4317,7 @@
      }
     },
     {
-     "code": "KL-3755",
+     "code": "KL-7332",
      "name": "Idukki",
      "population": 1100000,
      "deprivation": 0.54,
@@ -4369,7 +4370,7 @@
    },
    "districts": [
     {
-     "code": "TN-3596",
+     "code": "TN-9119",
      "name": "Chennai",
      "population": 7100000,
      "deprivation": 0.16,
@@ -4393,7 +4394,7 @@
      }
     },
     {
-     "code": "TN-8652",
+     "code": "TN-0081",
      "name": "Coimbatore",
      "population": 3800000,
      "deprivation": 0.22,
@@ -4417,7 +4418,7 @@
      }
     },
     {
-     "code": "TN-9077",
+     "code": "TN-5237",
      "name": "Madurai",
      "population": 3300000,
      "deprivation": 0.36,
@@ -4441,7 +4442,7 @@
      }
     },
     {
-     "code": "TN-3567",
+     "code": "TN-9371",
      "name": "Tiruvallur",
      "population": 4100000,
      "deprivation": 0.4,
@@ -4465,7 +4466,7 @@
      }
     },
     {
-     "code": "TN-2346",
+     "code": "TN-4808",
      "name": "Ramanathapuram",
      "population": 1400000,
      "deprivation": 0.72,
@@ -4489,7 +4490,7 @@
      }
     },
     {
-     "code": "TN-7065",
+     "code": "TN-7475",
      "name": "Dharmapuri",
      "population": 1600000,
      "deprivation": 0.74,
@@ -4542,7 +4543,7 @@
    },
    "districts": [
     {
-     "code": "PY-6289",
+     "code": "PY-6893",
      "name": "Puducherry",
      "population": 1100000,
      "deprivation": 0.22,
@@ -4566,7 +4567,7 @@
      }
     },
     {
-     "code": "PY-4884",
+     "code": "PY-7043",
      "name": "Karaikal",
      "population": 230000,
      "deprivation": 0.42,
@@ -4619,7 +4620,7 @@
    },
    "districts": [
     {
-     "code": "LD-2854",
+     "code": "LD-3593",
      "name": "Lakshadweep",
      "population": 68000,
      "deprivation": 0.4,
@@ -4672,7 +4673,7 @@
    },
    "districts": [
     {
-     "code": "AN-8292",
+     "code": "AN-1463",
      "name": "South Andaman",
      "population": 240000,
      "deprivation": 0.32,
@@ -4696,7 +4697,7 @@
      }
     },
     {
-     "code": "AN-4815",
+     "code": "AN-4965",
      "name": "Nicobar",
      "population": 40000,
      "deprivation": 0.76,
@@ -4726,7 +4727,7 @@
   {
    "id": "IN-INV-00001",
    "region": "LA",
-   "district": "LA-1848",
+   "district": "LA-7219",
    "sector": "water",
    "title": "Water & Sanitation programme — Leh",
    "budget": 7.92,
@@ -4737,7 +4738,7 @@
   {
    "id": "IN-INV-00002",
    "region": "LA",
-   "district": "LA-1848",
+   "district": "LA-7219",
    "sector": "education",
    "title": "Education programme — Leh",
    "budget": 15.61,
@@ -4748,7 +4749,7 @@
   {
    "id": "IN-INV-00003",
    "region": "JK",
-   "district": "JK-1013",
+   "district": "JK-3348",
    "sector": "water",
    "title": "Water & Sanitation programme — Srinagar",
    "budget": 106.62,
@@ -4759,7 +4760,7 @@
   {
    "id": "IN-INV-00004",
    "region": "JK",
-   "district": "JK-0411",
+   "district": "JK-6386",
    "sector": "water",
    "title": "Water & Sanitation programme — Jammu",
    "budget": 127.05,
@@ -4770,7 +4771,7 @@
   {
    "id": "IN-INV-00005",
    "region": "JK",
-   "district": "JK-5989",
+   "district": "JK-4985",
    "sector": "water",
    "title": "Water & Sanitation programme — Anantnag",
    "budget": 103.4,
@@ -4781,7 +4782,7 @@
   {
    "id": "IN-INV-00006",
    "region": "JK",
-   "district": "JK-1013",
+   "district": "JK-3348",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Srinagar",
    "budget": 155.95,
@@ -4792,7 +4793,7 @@
   {
    "id": "IN-INV-00007",
    "region": "JK",
-   "district": "JK-5989",
+   "district": "JK-4985",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Anantnag",
    "budget": 107.97,
@@ -4803,7 +4804,7 @@
   {
    "id": "IN-INV-00008",
    "region": "JK",
-   "district": "JK-0411",
+   "district": "JK-6386",
    "sector": "health",
    "title": "Healthcare programme — Jammu",
    "budget": 86.41,
@@ -4814,7 +4815,7 @@
   {
    "id": "IN-INV-00009",
    "region": "JK",
-   "district": "JK-1013",
+   "district": "JK-3348",
    "sector": "education",
    "title": "Education programme — Srinagar",
    "budget": 42.59,
@@ -4825,7 +4826,7 @@
   {
    "id": "IN-INV-00010",
    "region": "JK",
-   "district": "JK-3682",
+   "district": "JK-3016",
    "sector": "education",
    "title": "Education programme — Baramulla",
    "budget": 74.38,
@@ -4836,7 +4837,7 @@
   {
    "id": "IN-INV-00011",
    "region": "JK",
-   "district": "JK-0411",
+   "district": "JK-6386",
    "sector": "power",
    "title": "Electricity & Energy programme — Jammu",
    "budget": 89.17,
@@ -4847,7 +4848,7 @@
   {
    "id": "IN-INV-00012",
    "region": "JK",
-   "district": "JK-5989",
+   "district": "JK-4985",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Anantnag",
    "budget": 88.6,
@@ -4858,7 +4859,7 @@
   {
    "id": "IN-INV-00013",
    "region": "JK",
-   "district": "JK-0411",
+   "district": "JK-6386",
    "sector": "digital",
    "title": "Digital & Telecom programme — Jammu",
    "budget": 84.83,
@@ -4869,7 +4870,7 @@
   {
    "id": "IN-INV-00014",
    "region": "JK",
-   "district": "JK-3682",
+   "district": "JK-3016",
    "sector": "digital",
    "title": "Digital & Telecom programme — Baramulla",
    "budget": 77.88,
@@ -4880,7 +4881,7 @@
   {
    "id": "IN-INV-00015",
    "region": "JK",
-   "district": "JK-5989",
+   "district": "JK-4985",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Anantnag",
    "budget": 102.16,
@@ -4891,7 +4892,7 @@
   {
    "id": "IN-INV-00016",
    "region": "JK",
-   "district": "JK-5989",
+   "district": "JK-4985",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Anantnag",
    "budget": 104.15,
@@ -4902,7 +4903,7 @@
   {
    "id": "IN-INV-00017",
    "region": "HP",
-   "district": "HP-0106",
+   "district": "HP-9474",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Mandi",
    "budget": 30.23,
@@ -4913,7 +4914,7 @@
   {
    "id": "IN-INV-00018",
    "region": "HP",
-   "district": "HP-4649",
+   "district": "HP-9153",
    "sector": "health",
    "title": "Healthcare programme — Shimla",
    "budget": 74.61,
@@ -4924,7 +4925,7 @@
   {
    "id": "IN-INV-00019",
    "region": "HP",
-   "district": "HP-0106",
+   "district": "HP-9474",
    "sector": "transport",
    "title": "Public Transport programme — Mandi",
    "budget": 88.92,
@@ -4935,7 +4936,7 @@
   {
    "id": "IN-INV-00020",
    "region": "HP",
-   "district": "HP-1499",
+   "district": "HP-7738",
    "sector": "transport",
    "title": "Public Transport programme — Solan",
    "budget": 62.04,
@@ -4946,7 +4947,7 @@
   {
    "id": "IN-INV-00021",
    "region": "HP",
-   "district": "HP-0106",
+   "district": "HP-9474",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Mandi",
    "budget": 44.15,
@@ -4957,7 +4958,7 @@
   {
    "id": "IN-INV-00022",
    "region": "HP",
-   "district": "HP-1499",
+   "district": "HP-7738",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Solan",
    "budget": 62.77,
@@ -4968,7 +4969,7 @@
   {
    "id": "IN-INV-00023",
    "region": "HP",
-   "district": "HP-4649",
+   "district": "HP-9153",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Shimla",
    "budget": 28.76,
@@ -4979,7 +4980,7 @@
   {
    "id": "IN-INV-00024",
    "region": "HP",
-   "district": "HP-0106",
+   "district": "HP-9474",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Mandi",
    "budget": 55.49,
@@ -4990,7 +4991,7 @@
   {
    "id": "IN-INV-00025",
    "region": "PB",
-   "district": "PB-4211",
+   "district": "PB-3183",
    "sector": "water",
    "title": "Water & Sanitation programme — Jalandhar",
    "budget": 64.88,
@@ -5001,7 +5002,7 @@
   {
    "id": "IN-INV-00026",
    "region": "PB",
-   "district": "PB-9949",
+   "district": "PB-0471",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Ludhiana",
    "budget": 338.96,
@@ -5012,7 +5013,7 @@
   {
    "id": "IN-INV-00027",
    "region": "PB",
-   "district": "PB-6019",
+   "district": "PB-6815",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Bathinda",
    "budget": 116.26,
@@ -5023,7 +5024,7 @@
   {
    "id": "IN-INV-00028",
    "region": "PB",
-   "district": "PB-6019",
+   "district": "PB-6815",
    "sector": "education",
    "title": "Education programme — Bathinda",
    "budget": 116.15,
@@ -5034,7 +5035,7 @@
   {
    "id": "IN-INV-00029",
    "region": "PB",
-   "district": "PB-9949",
+   "district": "PB-0471",
    "sector": "transport",
    "title": "Public Transport programme — Ludhiana",
    "budget": 229.73,
@@ -5045,7 +5046,7 @@
   {
    "id": "IN-INV-00030",
    "region": "PB",
-   "district": "PB-1843",
+   "district": "PB-5306",
    "sector": "transport",
    "title": "Public Transport programme — Amritsar",
    "budget": 85.39,
@@ -5056,7 +5057,7 @@
   {
    "id": "IN-INV-00031",
    "region": "PB",
-   "district": "PB-9949",
+   "district": "PB-0471",
    "sector": "digital",
    "title": "Digital & Telecom programme — Ludhiana",
    "budget": 94.09,
@@ -5067,7 +5068,7 @@
   {
    "id": "IN-INV-00032",
    "region": "PB",
-   "district": "PB-8017",
+   "district": "PB-6803",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Patiala",
    "budget": 170.11,
@@ -5078,7 +5079,7 @@
   {
    "id": "IN-INV-00033",
    "region": "PB",
-   "district": "PB-6019",
+   "district": "PB-6815",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Bathinda",
    "budget": 125.01,
@@ -5089,7 +5090,7 @@
   {
    "id": "IN-INV-00034",
    "region": "PB",
-   "district": "PB-8017",
+   "district": "PB-6803",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Patiala",
    "budget": 194.84,
@@ -5100,7 +5101,7 @@
   {
    "id": "IN-INV-00035",
    "region": "PB",
-   "district": "PB-6019",
+   "district": "PB-6815",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Bathinda",
    "budget": 58.52,
@@ -5111,7 +5112,7 @@
   {
    "id": "IN-INV-00036",
    "region": "CH",
-   "district": "CH-0338",
+   "district": "CH-5380",
    "sector": "education",
    "title": "Education programme — Chandigarh",
    "budget": 116.74,
@@ -5122,7 +5123,7 @@
   {
    "id": "IN-INV-00037",
    "region": "CH",
-   "district": "CH-0338",
+   "district": "CH-5380",
    "sector": "power",
    "title": "Electricity & Energy programme — Chandigarh",
    "budget": 72.91,
@@ -5133,7 +5134,7 @@
   {
    "id": "IN-INV-00038",
    "region": "CH",
-   "district": "CH-0338",
+   "district": "CH-5380",
    "sector": "transport",
    "title": "Public Transport programme — Chandigarh",
    "budget": 74.34,
@@ -5144,7 +5145,7 @@
   {
    "id": "IN-INV-00039",
    "region": "CH",
-   "district": "CH-0338",
+   "district": "CH-5380",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Chandigarh",
    "budget": 84.65,
@@ -5155,7 +5156,7 @@
   {
    "id": "IN-INV-00040",
    "region": "CH",
-   "district": "CH-0338",
+   "district": "CH-5380",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Chandigarh",
    "budget": 81.79,
@@ -5166,7 +5167,7 @@
   {
    "id": "IN-INV-00041",
    "region": "UK",
-   "district": "UK-9225",
+   "district": "UK-3939",
    "sector": "water",
    "title": "Water & Sanitation programme — Haridwar",
    "budget": 76.29,
@@ -5177,7 +5178,7 @@
   {
    "id": "IN-INV-00042",
    "region": "UK",
-   "district": "UK-5486",
+   "district": "UK-1833",
    "sector": "health",
    "title": "Healthcare programme — Dehradun",
    "budget": 56.25,
@@ -5188,7 +5189,7 @@
   {
    "id": "IN-INV-00043",
    "region": "UK",
-   "district": "UK-9225",
+   "district": "UK-3939",
    "sector": "education",
    "title": "Education programme — Haridwar",
    "budget": 208.57,
@@ -5199,7 +5200,7 @@
   {
    "id": "IN-INV-00044",
    "region": "UK",
-   "district": "UK-9225",
+   "district": "UK-3939",
    "sector": "power",
    "title": "Electricity & Energy programme — Haridwar",
    "budget": 180.46,
@@ -5210,7 +5211,7 @@
   {
    "id": "IN-INV-00045",
    "region": "UK",
-   "district": "UK-5486",
+   "district": "UK-1833",
    "sector": "transport",
    "title": "Public Transport programme — Dehradun",
    "budget": 210.54,
@@ -5221,7 +5222,7 @@
   {
    "id": "IN-INV-00046",
    "region": "UK",
-   "district": "UK-1600",
+   "district": "UK-4670",
    "sector": "transport",
    "title": "Public Transport programme — Pithoragarh",
    "budget": 21.72,
@@ -5232,7 +5233,7 @@
   {
    "id": "IN-INV-00047",
    "region": "UK",
-   "district": "UK-1600",
+   "district": "UK-4670",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Pithoragarh",
    "budget": 20.63,
@@ -5243,7 +5244,7 @@
   {
    "id": "IN-INV-00048",
    "region": "UK",
-   "district": "UK-9225",
+   "district": "UK-3939",
    "sector": "digital",
    "title": "Digital & Telecom programme — Haridwar",
    "budget": 215.3,
@@ -5254,7 +5255,7 @@
   {
    "id": "IN-INV-00049",
    "region": "UK",
-   "district": "UK-3790",
+   "district": "UK-0454",
    "sector": "digital",
    "title": "Digital & Telecom programme — Nainital",
    "budget": 57.34,
@@ -5265,7 +5266,7 @@
   {
    "id": "IN-INV-00050",
    "region": "UK",
-   "district": "UK-1600",
+   "district": "UK-4670",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Pithoragarh",
    "budget": 36.61,
@@ -5276,7 +5277,7 @@
   {
    "id": "IN-INV-00051",
    "region": "HR",
-   "district": "HR-6184",
+   "district": "HR-1292",
    "sector": "water",
    "title": "Water & Sanitation programme — Karnal",
    "budget": 152.93,
@@ -5287,7 +5288,7 @@
   {
    "id": "IN-INV-00052",
    "region": "HR",
-   "district": "HR-0201",
+   "district": "HR-7792",
    "sector": "education",
    "title": "Education programme — Gurugram",
    "budget": 200.03,
@@ -5298,7 +5299,7 @@
   {
    "id": "IN-INV-00053",
    "region": "HR",
-   "district": "HR-5371",
+   "district": "HR-3851",
    "sector": "education",
    "title": "Education programme — Hisar",
    "budget": 48.62,
@@ -5309,7 +5310,7 @@
   {
    "id": "IN-INV-00054",
    "region": "HR",
-   "district": "HR-6184",
+   "district": "HR-1292",
    "sector": "education",
    "title": "Education programme — Karnal",
    "budget": 152.94,
@@ -5320,7 +5321,7 @@
   {
    "id": "IN-INV-00055",
    "region": "HR",
-   "district": "HR-0201",
+   "district": "HR-7792",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Gurugram",
    "budget": 140.62,
@@ -5331,7 +5332,7 @@
   {
    "id": "IN-INV-00056",
    "region": "HR",
-   "district": "HR-5371",
+   "district": "HR-3851",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Hisar",
    "budget": 63.54,
@@ -5342,7 +5343,7 @@
   {
    "id": "IN-INV-00057",
    "region": "HR",
-   "district": "HR-5371",
+   "district": "HR-3851",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Hisar",
    "budget": 43.99,
@@ -5353,7 +5354,7 @@
   {
    "id": "IN-INV-00058",
    "region": "HR",
-   "district": "HR-6184",
+   "district": "HR-1292",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Karnal",
    "budget": 55.81,
@@ -5364,7 +5365,7 @@
   {
    "id": "IN-INV-00059",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "water",
    "title": "Water & Sanitation programme — South West Delhi",
    "budget": 60.38,
@@ -5375,7 +5376,7 @@
   {
    "id": "IN-INV-00060",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "roads",
    "title": "Roads & Connectivity programme — South West Delhi",
    "budget": 69.19,
@@ -5386,7 +5387,7 @@
   {
    "id": "IN-INV-00061",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Shahdara",
    "budget": 65.45,
@@ -5397,7 +5398,7 @@
   {
    "id": "IN-INV-00062",
    "region": "DL",
-   "district": "DL-5251",
+   "district": "DL-2010",
    "sector": "health",
    "title": "Healthcare programme — New Delhi",
    "budget": 19.25,
@@ -5408,7 +5409,7 @@
   {
    "id": "IN-INV-00063",
    "region": "DL",
-   "district": "DL-5209",
+   "district": "DL-6323",
    "sector": "health",
    "title": "Healthcare programme — North East Delhi",
    "budget": 231.62,
@@ -5419,7 +5420,7 @@
   {
    "id": "IN-INV-00064",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "health",
    "title": "Healthcare programme — South West Delhi",
    "budget": 282.21,
@@ -5430,7 +5431,7 @@
   {
    "id": "IN-INV-00065",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "health",
    "title": "Healthcare programme — Shahdara",
    "budget": 108.39,
@@ -5441,7 +5442,7 @@
   {
    "id": "IN-INV-00066",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "education",
    "title": "Education programme — Shahdara",
    "budget": 157.98,
@@ -5452,7 +5453,7 @@
   {
    "id": "IN-INV-00067",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "power",
    "title": "Electricity & Energy programme — South West Delhi",
    "budget": 176.97,
@@ -5463,7 +5464,7 @@
   {
    "id": "IN-INV-00068",
    "region": "DL",
-   "district": "DL-5251",
+   "district": "DL-2010",
    "sector": "transport",
    "title": "Public Transport programme — New Delhi",
    "budget": 8.06,
@@ -5474,7 +5475,7 @@
   {
    "id": "IN-INV-00069",
    "region": "DL",
-   "district": "DL-5209",
+   "district": "DL-6323",
    "sector": "transport",
    "title": "Public Transport programme — North East Delhi",
    "budget": 117.97,
@@ -5485,7 +5486,7 @@
   {
    "id": "IN-INV-00070",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "transport",
    "title": "Public Transport programme — South West Delhi",
    "budget": 71.7,
@@ -5496,7 +5497,7 @@
   {
    "id": "IN-INV-00071",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "transport",
    "title": "Public Transport programme — Shahdara",
    "budget": 105.31,
@@ -5507,7 +5508,7 @@
   {
    "id": "IN-INV-00072",
    "region": "DL",
-   "district": "DL-5251",
+   "district": "DL-2010",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — New Delhi",
    "budget": 23.51,
@@ -5518,7 +5519,7 @@
   {
    "id": "IN-INV-00073",
    "region": "DL",
-   "district": "DL-5209",
+   "district": "DL-6323",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — North East Delhi",
    "budget": 129.2,
@@ -5529,7 +5530,7 @@
   {
    "id": "IN-INV-00074",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Shahdara",
    "budget": 178.81,
@@ -5540,7 +5541,7 @@
   {
    "id": "IN-INV-00075",
    "region": "DL",
-   "district": "DL-5251",
+   "district": "DL-2010",
    "sector": "digital",
    "title": "Digital & Telecom programme — New Delhi",
    "budget": 13.74,
@@ -5551,7 +5552,7 @@
   {
    "id": "IN-INV-00076",
    "region": "DL",
-   "district": "DL-5209",
+   "district": "DL-6323",
    "sector": "digital",
    "title": "Digital & Telecom programme — North East Delhi",
    "budget": 75.8,
@@ -5562,7 +5563,7 @@
   {
    "id": "IN-INV-00077",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — South West Delhi",
    "budget": 278.93,
@@ -5573,7 +5574,7 @@
   {
    "id": "IN-INV-00078",
    "region": "DL",
-   "district": "DL-4526",
+   "district": "DL-7906",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — South West Delhi",
    "budget": 231.24,
@@ -5584,7 +5585,7 @@
   {
    "id": "IN-INV-00079",
    "region": "DL",
-   "district": "DL-9370",
+   "district": "DL-7242",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Shahdara",
    "budget": 151.64,
@@ -5595,7 +5596,7 @@
   {
    "id": "IN-INV-00080",
    "region": "RJ",
-   "district": "RJ-3808",
+   "district": "RJ-2006",
    "sector": "water",
    "title": "Water & Sanitation programme — Banswara",
    "budget": 101.02,
@@ -5606,7 +5607,7 @@
   {
    "id": "IN-INV-00081",
    "region": "RJ",
-   "district": "RJ-7543",
+   "district": "RJ-3728",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Jodhpur",
    "budget": 257.07,
@@ -5617,7 +5618,7 @@
   {
    "id": "IN-INV-00082",
    "region": "RJ",
-   "district": "RJ-3808",
+   "district": "RJ-2006",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Banswara",
    "budget": 109.83,
@@ -5628,7 +5629,7 @@
   {
    "id": "IN-INV-00083",
    "region": "RJ",
-   "district": "RJ-5556",
+   "district": "RJ-5144",
    "sector": "health",
    "title": "Healthcare programme — Udaipur",
    "budget": 266.09,
@@ -5639,7 +5640,7 @@
   {
    "id": "IN-INV-00084",
    "region": "RJ",
-   "district": "RJ-7543",
+   "district": "RJ-3728",
    "sector": "education",
    "title": "Education programme — Jodhpur",
    "budget": 291.18,
@@ -5650,7 +5651,7 @@
   {
    "id": "IN-INV-00085",
    "region": "RJ",
-   "district": "RJ-1173",
+   "district": "RJ-6874",
    "sector": "education",
    "title": "Education programme — Bharatpur",
    "budget": 236.96,
@@ -5661,7 +5662,7 @@
   {
    "id": "IN-INV-00086",
    "region": "RJ",
-   "district": "RJ-3808",
+   "district": "RJ-2006",
    "sector": "education",
    "title": "Education programme — Banswara",
    "budget": 39.55,
@@ -5672,7 +5673,7 @@
   {
    "id": "IN-INV-00087",
    "region": "RJ",
-   "district": "RJ-8091",
+   "district": "RJ-6116",
    "sector": "transport",
    "title": "Public Transport programme — Jaipur",
    "budget": 501.03,
@@ -5683,7 +5684,7 @@
   {
    "id": "IN-INV-00088",
    "region": "RJ",
-   "district": "RJ-5556",
+   "district": "RJ-5144",
    "sector": "transport",
    "title": "Public Transport programme — Udaipur",
    "budget": 121.28,
@@ -5694,7 +5695,7 @@
   {
    "id": "IN-INV-00089",
    "region": "RJ",
-   "district": "RJ-3808",
+   "district": "RJ-2006",
    "sector": "transport",
    "title": "Public Transport programme — Banswara",
    "budget": 96.99,
@@ -5705,7 +5706,7 @@
   {
    "id": "IN-INV-00090",
    "region": "RJ",
-   "district": "RJ-7543",
+   "district": "RJ-3728",
    "sector": "digital",
    "title": "Digital & Telecom programme — Jodhpur",
    "budget": 310.58,
@@ -5716,7 +5717,7 @@
   {
    "id": "IN-INV-00091",
    "region": "RJ",
-   "district": "RJ-8091",
+   "district": "RJ-6116",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Jaipur",
    "budget": 777.73,
@@ -5727,7 +5728,7 @@
   {
    "id": "IN-INV-00092",
    "region": "UP",
-   "district": "UP-0337",
+   "district": "UP-7598",
    "sector": "water",
    "title": "Water & Sanitation programme — Gorakhpur",
    "budget": 186.87,
@@ -5738,7 +5739,7 @@
   {
    "id": "IN-INV-00093",
    "region": "UP",
-   "district": "UP-5509",
+   "district": "UP-1225",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Lucknow",
    "budget": 405.08,
@@ -5749,7 +5750,7 @@
   {
    "id": "IN-INV-00094",
    "region": "UP",
-   "district": "UP-0365",
+   "district": "UP-9279",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Shrawasti",
    "budget": 61.23,
@@ -5760,7 +5761,7 @@
   {
    "id": "IN-INV-00095",
    "region": "UP",
-   "district": "UP-5509",
+   "district": "UP-1225",
    "sector": "education",
    "title": "Education programme — Lucknow",
    "budget": 570.45,
@@ -5771,7 +5772,7 @@
   {
    "id": "IN-INV-00096",
    "region": "UP",
-   "district": "UP-0347",
+   "district": "UP-6218",
    "sector": "education",
    "title": "Education programme — Bahraich",
    "budget": 132.63,
@@ -5782,7 +5783,7 @@
   {
    "id": "IN-INV-00097",
    "region": "UP",
-   "district": "UP-0365",
+   "district": "UP-9279",
    "sector": "education",
    "title": "Education programme — Shrawasti",
    "budget": 52.35,
@@ -5793,7 +5794,7 @@
   {
    "id": "IN-INV-00098",
    "region": "UP",
-   "district": "UP-0365",
+   "district": "UP-9279",
    "sector": "transport",
    "title": "Public Transport programme — Shrawasti",
    "budget": 45.33,
@@ -5804,7 +5805,7 @@
   {
    "id": "IN-INV-00099",
    "region": "UP",
-   "district": "UP-0365",
+   "district": "UP-9279",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Shrawasti",
    "budget": 69.29,
@@ -5815,7 +5816,7 @@
   {
    "id": "IN-INV-00100",
    "region": "UP",
-   "district": "UP-0337",
+   "district": "UP-7598",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Gorakhpur",
    "budget": 245.41,
@@ -5826,7 +5827,7 @@
   {
    "id": "IN-INV-00101",
    "region": "SK",
-   "district": "SK-6707",
+   "district": "SK-0669",
    "sector": "water",
    "title": "Water & Sanitation programme — Gangtok (East)",
    "budget": 29.54,
@@ -5837,7 +5838,7 @@
   {
    "id": "IN-INV-00102",
    "region": "SK",
-   "district": "SK-1248",
+   "district": "SK-4780",
    "sector": "water",
    "title": "Water & Sanitation programme — West Sikkim",
    "budget": 6.12,
@@ -5848,7 +5849,7 @@
   {
    "id": "IN-INV-00103",
    "region": "SK",
-   "district": "SK-6707",
+   "district": "SK-0669",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Gangtok (East)",
    "budget": 23.59,
@@ -5859,7 +5860,7 @@
   {
    "id": "IN-INV-00104",
    "region": "SK",
-   "district": "SK-3380",
+   "district": "SK-1615",
    "sector": "roads",
    "title": "Roads & Connectivity programme — North Sikkim",
    "budget": 0.98,
@@ -5870,7 +5871,7 @@
   {
    "id": "IN-INV-00105",
    "region": "SK",
-   "district": "SK-1248",
+   "district": "SK-4780",
    "sector": "health",
    "title": "Healthcare programme — West Sikkim",
    "budget": 8.25,
@@ -5881,7 +5882,7 @@
   {
    "id": "IN-INV-00106",
    "region": "SK",
-   "district": "SK-3380",
+   "district": "SK-1615",
    "sector": "health",
    "title": "Healthcare programme — North Sikkim",
    "budget": 0.97,
@@ -5892,7 +5893,7 @@
   {
    "id": "IN-INV-00107",
    "region": "SK",
-   "district": "SK-3380",
+   "district": "SK-1615",
    "sector": "education",
    "title": "Education programme — North Sikkim",
    "budget": 3.32,
@@ -5903,7 +5904,7 @@
   {
    "id": "IN-INV-00108",
    "region": "SK",
-   "district": "SK-6707",
+   "district": "SK-0669",
    "sector": "power",
    "title": "Electricity & Energy programme — Gangtok (East)",
    "budget": 16.85,
@@ -5914,7 +5915,7 @@
   {
    "id": "IN-INV-00109",
    "region": "SK",
-   "district": "SK-1248",
+   "district": "SK-4780",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — West Sikkim",
    "budget": 7.25,
@@ -5925,7 +5926,7 @@
   {
    "id": "IN-INV-00110",
    "region": "GJ",
-   "district": "GJ-1910",
+   "district": "GJ-2012",
    "sector": "water",
    "title": "Water & Sanitation programme — Surat",
    "budget": 836.85,
@@ -5936,7 +5937,7 @@
   {
    "id": "IN-INV-00111",
    "region": "GJ",
-   "district": "GJ-5939",
+   "district": "GJ-8644",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Rajkot",
    "budget": 376.91,
@@ -5947,7 +5948,7 @@
   {
    "id": "IN-INV-00112",
    "region": "GJ",
-   "district": "GJ-6527",
+   "district": "GJ-0258",
    "sector": "health",
    "title": "Healthcare programme — Kachchh",
    "budget": 137.52,
@@ -5958,7 +5959,7 @@
   {
    "id": "IN-INV-00113",
    "region": "GJ",
-   "district": "GJ-6527",
+   "district": "GJ-0258",
    "sector": "education",
    "title": "Education programme — Kachchh",
    "budget": 179.89,
@@ -5969,7 +5970,7 @@
   {
    "id": "IN-INV-00114",
    "region": "GJ",
-   "district": "GJ-1910",
+   "district": "GJ-2012",
    "sector": "power",
    "title": "Electricity & Energy programme — Surat",
    "budget": 550.56,
@@ -5980,7 +5981,7 @@
   {
    "id": "IN-INV-00115",
    "region": "GJ",
-   "district": "GJ-6527",
+   "district": "GJ-0258",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Kachchh",
    "budget": 116.2,
@@ -5991,7 +5992,7 @@
   {
    "id": "IN-INV-00116",
    "region": "GJ",
-   "district": "GJ-1094",
+   "district": "GJ-0398",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Ahmedabad",
    "budget": 829.42,
@@ -6002,7 +6003,7 @@
   {
    "id": "IN-INV-00117",
    "region": "GJ",
-   "district": "GJ-6527",
+   "district": "GJ-0258",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Kachchh",
    "budget": 120.9,
@@ -6013,7 +6014,7 @@
   {
    "id": "IN-INV-00118",
    "region": "MP",
-   "district": "MP-6215",
+   "district": "MP-1612",
    "sector": "water",
    "title": "Water & Sanitation programme — Rewa",
    "budget": 223.43,
@@ -6024,7 +6025,7 @@
   {
    "id": "IN-INV-00119",
    "region": "MP",
-   "district": "MP-7174",
+   "district": "MP-5089",
    "sector": "water",
    "title": "Water & Sanitation programme — Sheopur",
    "budget": 29.41,
@@ -6035,7 +6036,7 @@
   {
    "id": "IN-INV-00120",
    "region": "MP",
-   "district": "MP-0390",
+   "district": "MP-8504",
    "sector": "health",
    "title": "Healthcare programme — Bhopal",
    "budget": 254.66,
@@ -6046,7 +6047,7 @@
   {
    "id": "IN-INV-00121",
    "region": "MP",
-   "district": "MP-6159",
+   "district": "MP-9038",
    "sector": "education",
    "title": "Education programme — Indore",
    "budget": 343.1,
@@ -6057,7 +6058,7 @@
   {
    "id": "IN-INV-00122",
    "region": "MP",
-   "district": "MP-0390",
+   "district": "MP-8504",
    "sector": "transport",
    "title": "Public Transport programme — Bhopal",
    "budget": 151.28,
@@ -6068,7 +6069,7 @@
   {
    "id": "IN-INV-00123",
    "region": "MP",
-   "district": "MP-8289",
+   "district": "MP-0271",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Jabalpur",
    "budget": 201.43,
@@ -6079,7 +6080,7 @@
   {
    "id": "IN-INV-00124",
    "region": "MP",
-   "district": "MP-0390",
+   "district": "MP-8504",
    "sector": "digital",
    "title": "Digital & Telecom programme — Bhopal",
    "budget": 196.95,
@@ -6090,7 +6091,7 @@
   {
    "id": "IN-INV-00125",
    "region": "MP",
-   "district": "MP-0300",
+   "district": "MP-9747",
    "sector": "digital",
    "title": "Digital & Telecom programme — Jhabua",
    "budget": 59.81,
@@ -6101,7 +6102,7 @@
   {
    "id": "IN-INV-00126",
    "region": "MP",
-   "district": "MP-6215",
+   "district": "MP-1612",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Rewa",
    "budget": 137.65,
@@ -6112,7 +6113,7 @@
   {
    "id": "IN-INV-00127",
    "region": "MP",
-   "district": "MP-0390",
+   "district": "MP-8504",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Bhopal",
    "budget": 186.52,
@@ -6123,7 +6124,7 @@
   {
    "id": "IN-INV-00128",
    "region": "MP",
-   "district": "MP-8289",
+   "district": "MP-0271",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Jabalpur",
    "budget": 194.91,
@@ -6134,7 +6135,7 @@
   {
    "id": "IN-INV-00129",
    "region": "BR",
-   "district": "BR-2008",
+   "district": "BR-8024",
    "sector": "water",
    "title": "Water & Sanitation programme — Araria",
    "budget": 180.66,
@@ -6145,7 +6146,7 @@
   {
    "id": "IN-INV-00130",
    "region": "BR",
-   "district": "BR-5005",
+   "district": "BR-7026",
    "sector": "health",
    "title": "Healthcare programme — Purnia",
    "budget": 114.54,
@@ -6156,7 +6157,7 @@
   {
    "id": "IN-INV-00131",
    "region": "BR",
-   "district": "BR-7339",
+   "district": "BR-9186",
    "sector": "digital",
    "title": "Digital & Telecom programme — Muzaffarpur",
    "budget": 132.69,
@@ -6167,7 +6168,7 @@
   {
    "id": "IN-INV-00132",
    "region": "BR",
-   "district": "BR-7339",
+   "district": "BR-9186",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Muzaffarpur",
    "budget": 154.03,
@@ -6178,7 +6179,7 @@
   {
    "id": "IN-INV-00133",
    "region": "BR",
-   "district": "BR-5644",
+   "district": "BR-8889",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Gaya",
    "budget": 363.53,
@@ -6189,7 +6190,7 @@
   {
    "id": "IN-INV-00134",
    "region": "AS",
-   "district": "AS-3846",
+   "district": "AS-8168",
    "sector": "water",
    "title": "Water & Sanitation programme — Kamrup Metro (Guwahati)",
    "budget": 143.21,
@@ -6200,7 +6201,7 @@
   {
    "id": "IN-INV-00135",
    "region": "AS",
-   "district": "AS-3303",
+   "district": "AS-1293",
    "sector": "education",
    "title": "Education programme — Dhubri",
    "budget": 110.66,
@@ -6211,7 +6212,7 @@
   {
    "id": "IN-INV-00136",
    "region": "AS",
-   "district": "AS-0484",
+   "district": "AS-4932",
    "sector": "education",
    "title": "Education programme — Dibrugarh",
    "budget": 108.79,
@@ -6222,7 +6223,7 @@
   {
    "id": "IN-INV-00137",
    "region": "AS",
-   "district": "AS-3303",
+   "district": "AS-1293",
    "sector": "power",
    "title": "Electricity & Energy programme — Dhubri",
    "budget": 76.93,
@@ -6233,7 +6234,7 @@
   {
    "id": "IN-INV-00138",
    "region": "AS",
-   "district": "AS-3846",
+   "district": "AS-8168",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Kamrup Metro (Guwahati)",
    "budget": 40.18,
@@ -6244,7 +6245,7 @@
   {
    "id": "IN-INV-00139",
    "region": "AS",
-   "district": "AS-3303",
+   "district": "AS-1293",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Dhubri",
    "budget": 99.38,
@@ -6255,7 +6256,7 @@
   {
    "id": "IN-INV-00140",
    "region": "NL",
-   "district": "NL-6168",
+   "district": "NL-1848",
    "sector": "education",
    "title": "Education programme — Mon",
    "budget": 5.19,
@@ -6266,7 +6267,7 @@
   {
    "id": "IN-INV-00141",
    "region": "NL",
-   "district": "NL-7517",
+   "district": "NL-7061",
    "sector": "power",
    "title": "Electricity & Energy programme — Kohima",
    "budget": 17.23,
@@ -6277,7 +6278,7 @@
   {
    "id": "IN-INV-00142",
    "region": "NL",
-   "district": "NL-6168",
+   "district": "NL-1848",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Mon",
    "budget": 16.57,
@@ -6288,7 +6289,7 @@
   {
    "id": "IN-INV-00143",
    "region": "DD",
-   "district": "DD-0717",
+   "district": "DD-9226",
    "sector": "water",
    "title": "Water & Sanitation programme — Dadra & Nagar Haveli",
    "budget": 39.36,
@@ -6299,7 +6300,7 @@
   {
    "id": "IN-INV-00144",
    "region": "DD",
-   "district": "DD-6285",
+   "district": "DD-0950",
    "sector": "power",
    "title": "Electricity & Energy programme — Daman",
    "budget": 19.18,
@@ -6310,7 +6311,7 @@
   {
    "id": "IN-INV-00145",
    "region": "DD",
-   "district": "DD-8991",
+   "district": "DD-0165",
    "sector": "power",
    "title": "Electricity & Energy programme — Diu",
    "budget": 5.66,
@@ -6321,7 +6322,7 @@
   {
    "id": "IN-INV-00146",
    "region": "DD",
-   "district": "DD-8991",
+   "district": "DD-0165",
    "sector": "transport",
    "title": "Public Transport programme — Diu",
    "budget": 1.54,
@@ -6332,7 +6333,7 @@
   {
    "id": "IN-INV-00147",
    "region": "DD",
-   "district": "DD-8991",
+   "district": "DD-0165",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Diu",
    "budget": 3.21,
@@ -6343,7 +6344,7 @@
   {
    "id": "IN-INV-00148",
    "region": "MH",
-   "district": "MH-4664",
+   "district": "MH-4168",
    "sector": "water",
    "title": "Water & Sanitation programme — Nagpur",
    "budget": 363.7,
@@ -6354,7 +6355,7 @@
   {
    "id": "IN-INV-00149",
    "region": "MH",
-   "district": "MH-2538",
+   "district": "MH-3367",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Chh. Sambhajinagar",
    "budget": 99.64,
@@ -6365,7 +6366,7 @@
   {
    "id": "IN-INV-00150",
    "region": "MH",
-   "district": "MH-6014",
+   "district": "MH-9918",
    "sector": "health",
    "title": "Healthcare programme — Mumbai Suburban",
    "budget": 573.72,
@@ -6376,7 +6377,7 @@
   {
    "id": "IN-INV-00151",
    "region": "MH",
-   "district": "MH-1942",
+   "district": "MH-7504",
    "sector": "health",
    "title": "Healthcare programme — Pune",
    "budget": 1202.29,
@@ -6387,7 +6388,7 @@
   {
    "id": "IN-INV-00152",
    "region": "MH",
-   "district": "MH-4664",
+   "district": "MH-4168",
    "sector": "health",
    "title": "Healthcare programme — Nagpur",
    "budget": 219.65,
@@ -6398,7 +6399,7 @@
   {
    "id": "IN-INV-00153",
    "region": "MH",
-   "district": "MH-6014",
+   "district": "MH-9918",
    "sector": "power",
    "title": "Electricity & Energy programme — Mumbai Suburban",
    "budget": 385.57,
@@ -6409,7 +6410,7 @@
   {
    "id": "IN-INV-00154",
    "region": "MH",
-   "district": "MH-4664",
+   "district": "MH-4168",
    "sector": "power",
    "title": "Electricity & Energy programme — Nagpur",
    "budget": 458.53,
@@ -6420,7 +6421,7 @@
   {
    "id": "IN-INV-00155",
    "region": "MH",
-   "district": "MH-2538",
+   "district": "MH-3367",
    "sector": "power",
    "title": "Electricity & Energy programme — Chh. Sambhajinagar",
    "budget": 375.97,
@@ -6431,7 +6432,7 @@
   {
    "id": "IN-INV-00156",
    "region": "MH",
-   "district": "MH-6014",
+   "district": "MH-9918",
    "sector": "transport",
    "title": "Public Transport programme — Mumbai Suburban",
    "budget": 1209.32,
@@ -6442,7 +6443,7 @@
   {
    "id": "IN-INV-00157",
    "region": "MH",
-   "district": "MH-1942",
+   "district": "MH-7504",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Pune",
    "budget": 1215.66,
@@ -6453,7 +6454,7 @@
   {
    "id": "IN-INV-00158",
    "region": "MH",
-   "district": "MH-1942",
+   "district": "MH-7504",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Pune",
    "budget": 292.61,
@@ -6464,7 +6465,7 @@
   {
    "id": "IN-INV-00159",
    "region": "MH",
-   "district": "MH-2538",
+   "district": "MH-3367",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Chh. Sambhajinagar",
    "budget": 156.43,
@@ -6475,7 +6476,7 @@
   {
    "id": "IN-INV-00160",
    "region": "CG",
-   "district": "CG-6028",
+   "district": "CG-7385",
    "sector": "health",
    "title": "Healthcare programme — Bastar",
    "budget": 64.02,
@@ -6486,7 +6487,7 @@
   {
    "id": "IN-INV-00161",
    "region": "CG",
-   "district": "CG-4124",
+   "district": "CG-8268",
    "sector": "power",
    "title": "Electricity & Energy programme — Korba",
    "budget": 103.26,
@@ -6497,7 +6498,7 @@
   {
    "id": "IN-INV-00162",
    "region": "CG",
-   "district": "CG-4124",
+   "district": "CG-8268",
    "sector": "transport",
    "title": "Public Transport programme — Korba",
    "budget": 81.55,
@@ -6508,7 +6509,7 @@
   {
    "id": "IN-INV-00163",
    "region": "CG",
-   "district": "CG-4124",
+   "district": "CG-8268",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Korba",
    "budget": 94.73,
@@ -6519,7 +6520,7 @@
   {
    "id": "IN-INV-00164",
    "region": "CG",
-   "district": "CG-0469",
+   "district": "CG-9818",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Raipur",
    "budget": 256.25,
@@ -6530,7 +6531,7 @@
   {
    "id": "IN-INV-00165",
    "region": "JH",
-   "district": "JH-0106",
+   "district": "JH-7798",
    "sector": "water",
    "title": "Water & Sanitation programme — Ranchi",
    "budget": 378.38,
@@ -6541,7 +6542,7 @@
   {
    "id": "IN-INV-00166",
    "region": "JH",
-   "district": "JH-8493",
+   "district": "JH-6081",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Sahibganj",
    "budget": 31.34,
@@ -6552,7 +6553,7 @@
   {
    "id": "IN-INV-00167",
    "region": "JH",
-   "district": "JH-0106",
+   "district": "JH-7798",
    "sector": "education",
    "title": "Education programme — Ranchi",
    "budget": 337.47,
@@ -6563,7 +6564,7 @@
   {
    "id": "IN-INV-00168",
    "region": "JH",
-   "district": "JH-3357",
+   "district": "JH-3753",
    "sector": "education",
    "title": "Education programme — Dhanbad",
    "budget": 290.85,
@@ -6574,7 +6575,7 @@
   {
    "id": "IN-INV-00169",
    "region": "JH",
-   "district": "JH-3357",
+   "district": "JH-3753",
    "sector": "power",
    "title": "Electricity & Energy programme — Dhanbad",
    "budget": 163.91,
@@ -6585,7 +6586,7 @@
   {
    "id": "IN-INV-00170",
    "region": "JH",
-   "district": "JH-3357",
+   "district": "JH-3753",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Dhanbad",
    "budget": 255.38,
@@ -6596,7 +6597,7 @@
   {
    "id": "IN-INV-00171",
    "region": "JH",
-   "district": "JH-0106",
+   "district": "JH-7798",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Ranchi",
    "budget": 338.36,
@@ -6607,7 +6608,7 @@
   {
    "id": "IN-INV-00172",
    "region": "JH",
-   "district": "JH-4341",
+   "district": "JH-5334",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Pakur",
    "budget": 58.69,
@@ -6618,7 +6619,7 @@
   {
    "id": "IN-INV-00173",
    "region": "JH",
-   "district": "JH-3357",
+   "district": "JH-3753",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Dhanbad",
    "budget": 183.84,
@@ -6629,7 +6630,7 @@
   {
    "id": "IN-INV-00174",
    "region": "WB",
-   "district": "WB-8885",
+   "district": "WB-2602",
    "sector": "water",
    "title": "Water & Sanitation programme — Kolkata",
    "budget": 165.44,
@@ -6640,7 +6641,7 @@
   {
    "id": "IN-INV-00175",
    "region": "WB",
-   "district": "WB-5367",
+   "district": "WB-0721",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Murshidabad",
    "budget": 120.37,
@@ -6651,7 +6652,7 @@
   {
    "id": "IN-INV-00176",
    "region": "WB",
-   "district": "WB-8885",
+   "district": "WB-2602",
    "sector": "health",
    "title": "Healthcare programme — Kolkata",
    "budget": 352.1,
@@ -6662,7 +6663,7 @@
   {
    "id": "IN-INV-00177",
    "region": "WB",
-   "district": "WB-0862",
+   "district": "WB-4794",
    "sector": "health",
    "title": "Healthcare programme — Darjeeling",
    "budget": 46.02,
@@ -6673,7 +6674,7 @@
   {
    "id": "IN-INV-00178",
    "region": "WB",
-   "district": "WB-8885",
+   "district": "WB-2602",
    "sector": "education",
    "title": "Education programme — Kolkata",
    "budget": 362.72,
@@ -6684,7 +6685,7 @@
   {
    "id": "IN-INV-00179",
    "region": "WB",
-   "district": "WB-5880",
+   "district": "WB-7600",
    "sector": "transport",
    "title": "Public Transport programme — North 24 Parganas",
    "budget": 1213.99,
@@ -6695,7 +6696,7 @@
   {
    "id": "IN-INV-00180",
    "region": "WB",
-   "district": "WB-6717",
+   "district": "WB-5910",
    "sector": "transport",
    "title": "Public Transport programme — Purulia",
    "budget": 103.99,
@@ -6706,7 +6707,7 @@
   {
    "id": "IN-INV-00181",
    "region": "WB",
-   "district": "WB-5880",
+   "district": "WB-7600",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — North 24 Parganas",
    "budget": 1086.88,
@@ -6717,7 +6718,7 @@
   {
    "id": "IN-INV-00182",
    "region": "WB",
-   "district": "WB-5367",
+   "district": "WB-0721",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Murshidabad",
    "budget": 322.61,
@@ -6728,7 +6729,7 @@
   {
    "id": "IN-INV-00183",
    "region": "WB",
-   "district": "WB-0862",
+   "district": "WB-4794",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Darjeeling",
    "budget": 171.46,
@@ -6739,7 +6740,7 @@
   {
    "id": "IN-INV-00184",
    "region": "WB",
-   "district": "WB-8885",
+   "district": "WB-2602",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Kolkata",
    "budget": 319.6,
@@ -6750,7 +6751,7 @@
   {
    "id": "IN-INV-00185",
    "region": "WB",
-   "district": "WB-0862",
+   "district": "WB-4794",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Darjeeling",
    "budget": 188.9,
@@ -6761,7 +6762,7 @@
   {
    "id": "IN-INV-00186",
    "region": "ML",
-   "district": "ML-7170",
+   "district": "ML-1164",
    "sector": "roads",
    "title": "Roads & Connectivity programme — East Khasi Hills (Shillong)",
    "budget": 23.27,
@@ -6772,7 +6773,7 @@
   {
    "id": "IN-INV-00187",
    "region": "ML",
-   "district": "ML-7719",
+   "district": "ML-0017",
    "sector": "roads",
    "title": "Roads & Connectivity programme — West Garo Hills",
    "budget": 20.22,
@@ -6783,7 +6784,7 @@
   {
    "id": "IN-INV-00188",
    "region": "ML",
-   "district": "ML-7719",
+   "district": "ML-0017",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — West Garo Hills",
    "budget": 34.15,
@@ -6794,7 +6795,7 @@
   {
    "id": "IN-INV-00189",
    "region": "ML",
-   "district": "ML-0820",
+   "district": "ML-9470",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Ri Bhoi",
    "budget": 21.62,
@@ -6805,7 +6806,7 @@
   {
    "id": "IN-INV-00190",
    "region": "MN",
-   "district": "MN-8725",
+   "district": "MN-0014",
    "sector": "power",
    "title": "Electricity & Energy programme — Imphal West",
    "budget": 50.06,
@@ -6816,7 +6817,7 @@
   {
    "id": "IN-INV-00191",
    "region": "MN",
-   "district": "MN-3538",
+   "district": "MN-2859",
    "sector": "power",
    "title": "Electricity & Energy programme — Ukhrul",
    "budget": 11.22,
@@ -6827,7 +6828,7 @@
   {
    "id": "IN-INV-00192",
    "region": "MN",
-   "district": "MN-8725",
+   "district": "MN-0014",
    "sector": "transport",
    "title": "Public Transport programme — Imphal West",
    "budget": 34.07,
@@ -6838,7 +6839,7 @@
   {
    "id": "IN-INV-00193",
    "region": "MN",
-   "district": "MN-8725",
+   "district": "MN-0014",
    "sector": "digital",
    "title": "Digital & Telecom programme — Imphal West",
    "budget": 33.9,
@@ -6849,7 +6850,7 @@
   {
    "id": "IN-INV-00194",
    "region": "GA",
-   "district": "GA-5211",
+   "district": "GA-0985",
    "sector": "roads",
    "title": "Roads & Connectivity programme — North Goa",
    "budget": 83.78,
@@ -6860,7 +6861,7 @@
   {
    "id": "IN-INV-00195",
    "region": "GA",
-   "district": "GA-5211",
+   "district": "GA-0985",
    "sector": "health",
    "title": "Healthcare programme — North Goa",
    "budget": 102.99,
@@ -6871,7 +6872,7 @@
   {
    "id": "IN-INV-00196",
    "region": "GA",
-   "district": "GA-5211",
+   "district": "GA-0985",
    "sector": "education",
    "title": "Education programme — North Goa",
    "budget": 97.9,
@@ -6882,7 +6883,7 @@
   {
    "id": "IN-INV-00197",
    "region": "GA",
-   "district": "GA-5211",
+   "district": "GA-0985",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — North Goa",
    "budget": 95.56,
@@ -6893,7 +6894,7 @@
   {
    "id": "IN-INV-00198",
    "region": "GA",
-   "district": "GA-0758",
+   "district": "GA-0886",
    "sector": "digital",
    "title": "Digital & Telecom programme — South Goa",
    "budget": 34.64,
@@ -6904,7 +6905,7 @@
   {
    "id": "IN-INV-00199",
    "region": "GA",
-   "district": "GA-5211",
+   "district": "GA-0985",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — North Goa",
    "budget": 66.1,
@@ -6915,7 +6916,7 @@
   {
    "id": "IN-INV-00200",
    "region": "TG",
-   "district": "TG-3964",
+   "district": "TG-4386",
    "sector": "water",
    "title": "Water & Sanitation programme — Hyderabad",
    "budget": 250.13,
@@ -6926,7 +6927,7 @@
   {
    "id": "IN-INV-00201",
    "region": "TG",
-   "district": "TG-0499",
+   "district": "TG-5309",
    "sector": "water",
    "title": "Water & Sanitation programme — Warangal",
    "budget": 121.83,
@@ -6937,7 +6938,7 @@
   {
    "id": "IN-INV-00202",
    "region": "TG",
-   "district": "TG-0856",
+   "district": "TG-2517",
    "sector": "water",
    "title": "Water & Sanitation programme — Adilabad",
    "budget": 45.88,
@@ -6948,7 +6949,7 @@
   {
    "id": "IN-INV-00203",
    "region": "TG",
-   "district": "TG-3573",
+   "district": "TG-4705",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Nalgonda",
    "budget": 128.85,
@@ -6959,7 +6960,7 @@
   {
    "id": "IN-INV-00204",
    "region": "TG",
-   "district": "TG-4210",
+   "district": "TG-2711",
    "sector": "health",
    "title": "Healthcare programme — Rangareddy",
    "budget": 292.29,
@@ -6970,7 +6971,7 @@
   {
    "id": "IN-INV-00205",
    "region": "TG",
-   "district": "TG-4210",
+   "district": "TG-2711",
    "sector": "education",
    "title": "Education programme — Rangareddy",
    "budget": 385.0,
@@ -6981,7 +6982,7 @@
   {
    "id": "IN-INV-00206",
    "region": "TG",
-   "district": "TG-3573",
+   "district": "TG-4705",
    "sector": "transport",
    "title": "Public Transport programme — Nalgonda",
    "budget": 122.86,
@@ -6992,7 +6993,7 @@
   {
    "id": "IN-INV-00207",
    "region": "TG",
-   "district": "TG-3964",
+   "district": "TG-4386",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Hyderabad",
    "budget": 277.65,
@@ -7003,7 +7004,7 @@
   {
    "id": "IN-INV-00208",
    "region": "TG",
-   "district": "TG-3573",
+   "district": "TG-4705",
    "sector": "digital",
    "title": "Digital & Telecom programme — Nalgonda",
    "budget": 90.23,
@@ -7014,7 +7015,7 @@
   {
    "id": "IN-INV-00209",
    "region": "TG",
-   "district": "TG-4210",
+   "district": "TG-2711",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Rangareddy",
    "budget": 390.9,
@@ -7025,7 +7026,7 @@
   {
    "id": "IN-INV-00210",
    "region": "TG",
-   "district": "TG-3573",
+   "district": "TG-4705",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Nalgonda",
    "budget": 114.74,
@@ -7036,7 +7037,7 @@
   {
    "id": "IN-INV-00211",
    "region": "TG",
-   "district": "TG-4210",
+   "district": "TG-2711",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Rangareddy",
    "budget": 338.0,
@@ -7047,7 +7048,7 @@
   {
    "id": "IN-INV-00212",
    "region": "OD",
-   "district": "OD-6528",
+   "district": "OD-0555",
    "sector": "health",
    "title": "Healthcare programme — Ganjam",
    "budget": 301.29,
@@ -7058,7 +7059,7 @@
   {
    "id": "IN-INV-00213",
    "region": "OD",
-   "district": "OD-5391",
+   "district": "OD-3949",
    "sector": "education",
    "title": "Education programme — Koraput",
    "budget": 51.51,
@@ -7069,7 +7070,7 @@
   {
    "id": "IN-INV-00214",
    "region": "OD",
-   "district": "OD-5391",
+   "district": "OD-3949",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Koraput",
    "budget": 25.4,
@@ -7080,7 +7081,7 @@
   {
    "id": "IN-INV-00215",
    "region": "OD",
-   "district": "OD-9971",
+   "district": "OD-9809",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Khordha (Bhubaneswar)",
    "budget": 186.06,
@@ -7091,7 +7092,7 @@
   {
    "id": "IN-INV-00216",
    "region": "OD",
-   "district": "OD-5391",
+   "district": "OD-3949",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Koraput",
    "budget": 40.12,
@@ -7102,7 +7103,7 @@
   {
    "id": "IN-INV-00217",
    "region": "TR",
-   "district": "TR-5245",
+   "district": "TR-7732",
    "sector": "water",
    "title": "Water & Sanitation programme — South Tripura",
    "budget": 35.75,
@@ -7113,7 +7114,7 @@
   {
    "id": "IN-INV-00218",
    "region": "TR",
-   "district": "TR-5245",
+   "district": "TR-7732",
    "sector": "health",
    "title": "Healthcare programme — South Tripura",
    "budget": 29.14,
@@ -7124,7 +7125,7 @@
   {
    "id": "IN-INV-00219",
    "region": "TR",
-   "district": "TR-1635",
+   "district": "TR-7020",
    "sector": "education",
    "title": "Education programme — West Tripura (Agartala)",
    "budget": 103.73,
@@ -7135,7 +7136,7 @@
   {
    "id": "IN-INV-00220",
    "region": "TR",
-   "district": "TR-6798",
+   "district": "TR-4541",
    "sector": "transport",
    "title": "Public Transport programme — Dhalai",
    "budget": 11.72,
@@ -7146,7 +7147,7 @@
   {
    "id": "IN-INV-00221",
    "region": "TR",
-   "district": "TR-1635",
+   "district": "TR-7020",
    "sector": "digital",
    "title": "Digital & Telecom programme — West Tripura (Agartala)",
    "budget": 64.6,
@@ -7157,7 +7158,7 @@
   {
    "id": "IN-INV-00222",
    "region": "TR",
-   "district": "TR-5245",
+   "district": "TR-7732",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — South Tripura",
    "budget": 19.43,
@@ -7168,7 +7169,7 @@
   {
    "id": "IN-INV-00223",
    "region": "MZ",
-   "district": "MZ-4280",
+   "district": "MZ-4598",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Aizawl",
    "budget": 45.8,
@@ -7179,7 +7180,7 @@
   {
    "id": "IN-INV-00224",
    "region": "MZ",
-   "district": "MZ-3354",
+   "district": "MZ-2030",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Lunglei",
    "budget": 7.38,
@@ -7190,7 +7191,7 @@
   {
    "id": "IN-INV-00225",
    "region": "MZ",
-   "district": "MZ-4280",
+   "district": "MZ-4598",
    "sector": "health",
    "title": "Healthcare programme — Aizawl",
    "budget": 22.48,
@@ -7201,7 +7202,7 @@
   {
    "id": "IN-INV-00226",
    "region": "MZ",
-   "district": "MZ-4280",
+   "district": "MZ-4598",
    "sector": "transport",
    "title": "Public Transport programme — Aizawl",
    "budget": 40.77,
@@ -7212,7 +7213,7 @@
   {
    "id": "IN-INV-00227",
    "region": "MZ",
-   "district": "MZ-1518",
+   "district": "MZ-1220",
    "sector": "digital",
    "title": "Digital & Telecom programme — Lawngtlai",
    "budget": 3.86,
@@ -7223,7 +7224,7 @@
   {
    "id": "IN-INV-00228",
    "region": "MZ",
-   "district": "MZ-1518",
+   "district": "MZ-1220",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Lawngtlai",
    "budget": 1.83,
@@ -7234,7 +7235,7 @@
   {
    "id": "IN-INV-00229",
    "region": "KA",
-   "district": "KA-6142",
+   "district": "KA-7459",
    "sector": "water",
    "title": "Water & Sanitation programme — Raichur",
    "budget": 57.15,
@@ -7245,7 +7246,7 @@
   {
    "id": "IN-INV-00230",
    "region": "KA",
-   "district": "KA-6142",
+   "district": "KA-7459",
    "sector": "health",
    "title": "Healthcare programme — Raichur",
    "budget": 100.79,
@@ -7256,7 +7257,7 @@
   {
    "id": "IN-INV-00231",
    "region": "KA",
-   "district": "KA-6811",
+   "district": "KA-5926",
    "sector": "education",
    "title": "Education programme — Bengaluru Urban",
    "budget": 847.38,
@@ -7267,7 +7268,7 @@
   {
    "id": "IN-INV-00232",
    "region": "KA",
-   "district": "KA-1942",
+   "district": "KA-5108",
    "sector": "education",
    "title": "Education programme — Mysuru",
    "budget": 130.69,
@@ -7278,7 +7279,7 @@
   {
    "id": "IN-INV-00233",
    "region": "KA",
-   "district": "KA-7681",
+   "district": "KA-6829",
    "sector": "power",
    "title": "Electricity & Energy programme — Yadgir",
    "budget": 81.11,
@@ -7289,7 +7290,7 @@
   {
    "id": "IN-INV-00234",
    "region": "KA",
-   "district": "KA-1340",
+   "district": "KA-7491",
    "sector": "digital",
    "title": "Digital & Telecom programme — Belagavi",
    "budget": 246.41,
@@ -7300,7 +7301,7 @@
   {
    "id": "IN-INV-00235",
    "region": "KA",
-   "district": "KA-1340",
+   "district": "KA-7491",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Belagavi",
    "budget": 477.37,
@@ -7311,7 +7312,7 @@
   {
    "id": "IN-INV-00236",
    "region": "KA",
-   "district": "KA-1340",
+   "district": "KA-7491",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Belagavi",
    "budget": 377.33,
@@ -7322,7 +7323,7 @@
   {
    "id": "IN-INV-00237",
    "region": "AP",
-   "district": "AP-3552",
+   "district": "AP-3346",
    "sector": "health",
    "title": "Healthcare programme — Guntur",
    "budget": 251.74,
@@ -7333,7 +7334,7 @@
   {
    "id": "IN-INV-00238",
    "region": "AP",
-   "district": "AP-0519",
+   "district": "AP-0265",
    "sector": "power",
    "title": "Electricity & Energy programme — Visakhapatnam",
    "budget": 493.07,
@@ -7344,7 +7345,7 @@
   {
    "id": "IN-INV-00239",
    "region": "AP",
-   "district": "AP-0519",
+   "district": "AP-0265",
    "sector": "transport",
    "title": "Public Transport programme — Visakhapatnam",
    "budget": 199.42,
@@ -7355,7 +7356,7 @@
   {
    "id": "IN-INV-00240",
    "region": "AP",
-   "district": "AP-0519",
+   "district": "AP-0265",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Visakhapatnam",
    "budget": 323.81,
@@ -7366,7 +7367,7 @@
   {
    "id": "IN-INV-00241",
    "region": "AP",
-   "district": "AP-0519",
+   "district": "AP-0265",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Visakhapatnam",
    "budget": 256.83,
@@ -7377,7 +7378,7 @@
   {
    "id": "IN-INV-00242",
    "region": "AP",
-   "district": "AP-3539",
+   "district": "AP-0117",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Kurnool",
    "budget": 217.79,
@@ -7388,7 +7389,7 @@
   {
    "id": "IN-INV-00243",
    "region": "AP",
-   "district": "AP-4634",
+   "district": "AP-9870",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Srikakulam",
    "budget": 41.69,
@@ -7399,7 +7400,7 @@
   {
    "id": "IN-INV-00244",
    "region": "KL",
-   "district": "KL-2948",
+   "district": "KL-9525",
    "sector": "water",
    "title": "Water & Sanitation programme — Ernakulam",
    "budget": 117.03,
@@ -7410,7 +7411,7 @@
   {
    "id": "IN-INV-00245",
    "region": "KL",
-   "district": "KL-3578",
+   "district": "KL-3480",
    "sector": "water",
    "title": "Water & Sanitation programme — Malappuram",
    "budget": 460.86,
@@ -7421,7 +7422,7 @@
   {
    "id": "IN-INV-00246",
    "region": "KL",
-   "district": "KL-3755",
+   "district": "KL-7332",
    "sector": "water",
    "title": "Water & Sanitation programme — Idukki",
    "budget": 64.68,
@@ -7432,7 +7433,7 @@
   {
    "id": "IN-INV-00247",
    "region": "KL",
-   "district": "KL-3578",
+   "district": "KL-3480",
    "sector": "roads",
    "title": "Roads & Connectivity programme — Malappuram",
    "budget": 286.97,
@@ -7443,7 +7444,7 @@
   {
    "id": "IN-INV-00248",
    "region": "KL",
-   "district": "KL-7873",
+   "district": "KL-8456",
    "sector": "health",
    "title": "Healthcare programme — Thiruvananthapuram",
    "budget": 394.12,
@@ -7454,7 +7455,7 @@
   {
    "id": "IN-INV-00249",
    "region": "KL",
-   "district": "KL-3755",
+   "district": "KL-7332",
    "sector": "health",
    "title": "Healthcare programme — Idukki",
    "budget": 71.82,
@@ -7465,7 +7466,7 @@
   {
    "id": "IN-INV-00250",
    "region": "KL",
-   "district": "KL-7873",
+   "district": "KL-8456",
    "sector": "education",
    "title": "Education programme — Thiruvananthapuram",
    "budget": 366.59,
@@ -7476,7 +7477,7 @@
   {
    "id": "IN-INV-00251",
    "region": "KL",
-   "district": "KL-3578",
+   "district": "KL-3480",
    "sector": "education",
    "title": "Education programme — Malappuram",
    "budget": 304.24,
@@ -7487,7 +7488,7 @@
   {
    "id": "IN-INV-00252",
    "region": "KL",
-   "district": "KL-2948",
+   "district": "KL-9525",
    "sector": "power",
    "title": "Electricity & Energy programme — Ernakulam",
    "budget": 182.73,
@@ -7498,7 +7499,7 @@
   {
    "id": "IN-INV-00253",
    "region": "KL",
-   "district": "KL-5129",
+   "district": "KL-8142",
    "sector": "power",
    "title": "Electricity & Energy programme — Wayanad",
    "budget": 31.25,
@@ -7509,7 +7510,7 @@
   {
    "id": "IN-INV-00254",
    "region": "KL",
-   "district": "KL-7873",
+   "district": "KL-8456",
    "sector": "transport",
    "title": "Public Transport programme — Thiruvananthapuram",
    "budget": 382.18,
@@ -7520,7 +7521,7 @@
   {
    "id": "IN-INV-00255",
    "region": "KL",
-   "district": "KL-2948",
+   "district": "KL-9525",
    "sector": "transport",
    "title": "Public Transport programme — Ernakulam",
    "budget": 134.61,
@@ -7531,7 +7532,7 @@
   {
    "id": "IN-INV-00256",
    "region": "KL",
-   "district": "KL-5129",
+   "district": "KL-8142",
    "sector": "transport",
    "title": "Public Transport programme — Wayanad",
    "budget": 23.51,
@@ -7542,7 +7543,7 @@
   {
    "id": "IN-INV-00257",
    "region": "KL",
-   "district": "KL-7873",
+   "district": "KL-8456",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Thiruvananthapuram",
    "budget": 419.74,
@@ -7553,7 +7554,7 @@
   {
    "id": "IN-INV-00258",
    "region": "KL",
-   "district": "KL-3578",
+   "district": "KL-3480",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Malappuram",
    "budget": 188.32,
@@ -7564,7 +7565,7 @@
   {
    "id": "IN-INV-00259",
    "region": "KL",
-   "district": "KL-5129",
+   "district": "KL-8142",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Wayanad",
    "budget": 27.35,
@@ -7575,7 +7576,7 @@
   {
    "id": "IN-INV-00260",
    "region": "KL",
-   "district": "KL-3578",
+   "district": "KL-3480",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Malappuram",
    "budget": 245.34,
@@ -7586,7 +7587,7 @@
   {
    "id": "IN-INV-00261",
    "region": "KL",
-   "district": "KL-5129",
+   "district": "KL-8142",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Wayanad",
    "budget": 64.03,
@@ -7597,7 +7598,7 @@
   {
    "id": "IN-INV-00262",
    "region": "TN",
-   "district": "TN-8652",
+   "district": "TN-0081",
    "sector": "water",
    "title": "Water & Sanitation programme — Coimbatore",
    "budget": 197.14,
@@ -7608,7 +7609,7 @@
   {
    "id": "IN-INV-00263",
    "region": "TN",
-   "district": "TN-3567",
+   "district": "TN-9371",
    "sector": "education",
    "title": "Education programme — Tiruvallur",
    "budget": 210.0,
@@ -7619,7 +7620,7 @@
   {
    "id": "IN-INV-00264",
    "region": "TN",
-   "district": "TN-7065",
+   "district": "TN-7475",
    "sector": "education",
    "title": "Education programme — Dharmapuri",
    "budget": 52.01,
@@ -7630,7 +7631,7 @@
   {
    "id": "IN-INV-00265",
    "region": "TN",
-   "district": "TN-9077",
+   "district": "TN-5237",
    "sector": "transport",
    "title": "Public Transport programme — Madurai",
    "budget": 86.33,
@@ -7641,7 +7642,7 @@
   {
    "id": "IN-INV-00266",
    "region": "TN",
-   "district": "TN-8652",
+   "district": "TN-0081",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Coimbatore",
    "budget": 212.91,
@@ -7652,7 +7653,7 @@
   {
    "id": "IN-INV-00267",
    "region": "PY",
-   "district": "PY-4884",
+   "district": "PY-7043",
    "sector": "digital",
    "title": "Digital & Telecom programme — Karaikal",
    "budget": 19.49,
@@ -7663,7 +7664,7 @@
   {
    "id": "IN-INV-00268",
    "region": "PY",
-   "district": "PY-4884",
+   "district": "PY-7043",
    "sector": "jobs",
    "title": "Livelihoods & Jobs programme — Karaikal",
    "budget": 23.62,
@@ -7674,7 +7675,7 @@
   {
    "id": "IN-INV-00269",
    "region": "LD",
-   "district": "LD-2854",
+   "district": "LD-3593",
    "sector": "water",
    "title": "Water & Sanitation programme — Lakshadweep",
    "budget": 3.36,
@@ -7685,7 +7686,7 @@
   {
    "id": "IN-INV-00270",
    "region": "LD",
-   "district": "LD-2854",
+   "district": "LD-3593",
    "sector": "transport",
    "title": "Public Transport programme — Lakshadweep",
    "budget": 3.44,
@@ -7696,7 +7697,7 @@
   {
    "id": "IN-INV-00271",
    "region": "LD",
-   "district": "LD-2854",
+   "district": "LD-3593",
    "sector": "housing",
    "title": "Housing & Urban Dev programme — Lakshadweep",
    "budget": 6.7,
@@ -7707,7 +7708,7 @@
   {
    "id": "IN-INV-00272",
    "region": "LD",
-   "district": "LD-2854",
+   "district": "LD-3593",
    "sector": "digital",
    "title": "Digital & Telecom programme — Lakshadweep",
    "budget": 1.9,
@@ -7718,7 +7719,7 @@
   {
    "id": "IN-INV-00273",
    "region": "LD",
-   "district": "LD-2854",
+   "district": "LD-3593",
    "sector": "agriculture",
    "title": "Agriculture & Irrigation programme — Lakshadweep",
    "budget": 3.25,
@@ -7729,7 +7730,7 @@
   {
    "id": "IN-INV-00274",
    "region": "AN",
-   "district": "AN-4815",
+   "district": "AN-4965",
    "sector": "water",
    "title": "Water & Sanitation programme — Nicobar",
    "budget": 1.68,
@@ -7740,7 +7741,7 @@
   {
    "id": "IN-INV-00275",
    "region": "AN",
-   "district": "AN-8292",
+   "district": "AN-1463",
    "sector": "roads",
    "title": "Roads & Connectivity programme — South Andaman",
    "budget": 11.08,

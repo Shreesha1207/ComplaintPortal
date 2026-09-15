@@ -48,7 +48,7 @@ synthetic multilingual requests across India, Brazil and South Africa (~8s).
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 28 tests, no test runner required
+python3 tests/test_app.py   # 32 tests, no test runner required
 ```
 
 ---
@@ -91,6 +91,40 @@ with every API response, and are adjustable live on the dashboard. A ranking
 that hides its weights is asserting that its politics are arithmetic.
 
 ## What the AI does — and what it is not allowed to do
+
+### What the offline engine actually is
+
+**No model, and no machine learning at all.** Its only imports are `math`, `re`
+and `unicodedata` — standard library. It is Unicode script ranges for language
+identification, a hand-written 1,000-term lexicon across 19 languages for
+classification, and regex for PII and population extraction. That is why it is
+deterministic, instant, and works with no network.
+
+The honest limit of that design: **it categorises, it does not translate.** With
+no model configured, `text_en` is a labelled gloss —
+`[ta] healthcare access — reported as critical` — not the citizen's words. The
+platform says so (`translated: false`) rather than passing a category label off
+as a translation.
+
+### Translation
+
+A Tamil request is useless to an official who reads Hindi. With a model
+configured, every request is translated twice:
+
+- `text_en` — English, the cross-country pivot, so a Tamil and a Zulu request
+  can be compared at all.
+- `text_local` — the country's **link language**, declared per country pack
+  (`hi` for India, `pt` for Brazil, `en` for South Africa). Translating only to
+  English makes the platform legible to donors and illegible to the ministry
+  using it.
+
+Both appear under the original text in the dashboard and the review queue.
+Requests already stored with a gloss can be upgraded in place, without wiping
+the database:
+
+```bash
+curl -X POST "localhost:8000/api/translate/backfill?country=IN&limit=100"
+```
 
 Two engines behind one interface. The **offline engine** (default) does
 script-based language identification, stem-tolerant lexicon classification across
