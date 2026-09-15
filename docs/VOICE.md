@@ -78,6 +78,27 @@ export GROQ_API_KEY=gsk_...
 Whisper large v3 covers ~99 languages with far better Indic accuracy than any
 browser engine, and reuses the same key as the classification engine.
 
+## If XVoice is a keyboard: IME safety
+
+This matters whether or not XVoice turns out to be an on-device keyboard,
+because many citizens type Indic text through a transliteration IME anyway
+(Gboard Hinglish → Devanagari, Tamil, and every CJK keyboard).
+
+Composing keyboards use **Enter to accept the candidate word**. A handler that
+submits on Enter therefore fires mid-composition and sends the half-typed Latin
+text instead of what the citizen actually wrote — silent corruption, in exactly
+the languages this platform exists to hear. The WhatsApp and SMS inputs now
+guard against it:
+
+```js
+const composing = (e) => e.isComposing || e.keyCode === 229;
+$('wainput').onkeydown = (e) => { if (e.key === 'Enter' && !composing(e)) waSend(); };
+```
+
+`isComposing` is the standard signal; `keyCode === 229` is the legacy one
+browsers still use mid-composition. Verified in a browser: a composing Enter
+leaves the text in the box untouched, a committed Enter submits.
+
 ## Integrating the real XVoice
 
 Answering these three questions is all that stands between the slot and a real

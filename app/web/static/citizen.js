@@ -74,9 +74,18 @@ async function boot() {
   $('voicesend').onclick = () => submit($('voicetext').value, 'voice');
   $('textsend').onclick = () => submit($('freetext').value, 'web');
   $('wasend').onclick = waSend;
-  $('wainput').onkeydown = (e) => e.key === 'Enter' && waSend();
+  // Enter must not submit while an input method is still composing a word.
+  // Transliteration keyboards (Gboard Hinglish -> Devanagari, Tamil, CJK, and
+  // any on-device keyboard that composes) use Enter to ACCEPT the candidate.
+  // Submitting on that keystroke sends the half-composed Latin text instead of
+  // what the citizen actually wrote — a silent corruption, in exactly the
+  // languages this platform exists to hear.
+  //   e.isComposing  — the standard signal
+  //   keyCode === 229 — the legacy signal browsers use mid-composition
+  const composing = (e) => e.isComposing || e.keyCode === 229;
+  $('wainput').onkeydown = (e) => { if (e.key === 'Enter' && !composing(e)) waSend(); };
   $('smssend').onclick = smsSend;
-  $('smsinput').onkeydown = (e) => e.key === 'Enter' && smsSend();
+  $('smsinput').onkeydown = (e) => { if (e.key === 'Enter' && !composing(e)) smsSend(); };
   $('voicetext').oninput = () => {
     const n = $('voicetext').value.trim().length;
     $('voicelen').textContent = n ? `${n} characters` : '';
