@@ -21,12 +21,13 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .ai.llm import get_engine
-from .engine.budget import STRATEGIES, allocate, compare_strategies
-from .engine.fusion import available_countries, build_matrix, load_pack
-from .engine.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
+from .ai.groq_engine import get_engine
+from .analysis.budget import STRATEGIES, allocate, compare_strategies
+from .analysis.fusion import available_countries, build_matrix, load_pack
+from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
-from .schemas import ReviewIn, RequestIn
+from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
+from .schemas import ReviewIn, RequestIn, TranscribeIn
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app")
@@ -119,7 +120,9 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
     rec = {
         "country": country, "region_code": region["code"], "district_code": district["code"],
         "channel": channel, "language": a.language, "language_confidence": a.language_confidence,
-        "text_original": a.text_original, "text_redacted": a.text_redacted, "text_en": a.text_en,
+        "text_original": a.text_original, "text_redacted": a.text_redacted,
+        "text_en": a.text_en, "text_local": a.text_local,
+        "translated": 1 if a.translated else 0,
         "sector": a.sector, "sector_confidence": a.sector_confidence,
         "urgency": a.urgency, "urgency_score": a.urgency_score,
         "affected_population": a.affected_population, "ai_confidence": a.confidence,
@@ -144,6 +147,115 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
 def health():
     return {"status": "ok", "ai_engine": ENGINE.health(),
             "data": db.counts(), "countries": available_countries()}
+
+
+@app.post("/api/voice/transcribe", tags=["intake"])
+def transcribe(body: TranscribeIn):
+    """Turn recorded audio into text, server-side.
+
+    Audio arrives base64-encoded in JSON rather than as a multipart upload so
+    the project keeps its three-package dependency list; clips are seconds
+    long, so the ~33% encoding overhead is irrelevant.
+
+    Transcribing on the server rather than in the browser is the point: it
+    works in every browser, over plain HTTP on a LAN, and on whatever model the
+    deployment chooses — none of which is true of the browser's own engine.
+    """
+    import base64
+    from .ai.speech import SpeechError, get_speech_provider
+
+    provider = get_speech_provider()
+    if not provider.available():
+        raise HTTPException(503, "No server-side transcription is configured. "
+                                 "Set XVOICE_STT_URL or GROQ_API_KEY.")
+    try:
+        audio = base64.b64decode(body.audio_base64, validate=True)
+    except Exception:                                     # noqa: BLE001
+        raise HTTPException(400, "audio_base64 is not valid base64.")
+    if not audio:
+        raise HTTPException(400, "Empty audio.")
+    if len(audio) > SPEECH_MAX_BYTES:
+        raise HTTPException(413, f"Audio exceeds {SPEECH_MAX_BYTES // (1024 * 1024)}MB.")
+    try:
+        result = provider.transcribe(audio, body.filename, body.language)
+    except SpeechError as exc:
+        # A failed transcription must not look like a crash to a citizen who
+        # just spoke into their phone.
+        raise HTTPException(502, str(exc))
+    return {**result, "bytes": len(audio)}
+
+
+@app.get("/api/voice/status", tags=["intake"])
+def voice_status():
+    """What the browser should do for voice input, decided server-side."""
+    from .ai.speech import get_speech_provider
+    provider = get_speech_provider()
+    return {
+        "server_transcription": provider.available(),
+        "provider": provider.health(),
+        "hint": ("Server-side transcription is active — the browser records "
+                 "audio and uploads it, which works in every browser."
+                 if provider.available() else
+                 "No server transcription configured. The browser falls back to "
+                 "its own speech engine, which needs Chrome/Safari on a secure "
+                 "origin (https:// or localhost) and covers few Indic languages. "
+                 "Set GROQ_API_KEY, or XVOICE_STT_URL for XVoice."),
+    }
+
+
+@app.post("/api/translate/backfill", tags=["intake"])
+def translate_backfill(country: str | None = None, limit: int = Query(25, le=200)):
+    """Translate stored requests that only carry the offline gloss.
+
+    Requests classified offline have a category gloss in `text_en`, not a
+    translation. This re-runs those through the configured model so a
+    policymaker can read what the citizen actually said — without wiping and
+    re-seeding the database.
+    """
+    from .ai.groq_engine import GroqEngine
+    engine = ENGINE if isinstance(ENGINE, GroqEngine) else GroqEngine()
+    if not engine.available():
+        raise HTTPException(503, "No translation model configured. Set GROQ_API_KEY.")
+
+    rows = db.untranslated(country=country.upper() if country else None, limit=limit)
+    done, failed = [], []
+    for row in rows:
+        a = engine.analyse(row["text_redacted"], hint_language=row["language"],
+                           country=row["country"])
+        if not a.translated:
+            failed.append(row["id"])
+            continue
+        db.set_translation(row["id"], a.text_en, a.text_local, actor="backfill")
+        done.append(row["id"])
+    if done:
+        bump_version()
+    return {"translated": len(done), "failed": len(failed),
+            "remaining": len(db.untranslated(country=country.upper() if country else None,
+                                             limit=100000)),
+            "ids": done[:50]}
+
+
+@app.get("/api/ai/models", tags=["meta"])
+def ai_models():
+    """Which models this deployment's Groq key can actually reach.
+
+    Asked live rather than served from a hardcoded list, because a hosted
+    provider's line-up changes and a stale constant is how a deployment gets
+    wedged. With no key configured this returns an empty list and the offline
+    engine stays in charge — which is a valid, fully functional state.
+    """
+    from .ai.groq_engine import GroqEngine
+    engine = ENGINE if isinstance(ENGINE, GroqEngine) else GroqEngine()
+    return {
+        "provider": "groq",
+        "configured": engine.available(),
+        "active_engine": ENGINE.name,
+        "selected_model": engine.model,
+        "available_models": engine.list_models(),
+        "hint": ("Set GROQ_API_KEY to enable, and GROQ_MODEL to pick a model "
+                 "from available_models. Without a key the offline engine "
+                 "handles every request on its own."),
+    }
 
 
 @app.get("/api/countries", tags=["meta"])

@@ -48,7 +48,7 @@ synthetic multilingual requests across India, Brazil and South Africa (~8s).
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 20 tests, no test runner required
+python3 tests/test_app.py   # 32 tests, no test runner required
 ```
 
 ---
@@ -92,13 +92,77 @@ that hides its weights is asserting that its politics are arithmetic.
 
 ## What the AI does — and what it is not allowed to do
 
-Two engines behind one interface. The **offline heuristic engine** (default) does
+### What the offline engine actually is
+
+**No model, and no machine learning at all.** Its only imports are `math`, `re`
+and `unicodedata` — standard library. It is Unicode script ranges for language
+identification, a hand-written 1,000-term lexicon across 19 languages for
+classification, and regex for PII and population extraction. That is why it is
+deterministic, instant, and works with no network.
+
+The honest limit of that design: **it categorises, it does not translate.** With
+no model configured, `text_en` is a labelled gloss —
+`[ta] healthcare access — reported as critical` — not the citizen's words. The
+platform says so (`translated: false`) rather than passing a category label off
+as a translation.
+
+### Translation
+
+A Tamil request is useless to an official who reads Hindi. With a model
+configured, every request is translated twice:
+
+- `text_en` — English, the cross-country pivot, so a Tamil and a Zulu request
+  can be compared at all.
+- `text_local` — the country's **link language**, declared per country pack
+  (`hi` for India, `pt` for Brazil, `en` for South Africa). Translating only to
+  English makes the platform legible to donors and illegible to the ministry
+  using it.
+
+Both appear under the original text in the dashboard and the review queue.
+Requests already stored with a gloss can be upgraded in place, without wiping
+the database:
+
+```bash
+curl -X POST "localhost:8000/api/translate/backfill?country=IN&limit=100"
+```
+
+Two engines behind one interface. The **offline engine** (default) does
 script-based language identification, stem-tolerant lexicon classification across
 19 languages, urgency grading, population extraction and PII redaction with no
 network call — because rural intake must work on a bad uplink and a demo must not
-depend on someone else's API. The **Claude adapter** (`ANTHROPIC_API_KEY`) adds
-real translation and handles code-mixed, misspelt and idiomatic text. Any failure
+depend on someone else's API. The **Groq adapter** (optional) adds real
+translation and handles code-mixed, misspelt and idiomatic text. Any failure
 degrades to the offline result rather than dropping a citizen's request.
+
+### Running without any API key
+
+**The platform is fully functional with no key and no internet.** That is the
+default path, not a crippled fallback: every request still gets a language, a
+sector, an urgency, an affected-population estimate and PII redaction. The
+offline engine is what the seeded 6,250-request corpus was classified with, and
+what every number in these docs was produced from.
+
+### Adding Groq (optional)
+
+```bash
+export GROQ_API_KEY=gsk_...              # from console.groq.com
+export GROQ_MODEL=llama-3.3-70b-versatile   # optional; pick any model your key can reach
+./run.sh
+```
+
+Model line-ups on hosted providers change, so nothing is hardcoded as gospel —
+`GET /api/ai/models` asks Groq what your key can actually reach and tells you
+which engine is currently live:
+
+```bash
+curl localhost:8000/api/ai/models
+```
+
+Other knobs: `GROQ_BASE_URL` (defaults to `https://api.groq.com/openai/v1`, so any
+OpenAI-compatible endpoint works) and `GROQ_TIMEOUT` (seconds).
+
+The adapter talks to Groq over the Python standard library — no SDK, no extra
+dependency. `requirements.txt` stays at three packages whether or not you use it.
 
 Three hard limits:
 
@@ -119,14 +183,28 @@ hierarchy, languages, sectors, hex-map layout, demographic and infrastructure
 indices, and the public investment pipeline. India, Brazil and South Africa ship
 as worked examples; `build_packs.py` regenerates them reproducibly.
 
-## Where XVoice fits
+## Voice input
 
 Voice is the channel that reaches the populations this platform flags as silent —
-low literacy, low smartphone penetration, languages no mainstream ASR covers.
-The demo uses the browser's `SpeechRecognition` as a stand-in. **XVoice** is the
-production intake layer: on-device recognition across a far wider language set.
-The contract is identical — audio in, text plus a language tag out — so nothing
-downstream changes when it is swapped in.
+low literacy, low smartphone penetration, languages no mainstream ASR covers. So
+it has to actually work, which means transcribing **server-side** rather than
+relying on the browser's own engine (Chrome/Safari only, secure-origin only, and
+weakest on exactly the languages that matter here).
+
+```bash
+export GROQ_API_KEY=gsk_...    # Whisper large v3, ~99 languages — works today
+./run.sh
+```
+
+`GET /api/voice/status` reports which path a browser will take and why; when
+voice cannot work, the UI names the specific reason instead of showing a dead
+microphone.
+
+**XVoice (xvoicekeyboard.com) is not yet integrated.** There is a configured,
+tested adapter slot for it, but its real API contract has not been verified —
+see [`docs/VOICE.md`](docs/VOICE.md) for exactly what is needed to finish it,
+including the case where XVoice is an on-device keyboard, in which case no
+server adapter is wanted at all.
 
 ---
 
@@ -153,6 +231,7 @@ spots the platform is built to find.
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Terser, implementation-focused version — data sources, scaling path |
 | [`docs/PRIORITIZATION.md`](docs/PRIORITIZATION.md) | The scoring maths, in full, with worked examples |
 | [`docs/DPG_COMPLIANCE.md`](docs/DPG_COMPLIANCE.md) | Digital Public Good standard, indicator by indicator |
+| [`docs/VOICE.md`](docs/VOICE.md) | Voice input: how it works, why it used to fail, and what XVoice integration needs |
 | [`docs/PITCH.md`](docs/PITCH.md) | Six-minute demo script |
 
 ## Licence

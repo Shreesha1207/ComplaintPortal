@@ -13,6 +13,7 @@ does not read as absence of need. Those are the claims the project rests on.
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
@@ -21,10 +22,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("APP_DB", os.path.join(tempfile.gettempdir(), "app_test.db"))
 
 from app.ai.heuristic import HeuristicEngine
-from app.ai.llm import LLMEngine, get_engine
-from app.engine.budget import allocate, compare_strategies
-from app.engine.fusion import build_matrix, load_pack
-from app.engine.priority import (DEFAULT_WEIGHTS, rollup_districts,
+from app.ai.groq_engine import GroqEngine, get_engine
+from app.analysis.budget import allocate, compare_strategies
+from app.analysis.fusion import build_matrix, load_pack
+from app.analysis.priority import (DEFAULT_WEIGHTS, rollup_districts,
                                    rollup_regions, score_cells)
 
 ENGINE = HeuristicEngine()
@@ -95,13 +96,245 @@ def test_unclassifiable_text_is_routed_to_review():
     assert a.sector == "other" and a.needs_review
 
 
-def test_llm_engine_degrades_to_heuristic_without_credentials():
-    """The demo must never depend on an API being reachable."""
-    e = LLMEngine()
-    a = e.analyse("हमारे गांव में पानी नहीं है")
-    assert a.sector == "water"
-    assert a.engine == "heuristic"      # degraded, not failed
-    assert get_engine().name in {"heuristic", "claude"}
+def test_platform_runs_fully_without_any_api_key():
+    """The headline availability claim: no key, no network, still works.
+
+    This is not a degraded mode with holes in it — language, sector, urgency,
+    reach and PII redaction all resolve offline."""
+    saved = os.environ.pop("GROQ_API_KEY", None)
+    try:
+        assert get_engine().name == "heuristic"
+        a = GroqEngine().analyse("हमारे गांव में तीन महीने से पानी नहीं है, 200 परिवार")
+        assert a.engine == "heuristic"          # degraded, not failed
+        assert a.sector == "water"
+        assert a.urgency in {"critical", "high", "medium", "low"}
+        assert a.affected_population == 1000
+        assert a.language == "hi"
+    finally:
+        if saved is not None:
+            os.environ["GROQ_API_KEY"] = saved
+
+
+def test_groq_engine_reports_why_it_is_inactive():
+    """Operators should never have to guess why the model isn't being used."""
+    saved = os.environ.pop("GROQ_API_KEY", None)
+    try:
+        h = GroqEngine().health()
+        assert h["available"] is False
+        assert "GROQ_API_KEY" in h["reason"]
+        assert h["model"]                        # a model is always named
+    finally:
+        if saved is not None:
+            os.environ["GROQ_API_KEY"] = saved
+
+
+def test_groq_engine_validates_and_coerces_model_output():
+    """A hosted model can return anything. Nothing reaches a funding
+    recommendation without being checked against the allowed vocabularies."""
+    engine = GroqEngine()
+    os.environ["GROQ_API_KEY"] = "test-key-not-used"
+    try:
+        # Stand in for the HTTP call so this runs with no network and no key.
+        engine._post = lambda path, payload: {"choices": [{"message": {"content": json.dumps({
+            "language": "hi", "text_en": "No drinking water for three months",
+            "sector": "NOT_A_REAL_SECTOR",        # must fall back to "other"
+            "urgency": "catastrophic",            # must fall back to "medium"
+            "affected_population": "not a number",  # must fall back to offline value
+            "confidence": 5.0,                    # must clamp into 0..1
+            "entities": ["Sitamarhi"], "rationale": "test",
+        })}}]}
+        a = engine.analyse("हमारे गांव में तीन महीने से पानी नहीं है")
+        assert a.sector == "other"
+        assert a.urgency == "medium"
+        assert 0.0 <= a.confidence <= 1.0
+        assert isinstance(a.affected_population, int)
+        assert a.engine.startswith("groq:")
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
+def test_groq_engine_never_sends_raw_pii_to_the_model():
+    """The model must only ever see already-redacted text."""
+    engine = GroqEngine()
+    os.environ["GROQ_API_KEY"] = "test-key-not-used"
+    sent = {}
+    try:
+        def capture(path, payload):
+            sent["content"] = payload["messages"][-1]["content"]
+            return {"choices": [{"message": {"content": json.dumps({
+                "language": "en", "text_en": "x", "sector": "roads",
+                "urgency": "medium", "affected_population": 250,
+                "confidence": 0.9, "entities": [], "rationale": "x"})}}]}
+        engine._post = capture
+        engine.analyse("Bad road here, call me on 9845012345 or ravi@example.com")
+        assert "9845012345" not in sent["content"]
+        assert "ravi@example.com" not in sent["content"]
+        assert "REDACTED" in sent["content"]
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
+def test_engine_disagreement_escalates_to_human_review():
+    """Two engines reaching different sectors is a better review trigger than
+    either engine's own confidence."""
+    engine = GroqEngine()
+    os.environ["GROQ_API_KEY"] = "test-key-not-used"
+    try:
+        engine._post = lambda path, payload: {"choices": [{"message": {"content": json.dumps({
+            "language": "en", "text_en": "The school has no teachers",
+            "sector": "education",          # offline engine will say "water"
+            "urgency": "high", "affected_population": 1800,
+            "confidence": 0.95,             # high confidence, yet still escalated
+            "entities": [], "rationale": "test",
+        })}}]}
+        a = engine.analyse("There is no drinking water and the borewell is broken")
+        assert a.needs_review, "sector disagreement must escalate"
+        assert "disagree" in a.rationale.lower()
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
+# ------------------------------------------------------------ translation
+def test_offline_engine_does_not_claim_to_translate():
+    """The offline engine categorises; it does not translate. Saying otherwise
+    would put a category label in front of a policymaker as if it were the
+    citizen's words."""
+    a = ENGINE.analyse("எங்கள் கிராமத்தில் மருத்துவமனை இல்லை")
+    assert a.translated is False
+    assert a.text_local == ""
+    assert a.text_en.startswith("[ta]")        # a labelled gloss, not prose
+
+
+def test_model_translates_into_english_and_the_country_link_language():
+    """A Tamil request must be readable by an official who reads Hindi or
+    English — translating only to English serves donors, not the ministry."""
+    engine = GroqEngine()
+    os.environ["GROQ_API_KEY"] = "test-key-not-used"
+    try:
+        engine._post = lambda path, payload: {"choices": [{"message": {"content": json.dumps({
+            "language": "ta",
+            "text_en": "There is no hospital in our village.",
+            "text_local": "हमारे गाँव में कोई अस्पताल नहीं है।",
+            "sector": "health", "urgency": "critical", "affected_population": 1800,
+            "confidence": 0.93, "entities": [], "rationale": "r",
+        })}}]}
+        a = engine.analyse("எங்கள் கிராமத்தில் மருத்துவமனை இல்லை", country="IN")
+        assert a.translated is True
+        assert a.text_en == "There is no hospital in our village."
+        assert a.text_local == "हमारे गाँव में कोई अस्पताल नहीं है।"
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
+
+
+def test_link_language_is_per_country():
+    from app.ai.groq_engine import link_language_for
+    assert link_language_for("IN") == "hi"
+    assert link_language_for("BR") == "pt"
+    assert link_language_for("ZA") == "en"
+    assert link_language_for("ZZ") == "en"     # unknown country must not crash
+
+
+def test_translation_columns_migrate_onto_an_existing_database():
+    """Adding translation must not require wiping a deployed database."""
+    import sqlite3, tempfile, importlib
+    from app import db as _db
+    path = os.path.join(tempfile.gettempdir(), "migrate_check.db")
+    if os.path.exists(path):
+        os.remove(path)
+    c = sqlite3.connect(path)
+    c.executescript("""CREATE TABLE requests (id TEXT PRIMARY KEY, created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL, country TEXT NOT NULL, region_code TEXT NOT NULL,
+      district_code TEXT NOT NULL, channel TEXT NOT NULL, language TEXT NOT NULL,
+      language_confidence REAL NOT NULL, text_original TEXT NOT NULL,
+      text_redacted TEXT NOT NULL, text_en TEXT NOT NULL, sector TEXT NOT NULL,
+      sector_confidence REAL NOT NULL, urgency TEXT NOT NULL, urgency_score REAL NOT NULL,
+      affected_population INTEGER NOT NULL, ai_confidence REAL NOT NULL,
+      ai_engine TEXT NOT NULL, ai_rationale TEXT NOT NULL,
+      pii_types TEXT NOT NULL DEFAULT '[]', entities TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'new', reviewer_note TEXT);
+      CREATE TABLE audit_log (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL,
+      request_id TEXT NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
+      detail TEXT NOT NULL DEFAULT '{}');""")
+    c.execute("INSERT INTO requests VALUES ('R1','t','t','IN','TN','TN-1','voice','ta',0.9,"
+              "'x','x','[ta] gloss','water',0.8,'high',0.7,1800,0.8,'heuristic','r',"
+              "'[]','[]','new',NULL)")
+    c.commit(); c.close()
+
+    saved = os.environ.get("APP_DB")
+    os.environ["APP_DB"] = path
+    try:
+        importlib.reload(_db)
+        _db.init_db()
+        row = _db.get_request("R1")
+        assert row is not None and row["text_original"] == "x"   # nothing lost
+        assert row["text_local"] == "" and row["translated"] == 0
+        assert len(_db.untranslated(country="IN")) == 1
+    finally:
+        if saved is not None:
+            os.environ["APP_DB"] = saved
+        else:
+            os.environ.pop("APP_DB", None)
+        importlib.reload(_db)
+
+
+# ------------------------------------------------------------------ voice
+def test_speech_provider_is_none_until_configured():
+    """No STT config must mean a clear 'not configured', never a crash."""
+    from app.ai.speech import get_speech_provider, SpeechError
+    for var in ("XVOICE_STT_URL", "GROQ_API_KEY", "SPEECH_PROVIDER"):
+        os.environ.pop(var, None)
+    p = get_speech_provider()
+    assert p.name == "none" and p.available() is False
+    try:
+        p.transcribe(b"x", "a.webm")
+        assert False, "should have raised"
+    except SpeechError:
+        pass
+
+
+def test_xvoice_wins_over_groq_when_both_configured():
+    """XVoice is the intended production path; Groq is the stand-in."""
+    from app.ai.speech import get_speech_provider
+    os.environ["GROQ_API_KEY"] = "k"
+    os.environ["XVOICE_STT_URL"] = "https://example.invalid/stt"
+    try:
+        assert get_speech_provider().name == "xvoice"
+        os.environ.pop("XVOICE_STT_URL")
+        assert get_speech_provider().name == "groq"
+    finally:
+        for var in ("GROQ_API_KEY", "XVOICE_STT_URL"):
+            os.environ.pop(var, None)
+
+
+def test_multipart_body_is_well_formed():
+    """Hand-rolled because the project refuses a dependency for one upload —
+    so it has to be tested rather than assumed."""
+    from app.ai.speech import _multipart
+    body, ctype = _multipart({"model": "m", "language": "ta", "skipme": None},
+                             "audio.webm", b"AUDIOBYTES")
+    assert ctype.startswith("multipart/form-data; boundary=")
+    boundary = ctype.split("boundary=")[1]
+    assert body.count(boundary.encode()) >= 3     # two fields + file + closing
+    assert b'name="model"' in body and b'name="language"' in body
+    assert b'name="skipme"' not in body           # None fields are dropped
+    assert b'filename="audio.webm"' in body
+    assert b"Content-Type: video/webm" in body or b"Content-Type: audio/webm" in body
+    assert b"AUDIOBYTES" in body
+    assert body.endswith(f"--{boundary}--\r\n".encode())
+
+
+def test_transcription_failure_is_reported_not_swallowed():
+    """A citizen who just spoke must get a real error, not silence."""
+    from app.ai.speech import GroqWhisper, SpeechError
+    os.environ["GROQ_API_KEY"] = "k"
+    try:
+        g = GroqWhisper()
+        g.transcribe(b"audio", "a.webm")          # unreachable host in tests
+        assert False, "should have raised"
+    except SpeechError as exc:
+        assert str(exc)                            # carries a showable message
+    finally:
+        os.environ.pop("GROQ_API_KEY", None)
 
 
 # ------------------------------------------------------------- data packs

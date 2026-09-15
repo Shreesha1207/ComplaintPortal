@@ -18,7 +18,10 @@ class Analysis:
     language: str = "en"                 # ISO-639-1 detected
     language_confidence: float = 0.0
     text_original: str = ""
-    text_en: str = ""                    # pivot-language rendering
+    text_en: str = ""                    # pivot-language (English) rendering
+    text_local: str = ""                 # country link-language rendering
+    translated: bool = False             # True only for a real translation,
+                                         # False when text_en is the offline gloss
     sector: str = "other"
     sector_confidence: float = 0.0
     sector_scores: dict[str, float] = field(default_factory=dict)
