@@ -48,7 +48,7 @@ synthetic multilingual requests across India, Brazil and South Africa (~8s).
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 20 tests, no test runner required
+python3 tests/test_app.py   # 24 tests, no test runner required
 ```
 
 ---
@@ -92,13 +92,43 @@ that hides its weights is asserting that its politics are arithmetic.
 
 ## What the AI does — and what it is not allowed to do
 
-Two engines behind one interface. The **offline heuristic engine** (default) does
+Two engines behind one interface. The **offline engine** (default) does
 script-based language identification, stem-tolerant lexicon classification across
 19 languages, urgency grading, population extraction and PII redaction with no
 network call — because rural intake must work on a bad uplink and a demo must not
-depend on someone else's API. The **Claude adapter** (`ANTHROPIC_API_KEY`) adds
-real translation and handles code-mixed, misspelt and idiomatic text. Any failure
+depend on someone else's API. The **Groq adapter** (optional) adds real
+translation and handles code-mixed, misspelt and idiomatic text. Any failure
 degrades to the offline result rather than dropping a citizen's request.
+
+### Running without any API key
+
+**The platform is fully functional with no key and no internet.** That is the
+default path, not a crippled fallback: every request still gets a language, a
+sector, an urgency, an affected-population estimate and PII redaction. The
+offline engine is what the seeded 6,250-request corpus was classified with, and
+what every number in these docs was produced from.
+
+### Adding Groq (optional)
+
+```bash
+export GROQ_API_KEY=gsk_...              # from console.groq.com
+export GROQ_MODEL=llama-3.3-70b-versatile   # optional; pick any model your key can reach
+./run.sh
+```
+
+Model line-ups on hosted providers change, so nothing is hardcoded as gospel —
+`GET /api/ai/models` asks Groq what your key can actually reach and tells you
+which engine is currently live:
+
+```bash
+curl localhost:8000/api/ai/models
+```
+
+Other knobs: `GROQ_BASE_URL` (defaults to `https://api.groq.com/openai/v1`, so any
+OpenAI-compatible endpoint works) and `GROQ_TIMEOUT` (seconds).
+
+The adapter talks to Groq over the Python standard library — no SDK, no extra
+dependency. `requirements.txt` stays at three packages whether or not you use it.
 
 Three hard limits:
 

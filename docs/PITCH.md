@@ -130,7 +130,7 @@ high-participation district is *divided down*.
 Determinism — a funding decision must reproduce at appeal. Availability — rural
 intake on a bad uplink. Cost — tens of millions of requests a year through a
 frontier model is not a defensible budget line. So the lexicon is the floor and
-Claude is the enhancement; and when both run and disagree, that disagreement
+Groq is the enhancement; and when both run and disagree, that disagreement
 escalates to a human.
 
 **"How is this different from a grievance redressal system?"**

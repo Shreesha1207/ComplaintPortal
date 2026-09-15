@@ -21,10 +21,10 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .ai.llm import get_engine
-from .engine.budget import STRATEGIES, allocate, compare_strategies
-from .engine.fusion import available_countries, build_matrix, load_pack
-from .engine.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
+from .ai.groq_engine import get_engine
+from .analysis.budget import STRATEGIES, allocate, compare_strategies
+from .analysis.fusion import available_countries, build_matrix, load_pack
+from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
 from .schemas import ReviewIn, RequestIn
 
@@ -144,6 +144,29 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
 def health():
     return {"status": "ok", "ai_engine": ENGINE.health(),
             "data": db.counts(), "countries": available_countries()}
+
+
+@app.get("/api/ai/models", tags=["meta"])
+def ai_models():
+    """Which models this deployment's Groq key can actually reach.
+
+    Asked live rather than served from a hardcoded list, because a hosted
+    provider's line-up changes and a stale constant is how a deployment gets
+    wedged. With no key configured this returns an empty list and the offline
+    engine stays in charge — which is a valid, fully functional state.
+    """
+    from .ai.groq_engine import GroqEngine
+    engine = ENGINE if isinstance(ENGINE, GroqEngine) else GroqEngine()
+    return {
+        "provider": "groq",
+        "configured": engine.available(),
+        "active_engine": ENGINE.name,
+        "selected_model": engine.model,
+        "available_models": engine.list_models(),
+        "hint": ("Set GROQ_API_KEY to enable, and GROQ_MODEL to pick a model "
+                 "from available_models. Without a key the offline engine "
+                 "handles every request on its own."),
+    }
 
 
 @app.get("/api/countries", tags=["meta"])

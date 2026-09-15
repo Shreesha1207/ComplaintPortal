@@ -20,7 +20,7 @@
 ┌── UNDERSTANDING ── app/ai/ ──────────────────────────────────────────┐
 │  AnalysisEngine (base.py) — one contract, swappable implementations     │
 │    HeuristicEngine   offline, deterministic, 19 languages  [default]    │
-│    LLMEngine         Claude; real translation, messy text  [optional]   │
+│    GroqEngine        Groq; real translation, messy text     [optional]   │
 │  redact → identify language → classify → extract → score confidence     │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼  Unified Request Envelope
@@ -28,12 +28,12 @@
 │  SQLite (WAL). requests + append-only audit_log.                        │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── FUSION ── app/engine/fusion.py ────────────────────────────────────┐
+┌── FUSION ── app/analysis/fusion.py ────────────────────────────────────┐
 │  requests ⋈ demographics ⋈ infrastructure ⋈ investment pipeline        │
 │  → exhaustive (district × sector) matrix                               │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── PRIORITISATION ── app/engine/priority.py, budget.py ───────────────┐
+┌── PRIORITISATION ── app/analysis/priority.py, budget.py ───────────────┐
 │  equity correction → weighted need → investment discount → flags       │
 │  → per-factor contributions, counterfactual, confidence, rollups       │
 └───────────────────────────────┬────────────────────────────────────────┘
@@ -123,8 +123,8 @@ coordinated-campaign detection, encryption at rest, and data-retention policy.
 
 ```
 app/
-  ai/        base.py · lexicon.py · heuristic.py · llm.py
-  engine/    fusion.py · priority.py · budget.py
+  ai/        base.py · lexicon.py · heuristic.py · groq_engine.py
+  analysis/  fusion.py · priority.py · budget.py
   packs/     build_packs.py · IN.json · BR.json · ZA.json
   web/       index · citizen · dashboard · review  + static/{app.css,viz.js,…}
   main.py    FastAPI app and REST API
@@ -132,5 +132,5 @@ app/
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_app.py  (20 tests, runs with or without pytest)
+tests/       test_app.py  (24 tests, runs with or without pytest)
 ```

@@ -29,7 +29,7 @@ import hashlib
 import random
 
 from .ai.lexicon import SECTOR_LEXICON
-from .engine.fusion import load_pack
+from .analysis.fusion import load_pack
 
 # Dominant language by region. Real platforms resolve this per-user; here it
 # gives the corpus a realistic linguistic geography.
