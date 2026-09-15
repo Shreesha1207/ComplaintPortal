@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AGORA — Citizen Intake</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23184f95%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27system-ui,sans-serif%27 font-size=%2720%27 font-weight=%27700%27 fill=%27white%27 text-anchor=%27middle%27%3EA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+<style>
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding:0 12px}
+  .tab{padding:10px 14px;border:0;background:none;color:var(--text-secondary);cursor:pointer;
+    font:600 13.5px var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+  .mic{width:96px;height:96px;border-radius:50%;border:2px solid var(--border-strong);
+    background:var(--surface-2);display:grid;place-items:center;font-size:36px;cursor:pointer;
+    margin:0 auto;transition:.15s;color:var(--text-primary)}
+  .mic:hover{border-color:var(--accent)}
+  .mic.rec{background:var(--status-critical);border-color:var(--status-critical);color:#fff;
+    animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(208,59,59,.45)}
+                   50%{box-shadow:0 0 0 16px rgba(208,59,59,0)}}
+  .phone{max-width:380px;margin:0 auto;background:var(--surface-3);border:1px solid var(--border);
+    border-radius:18px;padding:14px;min-height:300px;display:flex;flex-direction:column;gap:9px}
+  .bub{max-width:82%;padding:8px 12px;border-radius:14px;font-size:13.5px;line-height:1.5;
+    white-space:pre-wrap;word-break:break-word}
+  .bub.them{background:var(--surface-1);border:1px solid var(--border);align-self:flex-start;
+    border-bottom-left-radius:4px}
+  .bub.me{background:var(--accent);color:var(--accent-ink);align-self:flex-end;
+    border-bottom-right-radius:4px}
+  .sms{font-family:var(--mono);font-size:12.5px;background:#0b0b0b;color:#7dff7d;
+    border-radius:8px;padding:13px;min-height:190px;white-space:pre-wrap;line-height:1.65}
+  .result{border-left:3px solid var(--status-good);background:var(--surface-3);
+    border-radius:var(--radius-sm);padding:14px}
+  .exlist{display:flex;gap:7px;flex-wrap:wrap}
+  .ex{font:500 12.5px var(--sans);padding:5px 10px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text-secondary)}
+  .ex:hover{border-color:var(--accent);color:var(--text-primary)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none">
+    <span class="mark">A</span><span>AGORA<small>Citizen voice → national priority</small></span>
+  </a>
+  <nav class="navlinks">
+    <a href="/citizen" aria-current="page">Citizen intake</a>
+    <a href="/dashboard">Dashboard</a><a href="/review">Review queue</a><a href="/api/docs">API</a>
+    <button class="btn" id="theme" style="padding:6px 10px" aria-label="Toggle colour theme">◐</button>
+  </nav>
+</header>
+
+<main class="wrap" style="max-width:1080px">
+  <div class="cols map-side">
+    <div class="stack">
+      <div class="card">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="t-voice" aria-selected="true" aria-controls="p-voice">🎙 Voice</button>
+          <button class="tab" role="tab" id="t-text" aria-selected="false" aria-controls="p-text">⌨ Text</button>
+          <button class="tab" role="tab" id="t-wa" aria-selected="false" aria-controls="p-wa">💬 WhatsApp</button>
+          <button class="tab" role="tab" id="t-sms" aria-selected="false" aria-controls="p-sms">📟 SMS / IVR</button>
+        </div>
+
+        <div class="card-b stack">
+          <div class="controls">
+            <div class="field"><label for="country">Country</label><select id="country"></select></div>
+            <div class="field"><label for="region">Region</label><select id="region"></select></div>
+            <div class="field"><label for="district">District</label><select id="district"></select></div>
+            <div class="field"><label for="lang">Language</label><select id="lang"></select></div>
+          </div>
+
+          <!-- VOICE -->
+          <section id="p-voice" role="tabpanel" aria-labelledby="t-voice">
+            <div style="text-align:center;padding:8px 0 4px">
+              <button class="mic" id="mic" aria-label="Start voice recording">🎙</button>
+              <p class="small sec" id="micstatus" style="margin:12px 0 0">
+                Tap and speak in your own language.</p>
+              <p class="xs muted" id="micnote" style="margin:5px 0 0"></p>
+            </div>
+            <textarea id="voicetext" placeholder="Your words appear here…"
+                      aria-label="Transcribed request"></textarea>
+            <div class="row" style="justify-content:space-between">
+              <span class="xs muted" id="voicelen"></span>
+              <button class="btn primary lg" id="voicesend">Submit request</button>
+            </div>
+          </section>
+
+          <!-- TEXT -->
+          <section id="p-text" role="tabpanel" aria-labelledby="t-text" hidden>
+            <textarea id="freetext" placeholder="Describe what your community needs…"
+                      aria-label="Request text"></textarea>
+            <p class="xs muted" style="margin:8px 0">Try one of these — each is in a different language:</p>
+            <div class="exlist" id="examples"></div>
+            <div class="row" style="justify-content:flex-end;margin-top:12px">
+              <button class="btn primary lg" id="textsend">Submit request</button>
+            </div>
+          </section>
+
+          <!-- WHATSAPP -->
+          <section id="p-wa" role="tabpanel" aria-labelledby="t-wa" hidden>
+            <div class="phone" id="wathread"></div>
+            <div class="row" style="margin-top:12px">
+              <input type="text" id="wainput" placeholder="Type a message…" style="flex:1"
+                     aria-label="WhatsApp message">
+              <button class="btn primary" id="wasend">Send</button>
+            </div>
+            <p class="xs muted" style="margin:10px 0 0">
+              Simulates a WhatsApp Business API webhook. In production the same endpoint
+              receives real messages; nothing else in the pipeline changes.</p>
+          </section>
+
+          <!-- SMS / IVR -->
+          <section id="p-sms" role="tabpanel" aria-labelledby="t-sms" hidden>
+            <div class="sms" id="smsout"></div>
+            <div class="row" style="margin-top:12px">
+              <input type="text" id="smsinput" placeholder="Reply…" style="flex:1"
+                     aria-label="SMS reply">
+              <button class="btn primary" id="smssend">Send</button>
+            </div>
+            <p class="xs muted" style="margin:10px 0 0">
+              The feature-phone path. No smartphone, no data, no literacy requirement when
+              run as IVR — this is the channel that reaches the populations the dashboard
+              flags as <b>silent</b>.</p>
+          </section>
+        </div>
+      </div>
+
+      <div id="result" hidden></div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h2>What happens to your words</h2></div>
+        <div class="card-b">
+          <ol class="small sec" style="margin:0;padding-left:19px;line-height:1.85">
+            <li><b>Transcribe</b> — speech becomes text in the language spoken</li>
+            <li><b>Identify language</b> — by script and marker words</li>
+            <li><b>Redact</b> — phone numbers and IDs stripped before anything is stored</li>
+            <li><b>Classify</b> — matched to one of ten development sectors</li>
+            <li><b>Extract</b> — urgency and how many people are affected</li>
+            <li><b>Score confidence</b> — anything uncertain goes to a human, not into a
+                funding decision</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>Recent requests</h2>
+          <span class="sub" id="recentsub"></span></div>
+        <div class="card-b tight" id="recent" style="max-height:420px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module" src="/static/citizen.js"></script>
+</body>
+</html>
