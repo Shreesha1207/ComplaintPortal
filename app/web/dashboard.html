@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Policy Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23184f95%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none">
+    <span class="mark"></span>
+    <span>Citizen development requests → national priority</span>
+  </a>
+  <nav class="navlinks">
+    <a href="/citizen">Citizen intake</a>
+    <a href="/dashboard" aria-current="page">Dashboard</a>
+    <a href="/review">Review queue <span id="qbadge" class="chip"></span></a>
+    <a href="/api/docs">API</a>
+    <button class="btn" id="theme" style="padding:6px 10px" aria-label="Toggle colour theme">◐</button>
+  </nav>
+</header>
+
+<main class="wrap stack">
+
+  <!-- filters: one row, above the charts -->
+  <section class="card">
+    <div class="card-b tight">
+      <div class="controls">
+        <div class="field"><label for="country">Country</label>
+          <select id="country"></select></div>
+        <div class="field"><label for="sector">Sector</label>
+          <select id="sector"><option value="">All sectors</option></select></div>
+        <div class="field"><label for="region">Region</label>
+          <select id="region"><option value="">All regions</option></select></div>
+        <div class="field"><label for="lens">Lens</label>
+          <select id="lens">
+            <option value="">All recommendations</option>
+            <option value="blind">Blind spots only</option>
+            <option value="silent">Silent districts only</option>
+          </select></div>
+        <button class="btn" id="reset">Reset</button>
+        <a class="btn" id="csv" href="#" download>Export CSV</a>
+        <span id="busy" class="muted xs" hidden><span class="spinner"></span> loading…</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="notice" class="notice"></div>
+
+  <!-- headline numbers -->
+  <section class="stats" id="stats"></section>
+
+  <!-- map + ranked recommendations -->
+  <section class="cols map-side">
+    <div class="card">
+      <div class="card-h">
+        <h2 id="maptitle">Demand & deficit by region</h2>
+        <span class="sub" id="mapsub"></span>
+      </div>
+      <div class="card-b">
+        <div class="mapwrap" id="map"></div>
+        <div class="legend" id="maplegend"></div>
+        <p class="xs muted" style="margin:10px 0 0">
+          Equal-area tiles: every region gets the same visual weight, so colour reflects
+          priority rather than land area. Click a tile to filter; click again to clear.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <h2>Top recommendations</h2>
+        <span class="sub" id="recsub"></span>
+      </div>
+      <div class="tablewrap" style="max-height:540px;overflow-y:auto">
+        <table id="rectable">
+          <thead><tr>
+            <th style="width:28px"></th><th>District</th><th>Sector</th>
+            <th class="num">Priority</th><th class="num">Gap</th><th>Flags</th>
+          </tr></thead>
+          <tbody id="recbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- the selected recommendation, fully derived -->
+  <section class="card" id="detailcard">
+    <div class="card-h">
+      <h2 id="dtitle">Select a recommendation</h2>
+      <span class="sub" id="dsub"></span>
+    </div>
+    <div class="card-b" id="detail">
+      <div class="empty">Choose a row above to see exactly how its score was derived,
+        which citizen requests produced it, and what is already funded.</div>
+    </div>
+  </section>
+
+  <!-- policy weights + budget -->
+  <section class="cols half">
+    <div class="card">
+      <div class="card-h"><h2>Policy weights</h2>
+        <span class="sub">Ranking is a policy choice — make it visible</span></div>
+      <div class="card-b stack" id="weights"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Budget simulator</h2>
+        <span class="sub" id="budgetsub"></span></div>
+      <div class="card-b stack">
+        <div class="field">
+          <label for="envelope">Envelope: <b id="envval" class="mono"></b></label>
+          <input type="range" id="envelope" min="1000" max="300000" step="1000" value="50000">
+        </div>
+        <div class="tablewrap"><table id="budgettable">
+          <thead><tr><th>Strategy</th><th class="num">Districts</th>
+            <th class="num">People reached</th><th class="num">Cost / person</th>
+            <th class="num">Blind spots</th></tr></thead>
+          <tbody id="budgetbody"></tbody>
+        </table></div>
+        <p class="xs muted" style="margin:0">
+          Worst-first and value-for-money genuinely disagree. Both are shown because the
+          trade-off between reaching the most acute need and reaching the most people is a
+          political judgement, not something the model should quietly settle.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- intake composition -->
+  <section class="cols third">
+    <div class="card"><div class="card-h"><h2>Requests by language</h2></div>
+      <div class="card-b"><div class="chart" id="chLang"></div></div></div>
+    <div class="card"><div class="card-h"><h2>Requests by channel</h2></div>
+      <div class="card-b"><div class="chart" id="chChan"></div></div></div>
+    <div class="card"><div class="card-h"><h2>Requests by sector</h2></div>
+      <div class="card-b"><div class="chart" id="chSect"></div></div></div>
+  </section>
+
+  <p class="xs muted" style="text-align:center;margin:8px 0 0" id="footer"></p>
+</main>
+
+<script type="module" src="/static/dashboard.js"></script>
+</body>
+</html>

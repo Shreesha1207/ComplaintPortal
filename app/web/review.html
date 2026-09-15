@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Review Queue</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23184f95%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none">
+    <span class="mark"></span><span>Citizen development requests → national priority</span>
+  </a>
+  <nav class="navlinks">
+    <a href="/citizen">Citizen intake</a><a href="/dashboard">Dashboard</a>
+    <a href="/review" aria-current="page">Review queue</a><a href="/api/docs">API</a>
+    <button class="btn" id="theme" style="padding:6px 10px" aria-label="Toggle colour theme">◐</button>
+  </nav>
+</header>
+
+<main class="wrap stack" style="max-width:1180px">
+  <div class="card"><div class="card-b tight">
+    <div class="controls">
+      <div class="field"><label for="country">Country</label><select id="country"></select></div>
+      <button class="btn" id="refresh">Refresh</button>
+      <span class="sec small" id="qsum" style="margin-left:auto"></span>
+    </div>
+  </div></div>
+
+  <div class="notice">
+    <span aria-hidden="true">⚖</span>
+    <span>These requests scored below the AI's confidence threshold. Until a person
+    confirms one, it carries reduced weight in prioritisation — and a rejected request
+    carries none. Every decision here is written to an append-only audit log.</span>
+  </div>
+
+  <div class="cols map-side">
+    <div class="card">
+      <div class="card-h"><h2>Queue</h2><span class="sub" id="qcount"></span></div>
+      <div id="queue" style="max-height:640px;overflow-y:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2 id="rtitle">Select a request</h2></div>
+      <div class="card-b" id="rpanel">
+        <div class="empty">Choose a request from the queue to review it.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module" src="/static/review.js"></script>
+</body>
+</html>
