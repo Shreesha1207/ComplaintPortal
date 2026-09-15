@@ -148,7 +148,8 @@ spots the platform is built to find.
 
 | | |
 |---|---|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System design, data sources, scaling path |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | **Start here.** Plain-language walkthrough of what we built and why |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Terser, implementation-focused version — data sources, scaling path |
 | [`docs/PRIORITIZATION.md`](docs/PRIORITIZATION.md) | The scoring maths, in full, with worked examples |
 | [`docs/DPG_COMPLIANCE.md`](docs/DPG_COMPLIANCE.md) | Digital Public Good standard, indicator by indicator |
 | [`docs/PITCH.md`](docs/PITCH.md) | Six-minute demo script |
