@@ -48,7 +48,7 @@ synthetic multilingual requests across India, Brazil and South Africa (~8s).
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 32 tests, no test runner required
+python3 tests/test_app.py   # 36 tests, no test runner required
 ```
 
 ---
