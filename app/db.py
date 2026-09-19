@@ -67,6 +67,31 @@ CREATE TABLE IF NOT EXISTS audit_log (
   detail      TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS idx_audit_req ON audit_log(request_id);
+
+-- Staff accounts. Citizens have no account at all: intake is deliberately
+-- anonymous, because requiring a login to report a broken handpump would
+-- silence exactly the people this platform exists to hear.
+CREATE TABLE IF NOT EXISTS users (
+  username       TEXT PRIMARY KEY,
+  role           TEXT NOT NULL CHECK (role IN ('admin','reviewer')),
+  password_hash  TEXT NOT NULL,      -- pbkdf2_sha256$iterations$salt$hash
+  display_name   TEXT NOT NULL DEFAULT '',
+  created_at     TEXT NOT NULL,
+  last_login_at  TEXT,
+  failed_logins  INTEGER NOT NULL DEFAULT 0,
+  locked_until   TEXT
+);
+
+-- Server-side sessions. The cookie carries an opaque token; only its SHA-256
+-- is stored, so a database leak does not hand over live sessions.
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash  TEXT PRIMARY KEY,
+  username    TEXT NOT NULL,
+  created_at  TEXT NOT NULL,
+  expires_at  TEXT NOT NULL,
+  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(username);
 """
 
 

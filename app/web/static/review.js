@@ -1,11 +1,11 @@
 /* Human review — the escalation path that keeps the AI out of the last word. */
-import { api, apiPost, fmt, themeToggle, urgencyChip } from './viz.js';
+import { api, apiPost, fmt, renderNav, urgencyChip } from './viz.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { country: 'IN', pack: null, items: [], sel: null };
 
 async function boot() {
-  themeToggle($('theme'));
+  await renderNav($('nav'), '/review');
   const cs = await api('/api/countries');
   $('country').innerHTML = cs.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
   $('country').value = state.country;

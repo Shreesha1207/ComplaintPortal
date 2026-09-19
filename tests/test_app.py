@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import tempfile
+from pathlib import Path as pathlib_Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("APP_DB", os.path.join(tempfile.gettempdir(), "app_test.db"))
@@ -192,6 +193,216 @@ def test_engine_disagreement_escalates_to_human_review():
         assert "disagree" in a.rationale.lower()
     finally:
         os.environ.pop("GROQ_API_KEY", None)
+
+
+# ------------------------------------------------------------------- auth
+def _fresh_auth_db():
+    """Isolated database so auth tests never touch the seeded corpus."""
+    import importlib, tempfile
+    from app import db as _db
+    path = os.path.join(tempfile.gettempdir(), "auth_suite.db")
+    for suffix in ("", "-wal", "-shm"):
+        try:
+            os.remove(path + suffix)
+        except OSError:
+            pass
+    os.environ["APP_DB"] = path
+    importlib.reload(_db)
+    import app.auth as _auth
+    importlib.reload(_auth)
+    _db.init_db()
+    return _db, _auth
+
+
+def test_passwords_are_salted_hashed_and_never_stored_in_plaintext():
+    _db, _auth = _fresh_auth_db()
+    try:
+        _auth.create_user("a", "hunter2", "admin")
+        stored = _auth.get_user("a")["password_hash"]
+        assert "hunter2" not in stored
+        assert stored.startswith("pbkdf2_sha256$")
+        assert _auth.verify_password("hunter2", stored)
+        assert not _auth.verify_password("hunter3", stored)
+        # Same password, different user -> different hash (salt is per-user).
+        _auth.create_user("b", "hunter2", "reviewer")
+        assert _auth.get_user("b")["password_hash"] != stored
+    finally:
+        _fresh_auth_db()
+
+
+def test_login_does_not_reveal_whether_an_account_exists():
+    _db, _auth = _fresh_auth_db()
+    try:
+        _auth.create_user("real", "pw", "admin")
+        msgs = []
+        for u, pw in (("real", "wrong"), ("ghost", "wrong")):
+            try:
+                _auth.authenticate(u, pw)
+                assert False, "should have raised"
+            except _auth.AuthError as exc:
+                msgs.append(str(exc))
+        assert msgs[0] == msgs[1], "identical message or the endpoint enumerates users"
+    finally:
+        _fresh_auth_db()
+
+
+def test_repeated_failures_lock_the_account():
+    _db, _auth = _fresh_auth_db()
+    try:
+        _auth.create_user("target", "pw", "admin")
+        for _ in range(_auth.MAX_FAILED_LOGINS):
+            try:
+                _auth.authenticate("target", "wrong")
+            except _auth.AuthError:
+                pass
+        # Even the CORRECT password is refused while locked.
+        try:
+            _auth.authenticate("target", "pw")
+            assert False, "locked account must refuse the right password too"
+        except _auth.AuthError as exc:
+            assert "lock" in str(exc).lower()
+    finally:
+        _fresh_auth_db()
+
+
+def test_sessions_store_only_a_hash_and_expire():
+    _db, _auth = _fresh_auth_db()
+    try:
+        from datetime import timedelta
+        _auth.create_user("s", "pw", "admin")
+        token, _ = _auth.start_session("s")
+        # The raw token must not be in the database.
+        rows = list(_db.connect().execute("SELECT token_hash FROM sessions"))
+        assert rows and all(r["token_hash"] != token for r in rows)
+        assert _auth.session_user(token)["username"] == "s"
+        assert _auth.session_user("forged") is None
+
+        # Expired sessions resolve to nobody and are cleaned up.
+        past = (_auth._now() - timedelta(hours=1)).isoformat(timespec="seconds")
+        _db.connect().execute("UPDATE sessions SET expires_at=?", (past,))
+        _db.connect().commit()
+        assert _auth.session_user(token) is None
+        _auth.end_session(token)
+    finally:
+        _fresh_auth_db()
+
+
+def test_role_guards_separate_funding_from_verification():
+    """The whole point of the split: a reviewer may verify a request but must
+    not be able to reach a funding figure."""
+    from fastapi import HTTPException
+    _db, _auth = _fresh_auth_db()
+
+    class FakeRequest:
+        def __init__(self, cookie=None):
+            self.cookies = {_auth.SESSION_COOKIE: cookie} if cookie else {}
+
+    try:
+        _auth.create_user("boss", "pw", "admin")
+        _auth.create_user("clerk", "pw", "reviewer")
+        admin_tok, _ = _auth.start_session("boss")
+        clerk_tok, _ = _auth.start_session("clerk")
+
+        # Anonymous: refused everywhere staff-only.
+        for guard in (_auth.require_staff, _auth.require_admin):
+            try:
+                guard(FakeRequest())
+                assert False, "anonymous must be refused"
+            except HTTPException as exc:
+                assert exc.status_code == 401
+
+        # Reviewer: staff yes, admin no.
+        assert _auth.require_staff(FakeRequest(clerk_tok))["role"] == "reviewer"
+        try:
+            _auth.require_admin(FakeRequest(clerk_tok))
+            assert False, "reviewer must not reach admin-only data"
+        except HTTPException as exc:
+            assert exc.status_code == 403        # 403 not 404: they may know it exists
+
+        # Admin: both.
+        assert _auth.require_staff(FakeRequest(admin_tok))["role"] == "admin"
+        assert _auth.require_admin(FakeRequest(admin_tok))["role"] == "admin"
+    finally:
+        _fresh_auth_db()
+
+
+def _route_guards():
+    """Map each API route to the guard dependencies in its signature.
+
+    Keyed by (METHOD, path), not path alone: `/api/requests` is registered
+    twice — POST is the public citizen submission, GET is the staff-only list.
+    Keying by path lets one silently mask the other, which would hide exactly
+    the kind of mistake this test exists to catch.
+
+    Parsed with `ast`, not a regex: a signature like
+    `limit: int = Query(25, le=200), user: dict = Depends(auth.require_admin)`
+    contains nested parentheses, and a regex that stops at the first `)`
+    silently reports a guarded route as unguarded. A security test that can
+    produce a false alarm is a security test people learn to ignore.
+    """
+    import ast
+    src = (pathlib_Path(__file__).parent.parent / "app" / "main.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    routes = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        paths = []
+        for dec in node.decorator_list:
+            if (isinstance(dec, ast.Call) and isinstance(dec.func, ast.Attribute)
+                    and dec.func.attr in {"get", "post"} and dec.args
+                    and isinstance(dec.args[0], ast.Constant)):
+                paths.append((dec.func.attr.upper(), dec.args[0].value))
+        if not paths:
+            continue
+        guards = set()
+        for default in list(node.args.defaults) + list(node.args.kw_defaults):
+            if (isinstance(default, ast.Call) and isinstance(default.func, ast.Name)
+                    and default.func.id == "Depends" and default.args):
+                guards.add(ast.unparse(default.args[0]))
+        for key in paths:
+            routes[key] = guards
+    return routes
+
+
+def test_every_funding_endpoint_is_admin_guarded():
+    """If someone adds an analytics or export route later and forgets the
+    dependency, this fails rather than silently leaking funding data."""
+    routes = _route_guards()
+    admin_prefixes = ("/api/analytics", "/api/export", "/api/ai/models",
+                      "/api/translate/backfill")
+    found = [k for k in routes if k[1].startswith(admin_prefixes)]
+    assert len(found) >= 8, f"expected the funding routes, found {found}"
+    for key in found:
+        assert "auth.require_admin" in routes[key], f"{key} is not admin-guarded"
+
+
+def test_review_endpoints_require_staff():
+    routes = _route_guards()
+    for key in (("GET", "/api/review/queue"), ("POST", "/api/requests/{rid}/review")):
+        assert key in routes, f"{key} missing"
+        assert routes[key] & {"auth.require_staff", "auth.require_admin"}, \
+            f"{key} is not guarded"
+
+
+def test_citizen_intake_stays_anonymous():
+    """Requiring a login to report a broken handpump would silence exactly the
+    people this platform exists to hear. Intake must never gain a guard."""
+    routes = _route_guards()
+    public = [
+        ("POST", "/api/requests"),           # the citizen submission itself
+        ("POST", "/api/voice/transcribe"),   # speaking must not need an account
+        ("GET", "/api/requests/public"),
+        ("GET", "/api/countries"),
+        ("POST", "/api/auth/login"),
+    ]
+    for key in public:
+        assert key in routes, f"{key} missing"
+        assert not routes[key], f"{key} must stay public, found {routes[key]}"
+
+    # The staff-only twin of the same path must NOT be public.
+    assert "auth.require_staff" in routes[("GET", "/api/requests")], \
+        "the full request list must stay staff-only"
 
 
 # ------------------------------------------------------------ translation

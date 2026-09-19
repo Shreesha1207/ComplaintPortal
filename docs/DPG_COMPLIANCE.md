@@ -53,8 +53,10 @@ platform genuinely forkable rather than nominally open-source.
 
 ## Honest gaps
 
-1. **Not production-secure.** No auth, no RBAC, no rate limiting, no encryption at
-   rest. This is a prototype and says so.
+1. **Authentication exists, but it is basic.** Staff sign in (PBKDF2 hashing,
+   server-side sessions, account lockout) and roles separate funding from
+   verification. Still missing: SSO/2FA, a password-reset flow, per-country
+   scoping of staff accounts, rate limiting on intake, and encryption at rest.
 2. **Legal review not done.** Five BRICS jurisdictions, five data-protection
    regimes. Indicator 7 is genuinely partial.
 3. **No independent accuracy evaluation.** Classifier quality is demonstrated, not
