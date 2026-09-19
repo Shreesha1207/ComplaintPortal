@@ -499,14 +499,23 @@ def test_funding_routes_require_admin():
 
 
 def test_review_routes_require_a_signed_in_staff_member():
-    staff_paths = ("/api/requests/{rid}", "/api/review/queue")
-    checked = 0
+    """Named by (path, method), not by path alone: /api/requests is a staff read
+    and an anonymous write on the same path, and the verification POST is the
+    one that changes a request's status and writes the audit entry."""
+    staff_routes = {("/api/requests", "GET"),
+                    ("/api/requests/{rid}", "GET"),
+                    ("/api/review/queue", "GET"),
+                    ("/api/requests/{rid}/review", "POST")}
+    seen = set()
     for path, methods, guards in _api_routes():
-        if path in staff_paths or (path == "/api/requests" and "GET" in methods):
-            checked += 1
-            assert guards & {"require_staff", "require_admin"}, \
-                f"{' '.join(methods)} {path} exposes raw requests without a sign-in guard"
-    assert checked >= 3, f"expected at least 3 staff routes, found {checked}"
+        for m in methods:
+            if (path, m) in staff_routes:
+                seen.add((path, m))
+                assert guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} is reachable without a sign-in guard"
+    # An exact match, not a floor: a floor of 3 was satisfied by the three read
+    # routes alone, which let the verification POST go unchecked.
+    assert seen == staff_routes, f"routes missing from the table: {staff_routes - seen}"
 
 
 def test_citizen_intake_stays_anonymous():
