@@ -57,6 +57,7 @@ MAX_FAILED_LOGINS = int(os.getenv("MAX_FAILED_LOGINS", "8"))
 LOCKOUT_MINUTES = int(os.getenv("LOCKOUT_MINUTES", "15"))
 
 ROLES = ("admin", "reviewer")
+MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", "8"))
 
 
 def _now() -> datetime:
@@ -271,21 +272,69 @@ def require_admin(request: Request) -> dict:
 
 
 # -------------------------------------------------------------- bootstrap
-def bootstrap_admin() -> str | None:
-    """Ensure one admin exists. Returns a generated password if it made one.
+def user_count() -> int:
+    return int(db.connect().execute("SELECT COUNT(*) c FROM users").fetchone()["c"])
 
-    With no ADMIN_PASSWORD set, a random password is generated and logged once
-    rather than defaulting to something guessable. A deployment that ships with
-    admin/admin is worse than one with no login at all, because it looks
-    protected.
+
+def needs_setup() -> bool:
+    """True when no staff account exists yet, so the site must ask for one.
+
+    This is what makes the first administrator a thing you create on the site
+    rather than a thing you export in a shell before starting the server. It
+    is deliberately a question about the database, not about configuration:
+    once any account exists the answer is False forever, which is what closes
+    the setup endpoint.
     """
-    if db.connect().execute("SELECT COUNT(*) c FROM users").fetchone()["c"]:
+    return user_count() == 0
+
+
+def create_first_admin(username: str, password: str,
+                       display_name: str = "Administrator") -> dict:
+    """Create the very first administrator, and only the very first.
+
+    Refuses once any account exists. That check is the entire security of the
+    setup flow, so it lives here next to the write rather than in the route:
+    a second caller must not be able to mint themselves an admin because a new
+    endpoint forgot to ask.
+    """
+    username = (username or "").strip().lower()
+    if not username:
+        raise AuthError("Choose a username.")
+    if len(password or "") < MIN_PASSWORD_LENGTH:
+        raise AuthError(f"Choose a password of at least {MIN_PASSWORD_LENGTH} "
+                        f"characters.")
+    # Fail fast for the ordinary case, so a person who simply arrived late gets
+    # the right message without paying for a hash. This is a courtesy, not the
+    # guard: the guard is the conditional insert below, because anything
+    # checked before hashing can go stale while the hashing happens.
+    if not needs_setup():
+        raise AuthError("An administrator account already exists. Sign in instead.")
+
+    password_hash = hash_password(password)
+    if not db.claim_first_user(username, "admin", password_hash,
+                               display_name or username):
+        raise AuthError("An administrator account already exists. Sign in instead.")
+    log.info("First administrator created on the site: %r", username)
+    return {"username": username, "role": "admin",
+            "display_name": display_name or username}
+
+
+def bootstrap_admin() -> str | None:
+    """Create an admin from the environment, if and only if asked to.
+
+    ADMIN_PASSWORD stays supported because an unattended deployment has no one
+    at a browser to complete the setup screen. But it is no longer the default
+    path: with nothing set, no account is invented and no password is printed
+    to a log. The site asks for one instead, which is both easier to use and
+    better practice -- a credential in a terminal scrollback is a credential
+    in a terminal scrollback.
+    """
+    if not needs_setup():
         return None
-    username = os.getenv("ADMIN_USERNAME", "admin").strip().lower()
     password = os.getenv("ADMIN_PASSWORD")
-    generated = None
     if not password:
-        password = secrets.token_urlsafe(12)
-        generated = password
+        return None                      # the login page will offer setup
+    username = os.getenv("ADMIN_USERNAME", "admin").strip().lower()
     create_user(username, password, "admin", display_name="Administrator")
-    return generated
+    log.info("Administrator %r created from the environment.", username)
+    return None

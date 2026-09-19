@@ -39,7 +39,10 @@ const EXAMPLES = [
 
 /* ------------------------------------------------------------------ boot */
 async function boot() {
-  await renderNav($('nav'), '/citizen');
+  const me = await renderNav($('nav'), '/citizen');
+  // Signed-in staff already have their destinations in the nav; the footer
+  // entrance is only there for someone who still needs to get in.
+  if (me && me.authenticated) $('staffbar').hidden = true;
   const countries = await api('/api/countries');
   $('country').innerHTML = countries.map(c =>
     `<option value="${c.code}">${c.name}</option>`).join('');
@@ -90,6 +93,11 @@ async function boot() {
     const n = $('voicetext').value.trim().length;
     $('voicelen').textContent = n ? `${n} characters` : '';
   };
+
+  $('ackdone').onclick = closeAck;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('ack').dataset.open === 'true') closeAck();
+  });
 
   // Awaited: the mic must not be clickable before we know which path it takes.
   await setupMic();
@@ -318,11 +326,54 @@ async function submit(text, channel) {
     });
     showResult(r);
     loadRecent();
+    // The WhatsApp and SMS panels are channel simulations: they acknowledge
+    // inside their own transcript, and covering the screen would hide the very
+    // thing they exist to demonstrate.
+    if (channel === 'voice' || channel === 'web') openAck(r);
     return r;
   } catch (e) {
     flash(e.message, true);
     return null;
   }
+}
+
+/* ------------------------------------------------------- acknowledgement */
+/* A citizen who has just reported something needs one thing: to know it was
+   received. So the screen is cleared down to a check mark and a sentence, and
+   the classification detail waits underneath until they dismiss it. */
+let ackReturnFocus = null;
+
+function openAck(r) {
+  const ack = $('ack');
+  const ref = $('ackref');
+  if (r && r.id) {
+    ref.textContent = `Reference ${r.id}`;
+    ref.hidden = false;
+  } else {
+    ref.textContent = '';
+    ref.hidden = true;                 // never show an empty reference box
+  }
+  ackReturnFocus = document.activeElement;
+  ack.hidden = false;
+  ack.dataset.open = 'true';
+  // Nothing behind the screen should scroll or be reachable by Tab.
+  document.body.style.overflow = 'hidden';
+  $('ackdone').focus();
+}
+
+function closeAck() {
+  const ack = $('ack');
+  ack.dataset.open = 'false';
+  ack.hidden = true;
+  document.body.style.overflow = '';
+  // Clear the forms: the complaint is filed, and leaving the old text in place
+  // invites someone to submit the same thing twice.
+  $('voicetext').value = '';
+  $('voicelen').textContent = '';
+  $('freetext').value = '';
+  $('micstatus').textContent = 'Tap and speak in your own language.';
+  if (ackReturnFocus && document.contains(ackReturnFocus)) ackReturnFocus.focus();
+  ackReturnFocus = null;
 }
 
 function showResult(r) {
