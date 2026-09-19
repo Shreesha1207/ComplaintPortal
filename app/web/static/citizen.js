@@ -39,7 +39,10 @@ const EXAMPLES = [
 
 /* ------------------------------------------------------------------ boot */
 async function boot() {
-  await renderNav($('nav'), '/citizen');
+  const me = await renderNav($('nav'), '/citizen');
+  // Signed-in staff already have their destinations in the nav; the footer
+  // entrance is only there for someone who still needs to get in.
+  if (me && me.authenticated) $('staffbar').hidden = true;
   const countries = await api('/api/countries');
   $('country').innerHTML = countries.map(c =>
     `<option value="${c.code}">${c.name}</option>`).join('');

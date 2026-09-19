@@ -591,14 +591,28 @@ def export_csv(country: str = "IN", limit: int = Query(2000, le=20000),
 # ==========================================================================
 # Web UI
 # ==========================================================================
+# The app opens in citizen mode. Someone who lands on this platform is far more
+# likely to be a person with a problem than a member of staff, and asking them
+# to pick a door first -- past two doors marked with roles they do not have --
+# is a step that only ever costs the citizen something.
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(WEB_DIR / "index.html")
+    return FileResponse(WEB_DIR / "citizen.html")
 
 
 @app.get("/citizen", include_in_schema=False)
 def citizen():
     return FileResponse(WEB_DIR / "citizen.html")
+
+
+@app.get("/about", include_in_schema=False)
+def about():
+    """The overview of the whole platform, including the staff entrances.
+
+    This used to be the landing page. It is still the map of the project for
+    anyone evaluating it, but it is no longer what a citizen is shown first.
+    """
+    return FileResponse(WEB_DIR / "index.html")
 
 
 @app.get("/login", include_in_schema=False)

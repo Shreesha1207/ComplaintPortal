@@ -39,12 +39,17 @@ pip install -r requirements.txt
 Open <http://127.0.0.1:8000>. The database seeds itself on first run with ~6,250
 synthetic multilingual requests across India, Brazil and South Africa (~8s).
 
+The app opens in citizen mode. Staff sign in from the link at the foot of that
+page, or by going to `/login` directly; a citizen is never shown either.
+
 | Page | What it is |
 |---|---|
-| `/` | Overview |
-| `/citizen` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels |
-| `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator |
-| `/review` | Human review queue for low-confidence classifications |
+| `/` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels. No account needed |
+| `/citizen` | The same page, under its own name |
+| `/login` | Staff sign-in — the only way into the two pages below |
+| `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator. Admin only |
+| `/review` | Human review queue for low-confidence classifications. Any staff member |
+| `/about` | Overview of the platform and its entrances |
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash

@@ -64,6 +64,14 @@
     .ack-mark{animation:none}
     .ack-mark path{animation:none;stroke-dashoffset:0}
   }
+
+  /* The staff entrance. Deliberately quiet and at the very bottom: a citizen
+     should never be prompted to sign in to report a problem, and should not
+     have to wonder whether the page is asking them for an account. */
+  .staffbar{max-width:1080px;margin:0 auto;padding:26px 16px 40px;text-align:center}
+  .staffbar a{color:var(--text-muted);font-size:12.5px;text-decoration:none;
+    border-bottom:1px solid transparent}
+  .staffbar a:hover{color:var(--text-secondary);border-bottom-color:var(--border-strong)}
 </style>
 </head>
 <body>
@@ -176,6 +184,10 @@
     </div>
   </div>
 </main>
+<footer class="staffbar" id="staffbar">
+  <a href="/login">Staff sign-in</a>
+</footer>
+
 <!-- Acknowledgement screen: blank, with a check mark. Hidden until a request
      is accepted; citizen.js opens it and fills in the reference. -->
 <div class="ack" id="ack" data-open="false" role="alertdialog" aria-modal="true"
