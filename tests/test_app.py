@@ -453,6 +453,77 @@ def test_budget_counts_each_district_population_once():
     assert len(r["funded"]) > len(districts), "fixture should fund multi-sector districts"
 
 
+# ----------------------------------------------------------- app + guards
+# These are the tests that were missing when a merge conflict resolution
+# dropped `from . import auth` and the LoginIn model: every test below passed
+# green while the server could not start at all, because nothing here imported
+# app.main. Importing it is the point.
+def _load_app():
+    """Import the FastAPI app, with seeding off so this stays fast."""
+    os.environ["APP_NO_SEED"] = "1"
+    from app.main import app
+    return app
+
+
+def test_app_imports_and_starts():
+    """The server module imports. A NameError here means the app cannot boot,
+    which is invisible to every other test in this file."""
+    app = _load_app()
+    paths = {getattr(r, "path", "") for r in app.routes}
+    assert "/api/health" in paths, "health route missing from the route table"
+
+
+def _guards(route) -> set[str]:
+    """Names of the auth dependencies a route carries."""
+    deps = getattr(getattr(route, "dependant", None), "dependencies", [])
+    return {getattr(d.call, "__name__", "") for d in deps}
+
+
+def _api_routes():
+    for r in _load_app().routes:
+        path = getattr(r, "path", "")
+        if path.startswith("/api") and path not in ("/api/docs", "/api/openapi.json"):
+            yield path, sorted(getattr(r, "methods", []) or []), _guards(r)
+
+
+def test_funding_routes_require_admin():
+    """The boundary is the data, not the screen: anything carrying committed or
+    unfunded figures is admin-only, so a new endpoint cannot leak by omission."""
+    checked = 0
+    for path, methods, guards in _api_routes():
+        if path.startswith("/api/analytics") or path.startswith("/api/export"):
+            checked += 1
+            assert "require_admin" in guards, \
+                f"{' '.join(methods)} {path} returns funding data without require_admin"
+    assert checked >= 8, f"expected the funding surface to be larger than {checked} routes"
+
+
+def test_review_routes_require_a_signed_in_staff_member():
+    staff_paths = ("/api/requests/{rid}", "/api/review/queue")
+    checked = 0
+    for path, methods, guards in _api_routes():
+        if path in staff_paths or (path == "/api/requests" and "GET" in methods):
+            checked += 1
+            assert guards & {"require_staff", "require_admin"}, \
+                f"{' '.join(methods)} {path} exposes raw requests without a sign-in guard"
+    assert checked >= 3, f"expected at least 3 staff routes, found {checked}"
+
+
+def test_citizen_intake_stays_anonymous():
+    """Requiring a login to report a broken handpump would silence exactly the
+    people this platform exists to hear. Intake carries no guard, on purpose."""
+    open_routes = {("/api/requests", "POST"), ("/api/requests/public", "GET"),
+                   ("/api/countries", "GET"), ("/api/health", "GET")}
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in open_routes:
+                seen.add((path, m))
+                assert not guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} must not require an account: {sorted(guards)}"
+    assert seen == open_routes, f"routes missing from the table: {open_routes - seen}"
+
+
 # ------------------------------------------------------------------ main
 def _run_standalone() -> int:
     fns = [(n, f) for n, f in sorted(globals().items())

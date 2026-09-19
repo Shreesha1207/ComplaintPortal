@@ -123,9 +123,12 @@ per country and per sector with no coordination.
   shared-phone population the equity correction exists to serve.
 - **The boundary is the data, not the screen.** Every analytics response
   carries committed and unfunded amounts, so those endpoints are admin-only
-  even where another role might want the rest of the payload. An `ast`-based
-  test asserts every `/api/analytics`, `/api/export`, model-list and backfill
-  route carries the admin dependency, so a new route cannot leak by omission.
+  even where another role might want the rest of the payload. A test walks the
+  live route table and asserts every `/api/analytics` and `/api/export` route
+  carries the admin dependency, that the review routes require a signed-in
+  staff member, and that citizen intake requires no account at all -- so
+  neither a leak nor a sign-in wall can arrive by omission. The model-list and
+  backfill routes are not yet guarded; see the note in the README.
 
 Not yet built, and needed before any real deployment: SSO/2FA and a
 password-reset flow, per-country scoping of staff accounts, rate limiting on

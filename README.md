@@ -208,7 +208,13 @@ python3 -c "from app import db, auth; db.init_db(); \
 The boundary is drawn at **money, not pages**: every analytics response carries
 committed and unfunded figures, so those endpoints are admin-only even over the
 API. A test parses the route table and fails if any funding route is missing its
-guard, so a new endpoint cannot leak by omission.
+guard, so a new endpoint cannot leak by omission. The same test pins the other
+half of the split: citizen intake must keep working with no account.
+
+Two routes are deliberately left out of that guard for now and are open to
+anyone who can reach the server: `GET /api/ai/models`, which reveals which
+model is configured, and `POST /api/translate/backfill`, which spends
+translation API credits. Guard both before any real deployment.
 
 ## Adding a country
 
