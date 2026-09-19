@@ -211,10 +211,14 @@ API. A test parses the route table and fails if any funding route is missing its
 guard, so a new endpoint cannot leak by omission. The same test pins the other
 half of the split: citizen intake must keep working with no account.
 
-Two routes are deliberately left out of that guard for now and are open to
-anyone who can reach the server: `GET /api/ai/models`, which reveals which
-model is configured, and `POST /api/translate/backfill`, which spends
-translation API credits. Guard both before any real deployment.
+That guard covers the funding surface, which is sound: every analytics and
+export route is admin-only today, and the test now holds it that way. Two
+other routes are a different matter -- they carry no guard at all, by
+omission rather than by design, and are open to anyone who can reach the
+server: `GET /api/ai/models`, which reveals which model is configured, and
+`POST /api/translate/backfill`, which spends translation API credits. The
+unauthenticated examples above use them as-is. Guard both before any real
+deployment.
 
 ## Adding a country
 
