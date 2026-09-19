@@ -21,14 +21,14 @@ from fastapi.responses import (FileResponse, JSONResponse, RedirectResponse,
                                StreamingResponse)
 from fastapi.staticfiles import StaticFiles
 
-from . import db
+from . import auth, db
 from .ai.groq_engine import get_engine
 from .analysis.budget import STRATEGIES, allocate, compare_strategies
 from .analysis.fusion import available_countries, build_matrix, load_pack
 from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
 from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
-from .schemas import ReviewIn, RequestIn, TranscribeIn
+from .schemas import LoginIn, ReviewIn, RequestIn, TranscribeIn
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app")
