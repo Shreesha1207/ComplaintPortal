@@ -566,10 +566,10 @@ def test_a_missing_or_broken_env_file_does_not_stop_startup():
 def test_first_admin_is_created_once_and_only_once():
     """The setup flow's whole security is that it closes after the first use.
 
-    Runs against the real table and puts back whatever was there, rather than
-    pointing the module at another file: DB_PATH is resolved at import and the
-    connection is cached per thread, so swapping APP_DB mid-run would not do
-    what it looks like it does.
+    Runs against the real table and puts back whatever was there. Repointing
+    db.DB_PATH would also work -- connect() reads the global each call, and a
+    new thread has no cached connection -- but restoring the rows needs no
+    such arrangement, and leaves nothing to unwind if an assertion fails.
     """
     from app import db as _db, auth as _auth
     _db.init_db()
