@@ -16,7 +16,7 @@
    When neither is usable we say so, specifically, instead of leaving a dead
    microphone button on the screen. Every failure below names its own cause.
 */
-import { api, apiPost, fmt, themeToggle, urgencyChip } from './viz.js';
+import { api, apiPost, fmt, renderNav, urgencyChip } from './viz.js';
 
 const $ = (id) => document.getElementById(id);
 const state = {
@@ -39,7 +39,7 @@ const EXAMPLES = [
 
 /* ------------------------------------------------------------------ boot */
 async function boot() {
-  themeToggle($('theme'));
+  await renderNav($('nav'), '/citizen');
   const countries = await api('/api/countries');
   $('country').innerHTML = countries.map(c =>
     `<option value="${c.code}">${c.name}</option>`).join('');
@@ -428,17 +428,34 @@ async function smsSend() {
 
 /* --------------------------------------------------------------- recent */
 async function loadRecent() {
-  const rows = await api(`/api/requests?country=${state.country}&limit=14`);
-  $('recentsub').textContent = `${rows.length} newest`;
-  $('recent').innerHTML = rows.map(r => `
+  // The public feed, not /api/requests — that one is staff-only now. This is a
+  // narrow projection: no ids, no reviewer notes, no AI internals.
+  let d;
+  try {
+    d = await api(`/api/requests/public?country=${state.country}&limit=14`);
+  } catch {
+    $('recent').innerHTML = '<div class="empty">Could not load recent requests.</div>';
+    return;
+  }
+  if (!d.enabled) {
+    $('recentsub').textContent = '';
+    $('recent').innerHTML =
+      '<div class="empty">The public feed is switched off in this deployment.</div>';
+    return;
+  }
+  $('recentsub').textContent = `${d.count} newest`;
+  $('recent').innerHTML = d.items.map(r => `
     <div style="padding:9px 4px;border-bottom:1px solid var(--border)">
       <div class="row xs" style="gap:6px;margin-bottom:4px">
         ${urgencyChip(r.urgency)}
         <span class="chip">${r.language.toUpperCase()}</span>
         <span class="chip">${r.channel.replace('_', ' ')}</span>
-        ${r.status === 'review' ? '<span class="flag silent">review</span>' : ''}
+        ${r.district_name ? `<span class="chip">${escapeHtml(r.district_name)}</span>` : ''}
       </div>
-      <div class="small">${escapeHtml(r.text_redacted.slice(0, 110))}</div>
+      <div class="small">${escapeHtml(r.text.slice(0, 110))}</div>
+      ${r.translated && r.text_en
+        ? `<div class="xs muted" style="margin-top:3px">${escapeHtml(r.text_en.slice(0, 110))}</div>`
+        : ''}
     </div>`).join('') || '<div class="empty">No requests yet.</div>';
 }
 

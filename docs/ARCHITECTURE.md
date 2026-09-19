@@ -115,9 +115,22 @@ per country and per sector with no coordination.
   1.42× → 0.84× inversion is the evidence it works.
 - **Confidence gates influence.** Below threshold, a request waits for a human.
 
-Not yet built, and needed before any real deployment: authentication and RBAC for
-the dashboard and review queue, rate limiting on intake, duplicate and
-coordinated-campaign detection, encryption at rest, and data-retention policy.
+- **Roles separate money from verification.** Staff authenticate with
+  PBKDF2-hashed passwords and server-side sessions. `admin` sees funding,
+  analytics, the budget simulator and exports; `reviewer` sees only the
+  verification queue. Citizens never authenticate — intake is deliberately
+  anonymous, because a login requirement would filter out the low-literacy,
+  shared-phone population the equity correction exists to serve.
+- **The boundary is the data, not the screen.** Every analytics response
+  carries committed and unfunded amounts, so those endpoints are admin-only
+  even where another role might want the rest of the payload. An `ast`-based
+  test asserts every `/api/analytics`, `/api/export`, model-list and backfill
+  route carries the admin dependency, so a new route cannot leak by omission.
+
+Not yet built, and needed before any real deployment: SSO/2FA and a
+password-reset flow, per-country scoping of staff accounts, rate limiting on
+intake, duplicate and coordinated-campaign detection, encryption at rest, and a
+data-retention policy.
 
 ## Repository layout
 
@@ -127,6 +140,7 @@ app/
   analysis/  fusion.py · priority.py · budget.py
   packs/     build_packs.py · IN.json · BR.json · ZA.json
   web/       index · citizen · dashboard · review  + static/{app.css,viz.js,…}
+  auth.py    staff accounts, sessions, role guards
   main.py    FastAPI app and REST API
   db.py      SQLite schema and access
   schemas.py Unified Request Envelope

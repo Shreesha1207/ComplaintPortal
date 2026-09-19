@@ -1,6 +1,6 @@
 import {
   api, fmt, hbar, hexMap, hideTip, pluralize, priorityPill, seqLegend, stackedBar,
-  themeToggle, urgencyChip, CAT,
+  renderNav, urgencyChip, CAT,
 } from './viz.js';
 
 const $ = (id) => document.getElementById(id);
@@ -33,7 +33,7 @@ const qs = () => {
 
 /* ---------------------------------------------------------------- boot */
 async function boot() {
-  themeToggle($('theme'));
+  await renderNav($('nav'), '/dashboard');
   const countries = await api('/api/countries');
   $('country').innerHTML = countries
     .map(c => `<option value="${c.code}">${c.name}</option>`).join('');

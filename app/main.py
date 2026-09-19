@@ -16,8 +16,9 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import (FileResponse, JSONResponse, RedirectResponse,
+                               StreamingResponse)
 from fastapi.staticfiles import StaticFiles
 
 from . import db
@@ -91,9 +92,22 @@ def _weights_from_query(demand, gap, people, severity, vulnerability) -> dict | 
 @app.on_event("startup")
 def startup() -> None:
     db.init_db()
+    auth.purge_expired_sessions()
+    generated = auth.bootstrap_admin()
+    if generated:
+        # Logged once, never stored in plaintext. A deployment that ships with
+        # a guessable default is worse than one with no login, because it looks
+        # protected.
+        log.warning("=" * 68)
+        log.warning("Created first administrator account:")
+        log.warning("    username: %s", os.getenv("ADMIN_USERNAME", "admin"))
+        log.warning("    password: %s", generated)
+        log.warning("Set ADMIN_USERNAME / ADMIN_PASSWORD to choose your own.")
+        log.warning("=" * 68)
     if db.counts()["total"] == 0 and os.getenv("APP_NO_SEED") != "1":
         seed_all()
-    log.info("Ready — engine=%s, requests=%d", ENGINE.name, db.counts()["total"])
+    log.info("Ready — engine=%s, requests=%d, staff accounts=%d",
+             ENGINE.name, db.counts()["total"], len(auth.list_users()))
 
 
 def seed_all() -> None:
@@ -143,6 +157,53 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
 # ==========================================================================
 # Meta
 # ==========================================================================
+@app.post("/api/auth/login", tags=["auth"])
+def login(body: LoginIn, response: JSONResponse = None, request: Request = None):
+    """Sign in a staff member and set an httpOnly session cookie."""
+    try:
+        user = auth.authenticate(body.username, body.password)
+    except auth.AuthError as exc:
+        raise HTTPException(401, str(exc))
+    token, expires = auth.start_session(user["username"])
+    out = JSONResponse({"user": user, "expires_at": expires.isoformat(timespec="seconds")})
+    out.set_cookie(
+        auth.SESSION_COOKIE, token,
+        max_age=auth.SESSION_HOURS * 3600,
+        httponly=True,                      # unreadable from JavaScript
+        samesite="lax",                     # blocks cross-site form CSRF
+        secure=bool(request and request.url.scheme == "https"),
+        path="/",
+    )
+    log.info("Sign-in: %s (%s)", user["username"], user["role"])
+    return out
+
+
+@app.post("/api/auth/logout", tags=["auth"])
+def logout(request: Request):
+    auth.end_session(request.cookies.get(auth.SESSION_COOKIE))
+    out = JSONResponse({"ok": True})
+    out.delete_cookie(auth.SESSION_COOKIE, path="/")
+    return out
+
+
+@app.get("/api/auth/me", tags=["auth"])
+def me(request: Request):
+    """Who am I, and what may I see? Drives the navigation in every page."""
+    user = auth.current_user(request)
+    return {
+        "authenticated": user is not None,
+        "user": user,
+        "can": {
+            # Capabilities, not roles: the UI should never hard-code the rule.
+            "submit_requests": True,          # always public, by design
+            "review_queue": bool(user),
+            "view_analytics": bool(user and user["role"] == "admin"),
+            "view_funding": bool(user and user["role"] == "admin"),
+            "export_data": bool(user and user["role"] == "admin"),
+        },
+    }
+
+
 @app.get("/api/health", tags=["meta"])
 def health():
     return {"status": "ok", "ai_engine": ENGINE.health(),
@@ -305,13 +366,53 @@ def submit_request(body: RequestIn):
 @app.get("/api/requests", tags=["intake"])
 def list_requests(country: str | None = None, status: str | None = None,
                   district: str | None = None, sector: str | None = None,
-                  limit: int = Query(200, le=2000), offset: int = 0):
+                  limit: int = Query(200, le=2000), offset: int = 0,
+                  user: dict = Depends(auth.require_staff)):
     return db.list_requests(country=country, status=status, district=district,
                             sector=sector, limit=limit, offset=offset)
 
 
+@app.get("/api/requests/public", tags=["intake"])
+def public_requests(country: str = "IN", limit: int = Query(12, le=30)):
+    """A deliberately narrow public feed of recent requests.
+
+    Citizens seeing that other people's requests were actually recorded is what
+    makes the channel feel worth using, so this stays public. But it is a
+    hand-picked projection, not the stored row: redacted text, sector, urgency,
+    language, channel and district name. No request id, no reviewer notes, no
+    AI internals, no funding figures.
+
+    Worth stating plainly: redaction catches patterns (phone numbers, IDs), not
+    self-identification. "The house behind the temple" survives it. Before a
+    real deployment this feed should be reviewed against the local privacy
+    regime, and it is a single flag to turn off.
+    """
+    if os.getenv("PUBLIC_FEED", "1") != "1":
+        return {"enabled": False, "items": []}
+    try:
+        pack = load_pack(country)
+    except FileNotFoundError:
+        raise HTTPException(404, f"No country pack for '{country}'")
+    rows = db.list_requests(country=country.upper(), limit=limit)
+    items = []
+    for r in rows:
+        entry = pack.district_by_code.get(r["district_code"])
+        items.append({
+            "text": r["text_redacted"],
+            "text_en": r["text_en"] if r["translated"] else "",
+            "translated": bool(r["translated"]),
+            "language": r["language"],
+            "sector": r["sector"],
+            "urgency": r["urgency"],
+            "channel": r["channel"],
+            "district_name": entry[1]["name"] if entry else "",
+            "created_at": r["created_at"],
+        })
+    return {"enabled": True, "count": len(items), "items": items}
+
+
 @app.get("/api/requests/{rid}", tags=["intake"])
-def get_request(rid: str):
+def get_request(rid: str, user: dict = Depends(auth.require_staff)):
     rec = db.get_request(rid)
     if rec is None:
         raise HTTPException(404, "No such request")
@@ -323,7 +424,8 @@ def get_request(rid: str):
 # Human review — the AI never gets the last word
 # ==========================================================================
 @app.get("/api/review/queue", tags=["review"])
-def review_queue(country: str | None = None, limit: int = Query(100, le=1000)):
+def review_queue(country: str | None = None, limit: int = Query(100, le=1000),
+                 user: dict = Depends(auth.require_staff)):
     """Requests the AI was not confident enough to act on alone."""
     rows = db.list_requests(country=country, status="review", limit=limit)
     return {"count": db.count_requests(country=country, status="review"),
@@ -331,8 +433,11 @@ def review_queue(country: str | None = None, limit: int = Query(100, le=1000)):
 
 
 @app.post("/api/requests/{rid}/review", tags=["review"])
-def review_request(rid: str, body: ReviewIn):
-    out = db.update_review(rid, body.model_dump(exclude={"reviewer"}), body.reviewer)
+def review_request(rid: str, body: ReviewIn,
+                   user: dict = Depends(auth.require_staff)):
+    # Audit the signed-in reviewer, never a client-supplied name: an audit log
+    # you can forge is not an audit log.
+    out = db.update_review(rid, body.model_dump(exclude={"reviewer"}), user["username"])
     if out is None:
         raise HTTPException(404, "No such request")
     bump_version()
@@ -344,7 +449,7 @@ def review_request(rid: str, body: ReviewIn):
 # Analytics
 # ==========================================================================
 @app.get("/api/analytics/summary", tags=["analytics"])
-def summary(country: str = "IN"):
+def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
     scored = get_scored(country)
     districts = rollup_districts(scored)
     pack = load_pack(country)
@@ -386,7 +491,8 @@ def priorities(country: str = "IN", sector: str | None = None, region: str | Non
                demand: float | None = None, gap: float | None = None,
                people: float | None = None, severity: float | None = None,
                vulnerability: float | None = None,
-               discount_lambda: float = DEFAULT_LAMBDA):
+               discount_lambda: float = DEFAULT_LAMBDA,
+               user: dict = Depends(auth.require_admin)):
     """Ranked (district, sector) recommendations, each with its full derivation.
 
     Weights are query parameters so a policymaker can see how the ranking moves
@@ -411,7 +517,8 @@ def priorities(country: str = "IN", sector: str | None = None, region: str | Non
 
 @app.get("/api/analytics/districts", tags=["analytics"])
 def districts(country: str = "IN", region: str | None = None,
-              limit: int = Query(200, le=2000)):
+              limit: int = Query(200, le=2000),
+              user: dict = Depends(auth.require_admin)):
     rows = rollup_districts(get_scored(country))
     if region:
         rows = [r for r in rows if r["region_code"] == region]
@@ -419,13 +526,14 @@ def districts(country: str = "IN", region: str | None = None,
 
 
 @app.get("/api/analytics/regions", tags=["analytics"])
-def regions(country: str = "IN"):
+def regions(country: str = "IN", user: dict = Depends(auth.require_admin)):
     rows = rollup_regions(rollup_districts(get_scored(country)))
     return {"count": len(rows), "items": rows}
 
 
 @app.get("/api/analytics/cell/{district_code}/{sector}", tags=["analytics"])
-def cell_detail(district_code: str, sector: str, country: str = "IN"):
+def cell_detail(district_code: str, sector: str, country: str = "IN",
+                user: dict = Depends(auth.require_admin)):
     """Full derivation for one recommendation, plus the citizen requests behind
     it and the existing projects that discounted it."""
     match = next((r for r in get_scored(country)
@@ -445,7 +553,8 @@ def cell_detail(district_code: str, sector: str, country: str = "IN"):
 @app.get("/api/analytics/budget", tags=["analytics"])
 def budget(country: str = "IN", envelope: float = 50000,
            strategy: str = Query("priority", pattern="^(priority|value|blind_spots)$"),
-           limit: int = Query(80, le=1000)):
+           limit: int = Query(80, le=1000),
+           user: dict = Depends(auth.require_admin)):
     result = allocate(get_scored(country), envelope, strategy)
     result["funded"] = result["funded"][:limit]
     result["currency"] = load_pack(country).currency
@@ -454,13 +563,15 @@ def budget(country: str = "IN", envelope: float = 50000,
 
 
 @app.get("/api/analytics/budget/compare", tags=["analytics"])
-def budget_compare(country: str = "IN", envelope: float = 50000):
+def budget_compare(country: str = "IN", envelope: float = 50000,
+                   user: dict = Depends(auth.require_admin)):
     return {"envelope": envelope, "currency": load_pack(country).currency,
             "results": compare_strategies(get_scored(country), envelope)}
 
 
 @app.get("/api/export/priorities.csv", tags=["analytics"])
-def export_csv(country: str = "IN", limit: int = Query(2000, le=20000)):
+def export_csv(country: str = "IN", limit: int = Query(2000, le=20000),
+               user: dict = Depends(auth.require_admin)):
     rows = get_scored(country)[:limit]
     buf = io.StringIO()
     cols = ["region_name", "district_name", "sector_name", "priority_index", "confidence",
@@ -490,13 +601,27 @@ def citizen():
     return FileResponse(WEB_DIR / "citizen.html")
 
 
+@app.get("/login", include_in_schema=False)
+def login_page():
+    return FileResponse(WEB_DIR / "login.html")
+
+
 @app.get("/dashboard", include_in_schema=False)
-def dashboard():
+def dashboard(request: Request):
+    """Funding, analytics and the budget simulator. Administrators only."""
+    user = auth.current_user(request)
+    if user is None:
+        return RedirectResponse("/login?next=/dashboard", status_code=303)
+    if user["role"] != "admin":
+        return RedirectResponse("/review?denied=dashboard", status_code=303)
     return FileResponse(WEB_DIR / "dashboard.html")
 
 
 @app.get("/review", include_in_schema=False)
-def review():
+def review(request: Request):
+    """Verification queue. Any signed-in staff member."""
+    if auth.current_user(request) is None:
+        return RedirectResponse("/login?next=/review", status_code=303)
     return FileResponse(WEB_DIR / "review.html")
 
 

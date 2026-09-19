@@ -291,6 +291,51 @@ export const priorityPill = (v) => {
 export const urgencyChip = (u) =>
   `<span class="chip u-${u}"><span class="dot"></span>${u}</span>`;
 
+
+/* ---- identity & role-aware navigation ---------------------------------
+   Every page renders its own nav from the server's capability map rather
+   than from a hard-coded role check. The UI hiding a link is a courtesy,
+   not a control: the endpoints enforce the boundary themselves, so a
+   stale or tampered nav grants nothing.                                  */
+export async function whoami() {
+  try {
+    return await api('/api/auth/me');
+  } catch {
+    return { authenticated: false, user: null,
+             can: { submit_requests: true, review_queue: false,
+                    view_analytics: false, view_funding: false, export_data: false } };
+  }
+}
+
+export async function renderNav(el, current = '') {
+  const me = await whoami();
+  const link = (href, label) =>
+    `<a href="${href}"${href === current ? ' aria-current="page"' : ''}>${label}</a>`;
+  const parts = [link('/citizen', 'Submit a request')];
+  if (me.can.view_analytics) parts.push(link('/dashboard', 'Dashboard'));
+  if (me.can.review_queue) parts.push(link('/review', 'Review queue'));
+  if (me.authenticated) {
+    parts.push(`<span class="chip" title="Signed in as ${me.user.username}">` +
+               `${me.user.display_name || me.user.username} · ${me.user.role}</span>`);
+    parts.push('<button class="btn" id="logout" style="padding:6px 10px">Sign out</button>');
+  } else {
+    parts.push(link('/login', 'Staff sign-in'));
+  }
+  parts.push('<button class="btn" id="theme" style="padding:6px 10px" ' +
+             'aria-label="Toggle colour theme">\u25D0</button>');
+  el.innerHTML = parts.join('');
+
+  const out = document.getElementById('logout');
+  if (out) {
+    out.onclick = async () => {
+      try { await apiPost('/api/auth/logout', {}); } catch { /* already gone */ }
+      location.href = '/';
+    };
+  }
+  themeToggle(document.getElementById('theme'));
+  return me;
+}
+
 export async function api(path) {
   const r = await fetch(path, { headers: { Accept: 'application/json' } });
   if (!r.ok) throw new Error(`${r.status} ${r.statusText} — ${path}`);

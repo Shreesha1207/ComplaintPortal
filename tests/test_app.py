@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import tempfile
+from pathlib import Path as pathlib_Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("APP_DB", os.path.join(tempfile.gettempdir(), "app_test.db"))

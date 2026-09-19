@@ -170,6 +170,41 @@ When both engines are available and they *disagree* on the sector, that
 disagreement itself is treated as a red flag and the request goes to a human,
 even if each engine was individually confident.
 
+### Stage 2a — Who is allowed to see what
+
+Two audiences, drawn apart deliberately.
+
+**Citizens never sign in.** Intake is anonymous by design. Requiring an account
+to report a broken handpump would filter out precisely the low-literacy,
+shared-phone, no-email population the equity correction exists to serve — the
+front door would undo the maths behind it.
+
+**Staff sign in, in two roles:**
+
+| | `reviewer` | `admin` |
+|---|---|---|
+| Verification queue | ✓ | ✓ |
+| Read a stored request | ✓ | ✓ |
+| Priority rankings, demand map | — | ✓ |
+| **Funding: committed, unfunded, budget simulator** | — | ✓ |
+| Policy weights, CSV export | — | ✓ |
+
+A block officer confirming a request is real should not be able to move a
+budget, and does not need to.
+
+**The boundary is the data, not the screen.** Every analytics response carries
+committed and unfunded amounts per district, so those endpoints are admin-only
+even where a reviewer might find the rest of the payload useful. Drawing the
+line at pages would have left the numbers reachable over the API — which is
+where they would actually leak.
+
+Mechanically: PBKDF2-HMAC-SHA256 passwords, opaque session tokens stored only
+as SHA-256 hashes, httpOnly `SameSite=Lax` cookies, and lockout after repeated
+failures. All standard library — no new dependency to check a password. The
+navigation renders from a server-supplied capability map, but that is a
+courtesy: the endpoints enforce the boundary themselves, so a stale or tampered
+nav grants nothing.
+
 ### Stage 3 — Storage
 
 Every request and every human decision on it is written to SQLite — one table
@@ -316,9 +351,11 @@ never claims the numbers are real.
 
 A prototype should say what it hasn't built, not just what it has:
 
-- **No authentication.** Anyone who can reach the dashboard can see it and
-  submit to the review queue. A real deployment needs login and role-based
-  access before a single ministry official touches it.
+- **Authentication is in, but it is the simple kind.** Staff sign in with a
+  username and password (PBKDF2, server-side sessions, lockout after repeated
+  failures) and roles separate funding from verification — see §5a. What it
+  does *not* have: single sign-on, 2FA, password-reset flow, or per-country
+  scoping of staff accounts. A ministry will want all four.
 - **No duplicate or coordinated-submission detection.** A single actor could
   currently inflate demand for one district by submitting many requests.
   (The equity correction blunts this for a *high-participation* district
@@ -351,6 +388,7 @@ app/
 ├── web/                  No-build-step frontend
 │   ├── index / citizen / dashboard / review .html
 │   └── static/              app.css, viz.js (hand-rolled SVG charts), page scripts
+├── auth.py               staff accounts, sessions, role guards
 ├── main.py               FastAPI app — every route the system exposes
 ├── db.py                 SQLite schema + access (requests, audit_log)
 ├── schemas.py             the Unified Request Envelope

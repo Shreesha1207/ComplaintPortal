@@ -176,6 +176,40 @@ Three hard limits:
 
 Every AI decision and human override is written to an append-only audit log.
 
+## Roles: citizens vs staff
+
+**Citizens never sign in.** Intake is anonymous on purpose — requiring an
+account to report a broken handpump would filter out exactly the low-literacy,
+shared-phone population the equity correction exists to serve.
+
+**Staff sign in at `/login`**, in two roles:
+
+| | `reviewer` | `admin` |
+|---|---|---|
+| Verification queue | ✓ | ✓ |
+| Priority rankings and demand map | — | ✓ |
+| **Funding, budget simulator, exports** | — | ✓ |
+
+On first run an administrator account is created and the password printed once
+to the log. Choose your own instead:
+
+```bash
+export ADMIN_USERNAME=admin ADMIN_PASSWORD='choose-something-real'
+./run.sh
+```
+
+Add a verification officer:
+
+```bash
+python3 -c "from app import db, auth; db.init_db(); \
+  auth.create_user('officer', 'their-password', 'reviewer', 'Block Officer')"
+```
+
+The boundary is drawn at **money, not pages**: every analytics response carries
+committed and unfunded figures, so those endpoints are admin-only even over the
+API. A test parses the route table and fails if any funding route is missing its
+guard, so a new endpoint cannot leak by omission.
+
 ## Adding a country
 
 One JSON file in `app/packs/`, no code change. It declares the administrative
