@@ -53,7 +53,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 36 tests, no test runner required
+python3 tests/test_app.py   # 40 tests, no test runner required
 ```
 
 ---
@@ -195,12 +195,30 @@ shared-phone population the equity correction exists to serve.
 | Priority rankings and demand map | — | ✓ |
 | **Funding, budget simulator, exports** | — | ✓ |
 
-On first run an administrator account is created and the password printed once
-to the log. Choose your own instead:
+The first time you open `/login`, the page asks you to create the administrator
+account: pick a username and password there and you are signed in straight
+away. Nothing needs to be set in the environment, and no password is ever
+printed to a log. Once that account exists the page becomes an ordinary
+sign-in form, and the setup endpoint refuses to run again.
+
+For an unattended deployment, where nobody is at a browser to complete that
+screen, set the account in the environment instead and it is created on
+startup:
 
 ```bash
 export ADMIN_USERNAME=admin ADMIN_PASSWORD='choose-something-real'
 ./run.sh
+```
+
+### Configuration with `.env`
+
+Put settings in a `.env` file in the project root and they are loaded at
+startup — no extra package needed, and a real environment variable always wins
+over a line in the file. `.env.example` lists everything you can set; copy it
+to `.env` to begin. `.env` is gitignored.
+
+```bash
+cp .env.example .env     # then edit, e.g. GROQ_API_KEY=gsk_...
 ```
 
 Add a verification officer:

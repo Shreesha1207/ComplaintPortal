@@ -93,16 +93,10 @@ def _weights_from_query(demand, gap, people, severity, vulnerability) -> dict | 
 def startup() -> None:
     db.init_db()
     auth.purge_expired_sessions()
-    generated = auth.bootstrap_admin()
-    if generated:
-        # Logged once, never stored in plaintext. A deployment that ships with
-        # a guessable default is worse than one with no login, because it looks
-        # protected.
+    auth.bootstrap_admin()
+    if auth.needs_setup():
         log.warning("=" * 68)
-        log.warning("Created first administrator account:")
-        log.warning("    username: %s", os.getenv("ADMIN_USERNAME", "admin"))
-        log.warning("    password: %s", generated)
-        log.warning("Set ADMIN_USERNAME / ADMIN_PASSWORD to choose your own.")
+        log.warning("No staff account yet. Open /login to create the administrator.")
         log.warning("=" * 68)
     if db.counts()["total"] == 0 and os.getenv("APP_NO_SEED") != "1":
         seed_all()
@@ -178,6 +172,33 @@ def login(body: LoginIn, response: JSONResponse = None, request: Request = None)
     return out
 
 
+@app.post("/api/auth/setup", tags=["auth"], status_code=201)
+def setup(body: LoginIn, request: Request = None):
+    """Create the first administrator, from the site rather than the shell.
+
+    Open only while no account exists; `auth.create_first_admin` refuses once
+    one does. The new administrator is signed in immediately, because sending
+    someone to a login form to retype the password they just chose is a step
+    that exists only to annoy them.
+    """
+    try:
+        user = auth.create_first_admin(body.username, body.password)
+    except auth.AuthError as exc:
+        raise HTTPException(409, str(exc))
+    token, expires = auth.start_session(user["username"])
+    out = JSONResponse({"user": user,
+                        "expires_at": expires.isoformat(timespec="seconds")},
+                       status_code=201)
+    out.set_cookie(
+        auth.SESSION_COOKIE, token,
+        max_age=auth.SESSION_HOURS * 3600,
+        httponly=True, samesite="lax",
+        secure=bool(request and request.url.scheme == "https"),
+        path="/",
+    )
+    return out
+
+
 @app.post("/api/auth/logout", tags=["auth"])
 def logout(request: Request):
     auth.end_session(request.cookies.get(auth.SESSION_COOKIE))
@@ -193,6 +214,9 @@ def me(request: Request):
     return {
         "authenticated": user is not None,
         "user": user,
+        # Drives the login page: with no account yet, it asks you to create one
+        # instead of asking you to sign in to something that does not exist.
+        "setup_required": auth.needs_setup(),
         "can": {
             # Capabilities, not roles: the UI should never hard-code the rule.
             "submit_requests": True,          # always public, by design

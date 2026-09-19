@@ -149,5 +149,5 @@ app/
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_app.py  (36 tests, runs with or without pytest)
+tests/       test_app.py  (40 tests, runs with or without pytest)
 ```

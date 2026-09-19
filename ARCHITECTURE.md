@@ -400,7 +400,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_app.py       36 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       40 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it
@@ -415,7 +415,7 @@ Open `http://127.0.0.1:8000`. The database seeds itself on first run with
 Every number quoted in this document reproduces exactly from that seed.
 
 ```bash
-python3 tests/test_app.py     # 36/36 — no test runner required
+python3 tests/test_app.py     # 40/40 — no test runner required
 ```
 
 ---

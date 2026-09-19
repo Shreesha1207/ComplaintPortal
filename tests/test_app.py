@@ -533,6 +533,98 @@ def test_citizen_intake_stays_anonymous():
     assert seen == open_routes, f"routes missing from the table: {open_routes - seen}"
 
 
+# --------------------------------------------------------- setup and .env
+def test_dotenv_is_read_and_never_overrides_the_real_environment():
+    """A .env value fills a gap; it does not replace what the shell exported."""
+    import tempfile as _tf
+    from app import load_env
+    with _tf.TemporaryDirectory() as d:
+        f = pathlib_Path(d) / ".env"
+        f.write_text("# a comment\n\n"
+                     "APP_TEST_PLAIN=one\n"
+                     'APP_TEST_QUOTED="two words"\n'
+                     "export APP_TEST_EXPORTED=three\n"
+                     "APP_TEST_ALREADY_SET=from-file\n"
+                     "not a pair\n", encoding="utf-8")
+        os.environ["APP_TEST_ALREADY_SET"] = "from-shell"
+        for k in ("APP_TEST_PLAIN", "APP_TEST_QUOTED", "APP_TEST_EXPORTED"):
+            os.environ.pop(k, None)
+        load_env(f)
+
+    assert os.environ["APP_TEST_PLAIN"] == "one"
+    assert os.environ["APP_TEST_QUOTED"] == "two words", "quotes should be stripped"
+    assert os.environ["APP_TEST_EXPORTED"] == "three", "'export ' prefix should be tolerated"
+    assert os.environ["APP_TEST_ALREADY_SET"] == "from-shell", \
+        "a real environment variable must win over the file"
+
+
+def test_a_missing_or_broken_env_file_does_not_stop_startup():
+    from app import load_env
+    assert load_env(pathlib_Path("/nonexistent/nowhere/.env")) == []
+
+
+def test_first_admin_is_created_once_and_only_once():
+    """The setup flow's whole security is that it closes after the first use.
+
+    Runs against the real table and puts back whatever was there, rather than
+    pointing the module at another file: DB_PATH is resolved at import and the
+    connection is cached per thread, so swapping APP_DB mid-run would not do
+    what it looks like it does.
+    """
+    from app import db as _db, auth as _auth
+    _db.init_db()
+    conn = _db.connect()
+    saved = [dict(r) for r in conn.execute("SELECT * FROM users")]
+    conn.execute("DELETE FROM sessions")
+    conn.execute("DELETE FROM users")
+    conn.commit()
+    try:
+        assert _auth.needs_setup(), "with no rows, the site must ask for an account"
+
+        # Too short is refused, and a refused attempt must leave nothing behind.
+        try:
+            _auth.create_first_admin("admin", "short")
+            raise AssertionError("a short password should have been refused")
+        except _auth.AuthError:
+            pass
+        assert _auth.needs_setup(), "a refused attempt must not create an account"
+
+        user = _auth.create_first_admin("admin", "a-real-password")
+        assert user["role"] == "admin"
+        assert not _auth.needs_setup()
+        assert _auth.authenticate("admin", "a-real-password")["role"] == "admin"
+
+        # The second caller must not be able to mint themselves an admin.
+        try:
+            _auth.create_first_admin("intruder", "another-password")
+            raise AssertionError("setup should be closed once an account exists")
+        except _auth.AuthError:
+            pass
+        assert [u["username"] for u in _auth.list_users()] == ["admin"]
+    finally:
+        conn.execute("DELETE FROM sessions")
+        conn.execute("DELETE FROM users")
+        for row in saved:
+            cols = ",".join(row)
+            marks = ",".join("?" * len(row))
+            conn.execute(f"INSERT INTO users ({cols}) VALUES ({marks})",
+                         tuple(row.values()))
+        conn.commit()
+
+
+def test_setup_and_login_routes_need_no_account_to_reach():
+    """Both are the way in, so neither can sit behind a sign-in guard."""
+    open_auth = {("/api/auth/setup", "POST"), ("/api/auth/login", "POST")}
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in open_auth:
+                seen.add((path, m))
+                assert not guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} must be reachable without an account"
+    assert seen == open_auth, f"routes missing from the table: {open_auth - seen}"
+
+
 # ------------------------------------------------------------------ main
 def _run_standalone() -> int:
     fns = [(n, f) for n, f in sorted(globals().items())
