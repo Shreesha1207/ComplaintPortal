@@ -21,14 +21,14 @@ from fastapi.responses import (FileResponse, JSONResponse, RedirectResponse,
                                StreamingResponse)
 from fastapi.staticfiles import StaticFiles
 
-from . import auth, db
+from . import db
 from .ai.groq_engine import get_engine
 from .analysis.budget import STRATEGIES, allocate, compare_strategies
 from .analysis.fusion import available_countries, build_matrix, load_pack
 from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
 from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
-from .schemas import LoginIn, ReviewIn, RequestIn, TranscribeIn
+from .schemas import ReviewIn, RequestIn, TranscribeIn
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app")
@@ -265,8 +265,7 @@ def voice_status():
 
 
 @app.post("/api/translate/backfill", tags=["intake"])
-def translate_backfill(country: str | None = None, limit: int = Query(25, le=200),
-                       user: dict = Depends(auth.require_admin)):
+def translate_backfill(country: str | None = None, limit: int = Query(25, le=200)):
     """Translate stored requests that only carry the offline gloss.
 
     Requests classified offline have a category gloss in `text_en`, not a
@@ -298,7 +297,7 @@ def translate_backfill(country: str | None = None, limit: int = Query(25, le=200
 
 
 @app.get("/api/ai/models", tags=["meta"])
-def ai_models(user: dict = Depends(auth.require_admin)):
+def ai_models():
     """Which models this deployment's Groq key can actually reach.
 
     Asked live rather than served from a hardcoded list, because a hosted

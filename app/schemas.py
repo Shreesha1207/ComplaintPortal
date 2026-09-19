@@ -97,9 +97,3 @@ class TranscribeIn(BaseModel):
                           description="Used only for the content-type the STT service sees")
     language: Optional[str] = Field(default=None,
                                     description="ISO-639-1 hint. Omit to let the model detect.")
-
-
-class LoginIn(BaseModel):
-    """Staff sign-in. Citizens never authenticate — intake is anonymous."""
-    username: str = Field(min_length=1, max_length=64)
-    password: str = Field(min_length=1, max_length=256)
