@@ -612,6 +612,63 @@ def test_first_admin_is_created_once_and_only_once():
         conn.commit()
 
 
+def test_concurrent_setup_can_only_ever_create_one_administrator():
+    """Six callers racing a fresh install must yield one admin, not six.
+
+    This is the reason the emptiness test and the insert are a single
+    statement. When they were two, every caller passed the check while the
+    others were still hashing, and every caller then inserted: a fresh
+    deployment handed out six administrator accounts, none of which had to
+    sign in to anything. Threads, not coroutines, because the connection is
+    thread-local and the real server is a threaded worker pool.
+    """
+    import threading
+    from app import db as _db, auth as _auth
+    _db.init_db()
+    conn = _db.connect()
+    saved = [dict(r) for r in conn.execute("SELECT * FROM users")]
+    conn.execute("DELETE FROM sessions")
+    conn.execute("DELETE FROM users")
+    conn.commit()
+    try:
+        assert _auth.needs_setup()
+        created, refused = [], []
+        start = threading.Barrier(6)
+
+        def attempt(i):
+            start.wait()                      # all six leave the gate together
+            try:
+                created.append(_auth.create_first_admin(f"claimant{i}",
+                                                        f"a-real-password-{i}"))
+            except _auth.AuthError:
+                refused.append(i)
+
+        threads = [threading.Thread(target=attempt, args=(i,)) for i in range(6)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        accounts = _auth.list_users()
+        assert len(accounts) == 1, \
+            f"expected exactly one administrator, got {[a['username'] for a in accounts]}"
+        assert len(created) == 1, f"{len(created)} callers were told they succeeded"
+        assert len(refused) == 5, f"{len(refused)} callers were refused, expected 5"
+        # The winner must be a usable account, not a half-written row.
+        winner = created[0]["username"]
+        assert accounts[0]["username"] == winner
+        assert _auth.authenticate(winner, f"a-real-password-{winner[-1]}")["role"] == "admin"
+    finally:
+        conn.execute("DELETE FROM sessions")
+        conn.execute("DELETE FROM users")
+        for row in saved:
+            cols = ",".join(row)
+            marks = ",".join("?" * len(row))
+            conn.execute(f"INSERT INTO users ({cols}) VALUES ({marks})",
+                         tuple(row.values()))
+        conn.commit()
+
+
 def test_setup_and_login_routes_need_no_account_to_reach():
     """Both are the way in, so neither can sit behind a sign-in guard."""
     open_auth = {("/api/auth/setup", "POST"), ("/api/auth/login", "POST")}

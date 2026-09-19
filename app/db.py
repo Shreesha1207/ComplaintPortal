@@ -218,6 +218,29 @@ def update_review(rid: str, patch: dict, reviewer: str) -> dict | None:
     return get_request(rid)
 
 
+def claim_first_user(username: str, role: str, password_hash: str,
+                     display_name: str) -> bool:
+    """Insert a user only while the table is still empty. True if this call won.
+
+    The emptiness test and the insert are one statement on purpose. Doing them
+    as two -- ask whether any account exists, then create one -- leaves a
+    window between the question and the answer, and on a fresh install that
+    window is wide: password hashing sits in the middle of it and takes
+    hundreds of milliseconds. Concurrent callers all pass the check and all
+    insert, so a fresh deployment can be handed several administrators, none
+    of whom had to sign in. SQLite evaluates the NOT EXISTS under the write
+    lock it already holds for the insert, so the loser here inserts nothing
+    and finds out by the row count.
+    """
+    conn = connect()
+    cur = conn.execute(
+        "INSERT INTO users (username, role, password_hash, display_name, created_at) "
+        "SELECT ?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM users)",
+        (username, role, password_hash, display_name, now()))
+    conn.commit()
+    return cur.rowcount == 1
+
+
 def set_translation(rid: str, text_en: str, text_local: str, actor: str) -> dict | None:
     """Store a real translation over the offline gloss."""
     if get_request(rid) is None:

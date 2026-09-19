@@ -53,7 +53,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 40 tests, no test runner required
+python3 tests/test_app.py   # 41 tests, no test runner required
 ```
 
 ---

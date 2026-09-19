@@ -297,16 +297,26 @@ def create_first_admin(username: str, password: str,
     a second caller must not be able to mint themselves an admin because a new
     endpoint forgot to ask.
     """
-    if not needs_setup():
-        raise AuthError("An administrator account already exists. Sign in instead.")
+    username = (username or "").strip().lower()
+    if not username:
+        raise AuthError("Choose a username.")
     if len(password or "") < MIN_PASSWORD_LENGTH:
         raise AuthError(f"Choose a password of at least {MIN_PASSWORD_LENGTH} "
                         f"characters.")
-    if not (username or "").strip():
-        raise AuthError("Choose a username.")
-    user = create_user(username, password, "admin", display_name=display_name)
-    log.info("First administrator created on the site: %r", user["username"])
-    return user
+    # Fail fast for the ordinary case, so a person who simply arrived late gets
+    # the right message without paying for a hash. This is a courtesy, not the
+    # guard: the guard is the conditional insert below, because anything
+    # checked before hashing can go stale while the hashing happens.
+    if not needs_setup():
+        raise AuthError("An administrator account already exists. Sign in instead.")
+
+    password_hash = hash_password(password)
+    if not db.claim_first_user(username, "admin", password_hash,
+                               display_name or username):
+        raise AuthError("An administrator account already exists. Sign in instead.")
+    log.info("First administrator created on the site: %r", username)
+    return {"username": username, "role": "admin",
+            "display_name": display_name or username}
 
 
 def bootstrap_admin() -> str | None:
