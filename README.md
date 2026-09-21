@@ -245,8 +245,16 @@ omission. The same test pins the other half of the split: citizen intake must
 keep working with no account.
 
 Worth stating plainly for anyone widening access later: `/api/requests/public`
-is safe to publish because it is a hand-picked projection. `/api/analytics/cell`
-is not, and would need the same treatment.
+is safe to publish because it is a hand-picked projection — redacted text,
+sector, urgency, language, channel and district name, and nothing else.
+`/api/analytics/cell` is not, and would need the same treatment.
+
+That public feed is **on by default** and is what the citizen page's "Recent
+requests" panel reads. It is the other half of any re-identification argument
+about publishing statistics, because it already puts district, sector, urgency,
+timestamp and redacted text in public. Redaction catches patterns, not
+self-identification: "the house behind the temple" survives it. Set
+`PUBLIC_FEED=0` to turn it off — one environment variable, no code change.
 
 That guard covers the analytics surface, which is sound: every analytics and
 export route is admin-only today, and the test now holds it that way. Two
