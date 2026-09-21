@@ -88,6 +88,8 @@ async function loadSummary() {
     ['Silent districts', fmt.n(s.silent_districts), 'Severe deficit, no citizen signal received', 'warn'],
     ['Districts covered', fmt.n(s.districts), `across ${fmt.n(s.regions)} regions`, ''],
     ['Awaiting human review', fmt.n(s.requests_in_review), 'AI confidence below threshold', ''],
+    ['Unclassified', fmt.n(s.requests_unclassified),
+     `not in any sector, so outside the ${fmt.n(s.requests_counted_in_rollups)} counted above`, ''],
   ].map(([k, v, d, cls]) =>
     `<div class="stat ${cls}"><div class="k">${k}</div><div class="v">${v}</div>
      <div class="d">${d}</div></div>`).join('');

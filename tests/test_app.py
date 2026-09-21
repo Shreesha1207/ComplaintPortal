@@ -437,6 +437,28 @@ def test_silent_districts_still_surface_without_any_citizen_signal():
     assert any(r["silent_district"] for r in scored), "silence must be flagged"
 
 
+def test_unclassified_requests_are_accounted_for_not_silently_dropped():
+    """A request the classifier cannot place gets sector "other", which is not
+    one of the pack's ten sectors, so `build_matrix` has no cell for it and it
+    reaches no district or region count.
+
+    On the demo corpus that is 421 of 4,200 requests -- 10%. Published as-is, a
+    statistics page would show "4,200 requests received" above district counts
+    summing to 3,779, with nothing explaining the gap. The summary reports the
+    difference, and this pins the arithmetic so the two can never drift apart
+    unexplained again."""
+    rows = _synthetic_corpus()
+    unclassified = [r for r in rows if r["sector"] not in PACK.sectors]
+    assert unclassified, "fixture should contain requests the classifier cannot place"
+    assert all(r["sector"] == "other" for r in unclassified)
+
+    counted = sum(d["request_count"] for d in
+                  rollup_districts(score_cells(build_matrix(PACK, rows))))
+    assert counted + len(unclassified) == len(rows), (
+        f"{len(rows)} requests, {counted} reach a district count, "
+        f"{len(unclassified)} unclassified -- the three must reconcile exactly")
+
+
 def test_weights_actually_move_the_ranking():
     cells = build_matrix(PACK, [])
     heavy = lambda k: {kk: (0.9 if kk == k else 0.025) for kk in DEFAULT_WEIGHTS}

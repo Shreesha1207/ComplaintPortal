@@ -486,11 +486,22 @@ def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
 
     unmet = [r for r in scored if r["unmet_need"]]
     silent = [r for r in scored if r["silent_district"]]
+
+    # A request the classifier could not place lands in sector "other", which is
+    # not one of the pack's sectors, so `build_matrix` has no cell for it and it
+    # reaches no district or region count. It is still a request the platform
+    # received, and `requests_total` counts it. Reporting the difference is the
+    # only thing that stops `requests_total` and the sum of the published
+    # district counts from disagreeing by a silent 10%.
+    unclassified = sum(1 for r in rows if r["sector"] not in pack.sectors)
+
     return {
         "country": pack.code, "country_name": pack.name,
         "data_notice": pack.data_notice,
         "requests_total": len(rows),
         "requests_in_review": sum(1 for r in rows if r["status"] == "review"),
+        "requests_unclassified": unclassified,
+        "requests_counted_in_rollups": len(rows) - unclassified,
         "languages_seen": len(by_lang), "districts": len(pack.district_by_code),
         "regions": len(pack.regions),
         "unmet_needs": len(unmet), "silent_districts": len(silent),

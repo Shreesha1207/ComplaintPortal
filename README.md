@@ -249,6 +249,19 @@ is safe to publish because it is a hand-picked projection — redacted text,
 sector, urgency, language, channel and district name, and nothing else.
 `/api/analytics/cell` is not, and would need the same treatment.
 
+### One number a statistics page has to explain
+
+A request the classifier cannot place gets sector `other`, which is not one of the
+pack's ten sectors. `build_matrix` therefore has no cell for it, and it reaches no
+district or region count. On the demo corpus that is **421 of 4,200 requests, 10%**,
+all of them held for human review.
+
+So `requests_total` says 4,200 while the published district counts sum to 3,779.
+`/api/analytics/summary` now reports `requests_unclassified` and
+`requests_counted_in_rollups` alongside the total, and a test pins the three to
+reconcile exactly. Anything that publishes these figures should show the
+unclassified number rather than leave a silent 10% gap.
+
 That public feed is **on by default** and is what the citizen page's "Recent
 requests" panel reads. It is the other half of any re-identification argument
 about publishing statistics, because it already puts district, sector, urgency,
