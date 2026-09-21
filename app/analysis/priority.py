@@ -9,8 +9,7 @@ THE SCORE
 ---------
 For every (district, sector) cell:
 
-    Need  = w_D·D + w_G·G + w_P·P + w_S·S + w_V·V          (weights sum to 1)
-    Index = 100 · Need · (1 − λ·C)
+    Index = 100 · (w_D·D + w_G·G + w_P·P + w_S·S + w_V·V)  (weights sum to 1)
 
     D  Demand      citizen request intensity per capita, equity-corrected,
                    rank-normalised across all cells
@@ -18,15 +17,13 @@ For every (district, sector) cell:
     P  People      log-scaled affected population
     S  Severity    mean urgency of the requests received
     V  Vulnerability  poverty, low literacy and digital exclusion
-    C  Coverage    committed public investment ÷ investment required to close G
-    λ  Discount    how much committed money suppresses priority (default 0.6)
 
-WHY λ < 1
----------
-Committed money is not delivered infrastructure. A fully funded district still
-retains 40% of its priority because budget lines slip, get reallocated, or
-under-execute. Setting λ = 1 would let an announcement remove a district from
-the queue -- which is precisely the failure mode this platform exists to catch.
+WHAT THE INDEX IS NOT
+---------------------
+It is a measure of unmet need, and nothing else. It carries no budget, no
+committed investment and no cost, so it cannot be read as "what this would cost
+to fix" or "what is already being spent here". Deciding what to do about a need
+is a separate job that this platform deliberately does not do.
 
 THE EQUITY CORRECTION -- the single most important design choice here
 --------------------------------------------------------------------
@@ -55,9 +52,9 @@ response to silence.
 
 EVERY NUMBER IS ATTRIBUTABLE
 ----------------------------
-Each cell carries per-factor contributions that sum exactly to its index, a
-counterfactual, and a plain-language rationale. A policymaker challenged on a
-recommendation can say which term produced it and what would change it.
+Each cell carries per-factor contributions that sum exactly to its index and a
+plain-language rationale. Anyone challenged on a ranking can say which term
+produced it and what would change it.
 """
 from __future__ import annotations
 
@@ -73,7 +70,6 @@ DEFAULT_WEIGHTS = {
     "severity": 0.15,
     "vulnerability": 0.15,
 }
-DEFAULT_LAMBDA = 0.60
 
 FACTOR_LABELS = {
     "demand": "Citizen demand (equity-corrected)",
@@ -116,15 +112,7 @@ def participation_index(cell) -> float:
                          + 0.20 * cell.urbanization / 100.0))
 
 
-def required_investment(cell, pack) -> float:
-    """Capital needed to close this cell's gap, in the country's budget unit."""
-    gap = max(0.0, (cell.benchmark - cell.infra_index) / cell.benchmark)
-    capex = pack.currency.get("capex_per_capita", 5000)
-    return cell.population * capex * cell.cost_weight * gap / pack.currency["unit_value"]
-
-
-def score_cells(cells: list, pack, weights: dict | None = None,
-                lam: float = DEFAULT_LAMBDA) -> list[dict]:
+def score_cells(cells: list, weights: dict | None = None) -> list[dict]:
     w = dict(DEFAULT_WEIGHTS)
     if weights:
         w.update({k: float(v) for k, v in weights.items() if k in w})
@@ -155,23 +143,21 @@ def score_cells(cells: list, pack, weights: dict | None = None,
         factors = {"demand": d_norm, "gap": gap, "people": people,
                    "severity": severity, "vulnerability": vulnerability}
         need = sum(w[k] * factors[k] for k in w)
+        index = 100.0 * need
 
-        required = required_investment(c, pack)
-        coverage = min(1.0, c.committed / required) if required > 0.01 else (
-            1.0 if c.committed > 0 else 0.0)
-        discount = 1.0 - lam * coverage
-        index = 100.0 * need * discount
-
-        contributions = {k: round(100.0 * w[k] * factors[k] * discount, 2) for k in w}
+        contributions = {k: round(100.0 * w[k] * factors[k], 2) for k in w}
 
         # --- flags -----------------------------------------------------
-        blind_spot = d_norm >= 0.60 and gap >= 0.50 and coverage < 0.10
+        # Loud and badly served. This used to be called a blind spot, when it
+        # also required that no money was committed here; with investment data
+        # out of the platform the money half of that test no longer exists, so
+        # the flag says only what it can still actually see.
+        unmet_need = d_norm >= 0.60 and gap >= 0.50
         silent = c.request_count == 0 and gap >= 0.50 and vulnerability >= 0.50
-        well_covered = coverage >= 0.80
 
-        # --- recommendation confidence ---------------------------------
+        # --- ranking confidence ----------------------------------------
         # Distinct from the AI's per-request confidence: this is how much a
-        # policymaker should trust THIS cell's ranking.
+        # reader should trust THIS cell's ranking.
         sample = min(1.0, c.request_count / 12.0)
         ai_conf = c.ai_confidence_mean if c.request_count else 0.0
         if c.request_count == 0:
@@ -200,28 +186,19 @@ def score_cells(cells: list, pack, weights: dict | None = None,
             "infra_index": c.infra_index,
             "benchmark": c.benchmark,
             "gap_pct": round(gap * 100, 1),
-            "committed": round(c.committed, 2),
-            "required": round(required, 2),
-            "coverage": round(coverage, 3),
-            "unfunded": round(max(0.0, required - c.committed), 2),
-            "project_count": c.project_count,
             "languages": sorted(c.languages),
             "channels": sorted(c.channels),
-            "blind_spot": blind_spot,
+            "unmet_need": unmet_need,
             "silent_district": silent,
-            "well_covered": well_covered,
             "confidence": rec_conf,
-            "counterfactual": round(100.0 * need * (1.0 - lam), 2),
-            "rationale": _explain(c, factors, contributions, coverage, index,
-                                  blind_spot, silent, pack),
+            "rationale": _explain(c, factors, contributions, index,
+                                  unmet_need, silent),
         })
     out.sort(key=lambda r: r["priority_index"], reverse=True)
     return out
 
 
-def _explain(c, factors, contributions, coverage, index, blind_spot, silent, pack) -> str:
-    sym = pack.currency["symbol"]
-    unit = pack.currency["unit"]
+def _explain(c, factors, contributions, index, unmet_need, silent) -> str:
     top = sorted(contributions.items(), key=lambda kv: kv[1], reverse=True)[:2]
     bits = [f"Priority {index:.0f}/100 for {c.sector_name.lower()} in {c.district_name}"
             f" ({c.region_name})."]
@@ -235,16 +212,9 @@ def _explain(c, factors, contributions, coverage, index, blind_spot, silent, pac
     bits.append(f"Infrastructure index {c.infra_index:.0f} against a benchmark of "
                 f"{c.benchmark:.0f} — a {factors['gap'] * 100:.0f}% deficit"
                 f" affecting {c.population:,} people.")
-    if coverage <= 0.001:
-        bits.append(f"No public investment is committed here; closing the gap needs about "
-                    f"{sym}{required_investment(c, pack):,.0f} {unit}.")
-    else:
-        bits.append(f"{sym}{c.committed:,.0f} {unit} is already committed, covering "
-                    f"{coverage * 100:.0f}% of the estimated requirement — priority "
-                    f"discounted accordingly.")
-    if blind_spot:
-        bits.append("FLAGGED BLIND SPOT: strong citizen demand and a severe deficit, "
-                    "with effectively no money committed.")
+    if unmet_need:
+        bits.append("FLAGGED UNMET NEED: strong citizen demand against a severe "
+                    "infrastructure deficit.")
     if silent:
         bits.append("FLAGGED SILENT DISTRICT: severe deficit and high vulnerability but "
                     "no citizen requests received — treat as an outreach gap, not an "
@@ -274,9 +244,8 @@ def rollup_districts(scored: list[dict]) -> list[dict]:
             "top_sectors": [{"sector": r["sector"], "sector_name": r["sector_name"],
                              "priority_index": r["priority_index"]} for r in top],
             "request_count": sum(r["request_count"] for r in rows),
-            "blind_spots": sum(1 for r in rows if r["blind_spot"]),
+            "unmet_needs": sum(1 for r in rows if r["unmet_need"]),
             "silent": sum(1 for r in rows if r["silent_district"]),
-            "unfunded": round(sum(r["unfunded"] for r in rows), 2),
         })
     out.sort(key=lambda r: r["priority_index"], reverse=True)
     return out
@@ -298,9 +267,8 @@ def rollup_regions(districts: list[dict]) -> list[dict]:
                 sum(r["priority_index"] * r["population"] for r in rows) / pop, 2),
             "districts": len(rows),
             "request_count": sum(r["request_count"] for r in rows),
-            "blind_spots": sum(r["blind_spots"] for r in rows),
+            "unmet_needs": sum(r["unmet_needs"] for r in rows),
             "silent": sum(r["silent"] for r in rows),
-            "unfunded": round(sum(r["unfunded"] for r in rows), 2),
             "top_district": max(rows, key=lambda r: r["priority_index"])["district_name"],
         })
     out.sort(key=lambda r: r["priority_index"], reverse=True)

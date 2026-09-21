@@ -1,8 +1,11 @@
-# Citizen development requests → national investment priorities
+# Citizen development requests → where the need is greatest
 
 **A multilingual, multi-channel platform that turns fragmented citizen development
-requests into explainable, budget-aware investment recommendations — and, more
+requests into an explainable, auditable picture of unmet need — and, more
 usefully, shows governments where nobody is looking.**
+
+It measures need. It does not allocate money: there is no budget, no committed
+investment figure and no funding decision anywhere in it.
 
 Built for the BRICS *Innovation* challenge as a Digital Public Good: open API,
 pluggable country packs, no vendor lock-in, runnable offline on one laptop.
@@ -18,13 +21,13 @@ Citizen ──▶ Voice · Text · WhatsApp · SMS/IVR
      Unified Request Envelope  (one open schema, every channel)
               │
               ▼
-        Fusion  ── + demographics + infrastructure indices + investment pipeline
+        Fusion  ── + demographics + infrastructure indices
               │
               ▼
    Prioritisation engine  ── equity-corrected demand, deficit, reach, severity,
-              │               vulnerability, discounted by committed money
+              │               vulnerability
               ▼
-    Policy dashboard · Budget simulator · Open REST API
+      National dashboard · Open REST API
 ```
 
 ---
@@ -47,7 +50,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels. No account needed |
 | `/citizen` | The same page, under its own name |
 | `/login` | Staff sign-in — the only way into the two pages below |
-| `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator. Admin only |
+| `/dashboard` | National dashboard — map, ranked needs, ranking weights. Admin only |
 | `/review` | Human review queue for low-confidence classifications. Any staff member |
 | `/about` | Overview of the platform and its entrances |
 | `/api/docs` | Interactive OpenAPI documentation |
@@ -65,12 +68,11 @@ complain**, not **where need is greatest** — so public money follows the
 already-connected and the system launders inequity as evidence. This platform
 corrects for it: it divides demand by an expected-participation index (smartphone
 access, literacy, urbanisation), scores deficit and vulnerability from
-administrative data that needs no citizen to speak at all, and then
-**discounts priority where money is already committed**. What survives is the
-thing a planner actually wants: places with real need, real demand, and no one
-currently funding them.
+administrative data that needs no citizen to speak at all. What survives is the
+thing a planner actually wants: an ordered, challengeable account of where need
+is greatest and where nobody has heard about it yet.
 
-## Four design decisions worth defending
+## Three design decisions worth defending
 
 **1. The loudest voice is not the greatest need.** Demand is divided by expected
 participation, so twenty requests from a district where few can file outweigh
@@ -85,15 +87,20 @@ and is flagged `silent_district`: an outreach gap to close, never a reason to
 deprioritise. With **zero** citizen requests the engine independently surfaces
 Araria, Sitamarhi and Sukma — genuinely among India's most deprived districts.
 
-**3. Committed money lowers priority — but never to zero.** Coverage discounts
-the score by `1 − λ·C` with λ = 0.6, because a budget line is not delivered
-infrastructure. λ = 1 would let an *announcement* remove a district from the
-queue, which is the exact failure this platform exists to catch. What remains
-are `blind_spot`s: strong demand, severe deficit, no money.
+**3. Ranking is policy, not physics.** Weights are query parameters, travel with
+every API response, and are adjustable live on the dashboard. A ranking that
+hides its weights is asserting that its politics are arithmetic.
 
-**4. Ranking is policy, not physics.** Weights and λ are query parameters, travel
-with every API response, and are adjustable live on the dashboard. A ranking
-that hides its weights is asserting that its politics are arithmetic.
+### A note on what was removed
+
+Earlier versions scored a committed-investment figure per district and shipped a
+budget simulator that allocated an envelope down the ranking. Both are gone, at
+the UI, the API and the data layer — the country packs no longer carry an
+investment pipeline or even a currency. The `blind_spot` flag went with them,
+because it was defined as "strong demand, severe deficit, **and no money
+committed**"; `unmet_need` is its successor and asserts only the half that
+survives. On the demo corpus the old flag fired on 36 of 1,460 cells and the new
+one fires on 38.
 
 ## What the AI does — and what it is not allowed to do
 
@@ -173,7 +180,7 @@ Three hard limits:
 
 - **PII redaction is never delegated to a model.** A deterministic regex pass runs
   on every request, and the LLM only ever receives already-redacted text.
-- **Low confidence does not become a funding recommendation.** Anything below
+- **Low confidence does not become a published statistic.** Anything below
   threshold is held for a human; a request in review carries reduced weight and a
   rejected one carries none.
 - **Disagreement escalates.** When both engines run and reach different sectors,
@@ -193,7 +200,7 @@ shared-phone population the equity correction exists to serve.
 |---|---|---|
 | Verification queue | ✓ | ✓ |
 | Priority rankings and demand map | — | ✓ |
-| **Funding, budget simulator, exports** | — | ✓ |
+| **National analytics and exports** | — | ✓ |
 
 The first time you open `/login`, the page asks you to create the administrator
 account: pick a username and password there and you are signed in straight
@@ -228,13 +235,20 @@ python3 -c "from app import db, auth; db.init_db(); \
   auth.create_user('officer', 'their-password', 'reviewer', 'Block Officer')"
 ```
 
-The boundary is drawn at **money, not pages**: every analytics response carries
-committed and unfunded figures, so those endpoints are admin-only even over the
-API. A test parses the route table and fails if any funding route is missing its
-guard, so a new endpoint cannot leak by omission. The same test pins the other
-half of the split: citizen intake must keep working with no account.
+The boundary is drawn at **the data, not the pages**. With money gone it is no
+longer a boundary around funding figures; it is a boundary around the national
+aggregate and, in `GET /api/analytics/cell/...`, the stored request rows behind a
+cell — which include `text_original`, the citizen's words *before* redaction.
+A test pins the exact set of (path, method) pairs on the analytics surface and
+fails if any of them loses `require_admin`, so a new endpoint cannot leak by
+omission. The same test pins the other half of the split: citizen intake must
+keep working with no account.
 
-That guard covers the funding surface, which is sound: every analytics and
+Worth stating plainly for anyone widening access later: `/api/requests/public`
+is safe to publish because it is a hand-picked projection. `/api/analytics/cell`
+is not, and would need the same treatment.
+
+That guard covers the analytics surface, which is sound: every analytics and
 export route is admin-only today, and the test now holds it that way. Two
 other routes are a different matter -- they carry no guard at all, by
 omission rather than by design, and are open to anyone who can reach the
@@ -246,9 +260,16 @@ deployment.
 ## Adding a country
 
 One JSON file in `app/packs/`, no code change. It declares the administrative
-hierarchy, languages, sectors, hex-map layout, demographic and infrastructure
-indices, and the public investment pipeline. India, Brazil and South Africa ship
-as worked examples; `build_packs.py` regenerates them reproducibly.
+hierarchy, languages, sectors, hex-map layout, and demographic and infrastructure
+indices. It carries no budget, no currency and no investment pipeline. India,
+Brazil and South Africa ship as worked examples.
+
+`build_packs.py` regenerates them. Note that regeneration **changes every
+district code**: the committed packs were built when the generator keyed district
+codes off Python's built-in `hash()`, which is salted per process, so it produced
+different codes on every run. The generator now uses a stable SHA-256 digest, but
+it cannot reproduce codes that were never reproducible. Regenerating a pack
+orphans any stored request that references an old code.
 
 ## Voice input
 
@@ -279,16 +300,14 @@ server adapter is wanted at all.
 
 Administrative names and approximate populations are **real**. Every index
 (literacy, urbanisation, poverty, smartphone penetration, per-sector
-infrastructure) and **every investment record is synthetic demonstration data**
-generated by `app/packs/build_packs.py`. They are calibrated to plausible
+infrastructure) is **synthetic demonstration data** generated by
+`app/packs/build_packs.py`. They are calibrated to plausible
 ranges so the prototype behaves realistically. **They are not official statistics
 and must not be cited.** Production adapters for real sources are described in
 `docs/ARCHITECTURE.md`.
 
-One modelling assumption is deliberate and documented: investment is generated as
-a function of urbanisation and literacy — of political salience — rather than of
-need. That reproduces a well-observed pattern, and it is what creates the blind
-spots the platform is built to find.
+This notice is currently rendered only on the admin dashboard. Anything that
+publishes these figures more widely has to carry it too.
 
 ## Documentation
 

@@ -91,9 +91,6 @@ class WeightsIn(BaseModel):
     people: float = Field(default=0.15, ge=0, le=1)
     severity: float = Field(default=0.15, ge=0, le=1)
     vulnerability: float = Field(default=0.15, ge=0, le=1)
-    discount_lambda: float = Field(default=0.60, ge=0, le=1,
-                                   description="How strongly committed investment "
-                                               "suppresses priority")
 
 
 class TranscribeIn(BaseModel):

@@ -30,10 +30,10 @@ Countermeasures, all implemented and tested:
 |---|---|---|
 | Participation bias — the connected dominate | Demand divided by expected-participation index | `test_equity_correction_inverts_participation_bias`; measured 1.42× → 0.84× |
 | Silent populations disappear | Demand is only 30%; exhaustive matrix; `silent_district` flag | `test_silent_districts_still_surface_without_any_citizen_signal` |
-| Announced-but-undelivered projects mask need | λ = 0.6, never 1.0; completed projects excluded from coverage | `test_investment_coverage_discounts_priority_but_never_to_zero_by_default` |
-| Opaque ranking that cannot be challenged | Per-factor contributions sum exactly to the index; counterfactual; rationale | `test_contributions_sum_exactly_to_the_priority_index` |
+| A ranking that quietly carries a funding agenda | No budget, currency or committed-investment figure exists anywhere in the model or the data | `test_no_scored_cell_carries_a_money_field`, `test_no_money_survives_anywhere_in_the_scored_payload` |
+| Opaque ranking that cannot be challenged | Per-factor contributions sum exactly to the index; plain-language rationale | `test_contributions_sum_exactly_to_the_priority_index` |
 | Hidden politics presented as arithmetic | Weights and λ are API parameters, returned in every response, live-adjustable | `test_weights_actually_move_the_ranking` |
-| AI error becomes a funding decision | Confidence threshold → human review; ensemble disagreement escalates; rejected requests carry zero weight | `test_unclassifiable_text_is_routed_to_review` |
+| AI error becomes a published statistic | Confidence threshold → human review; ensemble disagreement escalates; rejected requests carry zero weight | `test_unclassifiable_text_is_routed_to_review` |
 | Personal data exposure | Deterministic redaction before storage and before any model call | `test_pii_is_always_redacted` |
 | Profiling by protected attribute | Never inferred; explicitly forbidden in the LLM prompt | Prompt in `app/ai/groq_engine.py` |
 | Vendor/model lock-in | Adapter interface; offline engine is the default and always sufficient | `test_llm_engine_degrades_to_heuristic_without_credentials` |
@@ -47,14 +47,14 @@ languages, with no country-specific branches in the code.
 
 What a new country supplies: administrative hierarchy and populations, language
 list with BCP-47 tags, hex-map coordinates, demographic and infrastructure
-indices, investment pipeline, sector benchmarks, and per-language lexicon entries.
+indices, sector benchmarks, and per-language lexicon entries.
 Lexicons are data maintained by a national language team, which is what makes the
 platform genuinely forkable rather than nominally open-source.
 
 ## Honest gaps
 
 1. **Authentication exists, but it is basic.** Staff sign in (PBKDF2 hashing,
-   server-side sessions, account lockout) and roles separate funding from
+   server-side sessions, account lockout) and roles separate national analytics from
    verification. Still missing: SSO/2FA, a password-reset flow, per-country
    scoping of staff accounts, rate limiting on intake, and encryption at rest.
 2. **Legal review not done.** Five BRICS jurisdictions, five data-protection

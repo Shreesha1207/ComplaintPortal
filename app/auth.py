@@ -11,19 +11,24 @@ The equity correction is worthless if the front door filters them out first.
 
 Staff have accounts, in two roles:
 
-  admin     Sees money. The dashboard, every analytics endpoint, the budget
-            simulator, the policy weights and the exports. Funding decisions
-            and the data behind them live entirely here.
+  admin     Sees the national picture. The dashboard, every analytics endpoint,
+            the ranking weights and the exports.
   reviewer  Sees the review queue and nothing else. A block officer confirming
-            that a request is real should not be able to move a budget, and
-            should not need to.
+            that a request is real does not thereby get the national rankings.
 
-WHY THE SPLIT IS DRAWN AT "MONEY", NOT AT "PAGES"
--------------------------------------------------
-Every analytics response carries committed and unfunded amounts per district.
-So the boundary is the data, not the screen: an endpoint that returns a funding
-figure is admin-only even if some other role might find the rest of it useful.
-Drawing the line at pages would have left the numbers reachable over the API.
+WHY THE SPLIT IS DRAWN AT THE DATA, NOT AT "PAGES"
+--------------------------------------------------
+The analytics surface joins citizen reports to district-level indices, and
+`/api/analytics/cell/...` returns the stored request rows behind a cell,
+including `text_original` -- the citizen's words before redaction. So the
+boundary is the data, not the screen: an analytics endpoint is admin-only even
+if some other role might find part of it useful. Drawing the line at pages
+would have left the same rows reachable over the API.
+
+There is no money anywhere in this application, so the admin boundary is no
+longer a boundary around money. It is a boundary around the raw citizen record
+and the national aggregate. Anything published more widely than this needs a
+hand-picked projection, the way `/api/requests/public` already does it.
 
 NO NEW DEPENDENCIES
 -------------------
@@ -259,7 +264,7 @@ def require_staff(request: Request) -> dict:
 
 
 def require_admin(request: Request) -> dict:
-    """Admin only. Everything touching money goes through here.
+    """Admin only. The whole analytics surface goes through here.
 
     A reviewer hitting this gets 403, not 404: they are legitimately signed in
     and are entitled to know the resource exists and is not theirs.
@@ -267,7 +272,7 @@ def require_admin(request: Request) -> dict:
     user = require_staff(request)
     if user["role"] != "admin":
         raise HTTPException(403, "Administrator access required. "
-                                 "Funding data is restricted to administrators.")
+                                 "Analytics are restricted to administrators.")
     return user
 
 

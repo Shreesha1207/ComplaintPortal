@@ -29,13 +29,13 @@
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
 ┌── FUSION ── app/analysis/fusion.py ────────────────────────────────────┐
-│  requests ⋈ demographics ⋈ infrastructure ⋈ investment pipeline        │
+│  requests ⋈ demographics ⋈ infrastructure                              │
 │  → exhaustive (district × sector) matrix                               │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
-┌── PRIORITISATION ── app/analysis/priority.py, budget.py ───────────────┐
-│  equity correction → weighted need → investment discount → flags       │
-│  → per-factor contributions, counterfactual, confidence, rollups       │
+┌── PRIORITISATION ── app/analysis/priority.py ──────────────────────────┐
+│  equity correction → weighted need → flags                             │
+│  → per-factor contributions, confidence, rollups                       │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
 ┌── DELIVERY ── app/main.py, app/web/ ───────────────────────────────┐
@@ -51,7 +51,7 @@
 | **SQLite** | A ministry must be able to run this on one laptop. Plain SQL and a thin access layer mean Postgres is a connection string plus a migration, not a rewrite. |
 | **No frontend build step** | No npm, no bundler, no CDN. The dashboard renders behind a restrictive government proxy and in a demo room with no uplink. Every mark is hand-drawn SVG. |
 | **Hex cartogram, not a real map** | On a geographic map, visual weight tracks land area, so vast empty districts dominate and dense ones vanish — inverting the signal for a demand map. Equal-area tiles give every unit equal weight, and work for any country pack. |
-| **Lexicon before LLM** | Determinism (a funding decision must be reproducible at appeal), availability (rural intake on a bad uplink), and cost (tens of millions of requests a year through a frontier model is not a defensible budget line). |
+| **Lexicon before LLM** | Determinism (a published statistic must be reproducible at appeal), availability (rural intake on a bad uplink), and cost (tens of millions of requests a year through a frontier model is not a defensible budget line). |
 
 ## The Unified Request Envelope
 
@@ -95,7 +95,7 @@ with results cached against a data-version counter that bumps on write.
 | ~10⁶ | Postgres; move scoring to a scheduled job writing a `priority_cells` table. |
 | ~10⁷+ | Queue intake (Kafka/Redis); batch classification via the Message Batches API at ~50% cost; partition by country; read replicas for the dashboard. |
 
-The scoring engine is a pure function of (cells, weights, λ), so it parallelises
+The scoring engine is a pure function of (cells, weights), so it parallelises
 per country and per sector with no coordination.
 
 ## Security, privacy, responsible AI
@@ -115,17 +115,17 @@ per country and per sector with no coordination.
   1.42× → 0.84× inversion is the evidence it works.
 - **Confidence gates influence.** Below threshold, a request waits for a human.
 
-- **Roles separate money from verification.** Staff authenticate with
-  PBKDF2-hashed passwords and server-side sessions. `admin` sees funding,
-  analytics, the budget simulator and exports; `reviewer` sees only the
-  verification queue. Citizens never authenticate — intake is deliberately
+- **Roles separate the national picture from verification.** Staff authenticate
+  with PBKDF2-hashed passwords and server-side sessions. `admin` sees the
+  analytics surface and exports; `reviewer` sees only the verification queue. Citizens never authenticate — intake is deliberately
   anonymous, because a login requirement would filter out the low-literacy,
   shared-phone population the equity correction exists to serve.
-- **The boundary is the data, not the screen.** Every analytics response
-  carries committed and unfunded amounts, so those endpoints are admin-only
-  even where another role might want the rest of the payload. A test walks the
-  live route table and asserts every `/api/analytics` and `/api/export` route
-  carries the admin dependency, that the review routes require a signed-in
+- **The boundary is the data, not the screen.** There is no money in this
+  application, so the boundary is no longer around funding figures: it is around
+  the national aggregate and, in `/api/analytics/cell/...`, the stored request
+  rows behind a cell, including `text_original` -- the citizen's words before
+  redaction. A test pins the exact set of (path, method) pairs on that surface
+  and asserts each carries the admin dependency, that the review routes require a signed-in
   staff member, and that citizen intake requires no account at all -- so
   neither a leak nor a sign-in wall can arrive by omission. The model-list and
   backfill routes are not yet guarded; see the note in the README.
@@ -140,7 +140,7 @@ data-retention policy.
 ```
 app/
   ai/        base.py · lexicon.py · heuristic.py · groq_engine.py
-  analysis/  fusion.py · priority.py · budget.py
+  analysis/  fusion.py · priority.py
   packs/     build_packs.py · IN.json · BR.json · ZA.json
   web/       index · citizen · dashboard · review  + static/{app.css,viz.js,…}
   auth.py    staff accounts, sessions, role guards

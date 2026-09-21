@@ -1,12 +1,16 @@
 # The prioritisation model
 
 Everything the dashboard ranks comes from this. It is written out in full because
-a recommendation that cannot be challenged is not decision support — it is an
-oracle, and no ministry should fund one.
+a ranking that cannot be challenged is not decision support — it is an oracle,
+and no ministry should trust one.
+
+This model measures **need**. It holds no budget, no committed-investment figure
+and no cost estimate, and it makes no allocation. What a government spends, and
+where, is a separate decision it deliberately does not touch.
 
 ## Unit of analysis
 
-One **(district, sector)** cell. That is what a government actually funds: not
+One **(district, sector)** cell. That is the grain a government acts at: not
 "Bihar", not "water", but *water in Sitamarhi*. For India that is 146 districts ×
 10 sectors = 1,460 cells.
 
@@ -19,7 +23,7 @@ the single most consequential way a system like this fails.
 
 ```
 Need  = w_D·D + w_G·G + w_P·P + w_S·S + w_V·V         (weights renormalised to 1)
-Index = 100 · Need · (1 − λ·C)
+Index = 100 · Need
 ```
 
 | | Factor | Definition | Default |
@@ -29,8 +33,6 @@ Index = 100 · Need · (1 − λ·C)
 | **P** | People | `log₁₀(1+population) / log₁₀(1+max population)` | 0.15 |
 | **S** | Severity | mean urgency weight of the requests received | 0.15 |
 | **V** | Vulnerability | `0.50·poverty + 0.30·(1−literacy) + 0.20·(1−smartphone)` | 0.15 |
-| **C** | Coverage | committed investment ÷ investment required to close G, clamped to [0,1] | — |
-| **λ** | Discount | how far committed money suppresses priority | 0.60 |
 
 Urgency weights: critical 1.0, high 0.7, medium 0.4, low 0.15.
 
@@ -96,51 +98,48 @@ Sitamarhi and Sukma at the top on administrative data alone.
 
 ---
 
-## The investment discount
+## What was removed, and what it cost
 
-```
-required = population × capex_per_capita × sector_cost_weight × G
-C        = clamp(committed / required, 0, 1)      # planned + ongoing only
-Index    = 100 · Need · (1 − λ·C)
-```
+The model used to carry a third term: an **investment-coverage discount**. Each
+cell estimated the capital required to close its gap, compared that with the
+public money already committed there, and multiplied the index by `(1 − λ·C)`
+with λ = 0.60. The platform no longer holds investment data at all, so the term
+is gone along with the country packs' investment pipeline and currency.
 
-Completed projects are excluded: they are already reflected in the infrastructure
-index, so counting them again would discount the same spend twice.
+Two things are worth being precise about.
 
-**Why λ = 0.6 and not 1.0.** Committed money is not delivered infrastructure.
-Budget lines slip, get reallocated, and under-execute. At λ = 1 a district drops
-out of the queue the moment a project is *announced* — precisely the failure mode
-this platform exists to catch. At λ = 0.6, full funding removes 60% of priority
-and leaves 40% as residual risk.
+**The ordering barely moved.** Measured on the demo corpus, 48 of the top 50
+cells are the same with the discount and without it. Individual cells moved by
+up to a thousand ranks, but the head of the list — the part anyone reads — is
+essentially unchanged.
 
-Worked example (Bhopal / jobs, coverage 1.00, need 0.609):
-
-| λ | Index |
-|---|---|
-| 0.0 | 60.91 |
-| 0.6 | 24.36 |
-| 1.0 | 0.00 |
+**One flag lost half its meaning, and that is the real cost.** `blind_spot`
+required `C < 0.10`, so it asserted "loud demand, severe deficit, **and nobody
+is paying for it**" — a sharper claim than anything else the platform produced.
+Its successor `unmet_need` drops that clause and asserts only the first half. It
+did not empty out: the old rule fired on 36 of 1,460 cells and the new one fires
+on 38, the two extra being cells the old rule suppressed because money was
+committed there. But "nobody is funding this" is no longer something this model
+can say, and it cannot be recovered without investment data.
 
 ## Flags
 
 | Flag | Condition | Reading |
 |---|---|---|
-| `blind_spot` | D ≥ 0.60 and G ≥ 0.50 and C < 0.10 | Loud demand, severe deficit, no money. **Act.** |
+| `unmet_need` | D ≥ 0.60 and G ≥ 0.50 | Loud demand, severe deficit. **Act.** |
 | `silent_district` | 0 requests, G ≥ 0.50, V ≥ 0.50 | Severe deficit, no voice heard. **Reach out.** |
-| `well_covered` | C ≥ 0.80 | Already funded — monitor delivery, don't re-fund. |
 
 ## Explainability
 
-Every cell carries `contributions[factor] = 100 · w · factor · (1 − λ·C)`, which
-**sum exactly to the index** (asserted in the test suite to within 0.05). So any
-recommendation can be answered precisely: *which term produced this, and what
-would change it.* Each cell also carries a counterfactual — the score if committed
-money were fully disbursed — and the citizen requests behind it.
+Every cell carries `contributions[factor] = 100 · w · factor`, which **sum
+exactly to the index** (asserted in the test suite to within 0.05). So any
+ranking can be answered precisely: *which term produced this, and what would
+change it.* Each cell also carries the citizen requests behind it.
 
 ## Recommendation confidence
 
-Distinct from the AI's per-request confidence. This is how much a policymaker
-should trust *this cell's ranking*:
+Distinct from the AI's per-request confidence. This is how much a reader should
+trust *this cell's ranking*:
 
 ```
 requests > 0 :  0.40·min(1, n/12) + 0.30·mean_AI_confidence + 0.30
@@ -158,24 +157,6 @@ same conclusion corroborated by citizen reports — and the number says so.
 - **Region** = population-weighted mean of its districts, so a region is not
   dragged up by one small outlier.
 
-## Budget allocation
-
-Greedy descent of the ranking, with partial funding of the last item. Greedy is
-correct here rather than a placeholder: *the ranking is the policy*, so spending
-straight down it is exactly what a policymaker is asking to simulate.
-
-Three strategies, presented together because they genuinely disagree:
-
-| Strategy | ₹50,000 cr reaches | Cost/person |
-|---|---|---|
-| Worst-first | 45 districts, 92.8M people | ₹5,390 |
-| Value for money | 109 districts, 221.5M people | ₹2,257 |
-| Blind spots only | 20 districts, 42.2M people | ₹5,860 |
-
-Neither of the first two is *correct*. Value-for-money reaches 2.4× the people and
-systematically skips the hardest cases. Quantifying that trade-off and handing it
-to a human is more honest than hard-coding one and calling the output "optimal".
-
 ## Known limitations
 
 1. **Demand cannot measure the unheard.** Mitigated structurally (above), not
@@ -188,5 +169,8 @@ to a human is more honest than hard-coding one and calling the output "optimal".
 4. **Verification is shallow.** Status is `new`/`review`/`verified`/`rejected`
    with no duplicate detection or coordinated-campaign defence. A national system
    needs both — a single actor should not be able to manufacture demand signal.
-5. **Cost model is coarse.** `capex_per_capita × cost_weight × gap` is a planning
-   approximation, not an engineering estimate.
+5. **The model cannot see what is already being done.** With investment data
+   removed it ranks need without any knowledge of which needs are already being
+   addressed, so a district with a funded project under way ranks exactly as it
+   would with nothing happening at all. That is a deliberate consequence of
+   taking money out, not an oversight.

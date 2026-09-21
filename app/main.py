@@ -23,10 +23,9 @@ from fastapi.staticfiles import StaticFiles
 
 from . import auth, db
 from .ai.groq_engine import get_engine
-from .analysis.budget import STRATEGIES, allocate, compare_strategies
 from .analysis.fusion import available_countries, build_matrix, load_pack
-from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
-                              rollup_districts, rollup_regions, score_cells)
+from .analysis.priority import (DEFAULT_WEIGHTS, FACTOR_LABELS, rollup_districts,
+                                rollup_regions, score_cells)
 from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
 from .schemas import LoginIn, ReviewIn, RequestIn, TranscribeIn
 
@@ -39,14 +38,15 @@ ENGINE = get_engine()
 app = FastAPI(
     title="Citizen Development Priority API",
     description=(
-        "Citizen development requests → national investment priorities.\n\n"
+        "Citizen feedback → where the need is greatest.\n\n"
         "A multilingual, multi-channel platform that turns fragmented citizen "
-        "feedback into explainable, budget-aware project recommendations. "
+        "feedback into an explainable, auditable picture of unmet need. "
         "Built as a Digital Public Good: open API, pluggable country packs, "
         "no vendor lock-in.\n\n"
-        "**All demographic, infrastructure and investment figures in this "
-        "deployment are synthetic demo data.** See `/api/countries/{code}` → "
-        "`data_notice`."
+        "It measures need. It does not allocate money, and carries no budget "
+        "or investment data of any kind.\n\n"
+        "**All demographic and infrastructure figures in this deployment are "
+        "synthetic demo data.** See `/api/countries/{code}` → `data_notice`."
     ),
     version="0.1.0",
     docs_url="/api/docs",
@@ -54,7 +54,7 @@ app = FastAPI(
 )
 
 # --------------------------------------------------------------------------
-# Scoring cache. The matrix is deterministic given (country, weights, λ, data
+# Scoring cache. The matrix is deterministic given (country, weights, data
 # version), so recomputing it per request is pure waste. The version counter is
 # bumped on any write, which keeps the cache correct without a TTL.
 # --------------------------------------------------------------------------
@@ -68,15 +68,14 @@ def bump_version() -> None:
     _CACHE.clear()
 
 
-def get_scored(country: str, weights: dict | None = None,
-               lam: float = DEFAULT_LAMBDA) -> list[dict]:
+def get_scored(country: str, weights: dict | None = None) -> list[dict]:
     wkey = tuple(sorted((weights or {}).items()))
-    key = (country.upper(), wkey, round(lam, 4), _VERSION)
+    key = (country.upper(), wkey, _VERSION)
     if key not in _CACHE:
         pack = load_pack(country)
         rows = db.list_requests(country=country.upper(), limit=1_000_000)
         cells = build_matrix(pack, rows)
-        _CACHE[key] = score_cells(cells, pack, weights, lam)
+        _CACHE[key] = score_cells(cells, weights)
         if len(_CACHE) > 24:                     # bounded; drop the oldest key
             _CACHE.pop(next(iter(_CACHE)))
     return _CACHE[key]
@@ -137,7 +136,7 @@ def _ingest(text: str, country: str, district_code: str, channel: str,
         "ai_engine": a.engine, "ai_rationale": a.rationale,
         "pii_types": a.pii_types, "entities": a.entities,
         # Low-confidence requests are held for a human rather than silently
-        # counted toward a funding recommendation.
+        # counted toward a ranking.
         "status": "review" if a.needs_review else "new",
         "reviewer_note": None,
     }
@@ -222,7 +221,6 @@ def me(request: Request):
             "submit_requests": True,          # always public, by design
             "review_queue": bool(user),
             "view_analytics": bool(user and user["role"] == "admin"),
-            "view_funding": bool(user and user["role"] == "admin"),
             "export_data": bool(user and user["role"] == "admin"),
         },
     }
@@ -355,7 +353,7 @@ def country_detail(code: str):
     except FileNotFoundError:
         raise HTTPException(404, f"No country pack for '{code}'")
     return {
-        "code": pack.code, "name": pack.name, "currency": pack.currency,
+        "code": pack.code, "name": pack.name,
         "admin_levels": pack.admin_levels, "languages": pack.languages,
         "sectors": list(pack.sectors.values()), "map": pack.map,
         "data_notice": pack.data_notice,
@@ -366,7 +364,7 @@ def country_detail(code: str):
                             "population": d["population"]} for d in r["districts"]]}
             for r in pack.regions
         ],
-        "weight_defaults": {**DEFAULT_WEIGHTS, "discount_lambda": DEFAULT_LAMBDA},
+        "weight_defaults": dict(DEFAULT_WEIGHTS),
         "factor_labels": FACTOR_LABELS,
     }
 
@@ -404,7 +402,7 @@ def public_requests(country: str = "IN", limit: int = Query(12, le=30)):
     makes the channel feel worth using, so this stays public. But it is a
     hand-picked projection, not the stored row: redacted text, sector, urgency,
     language, channel and district name. No request id, no reviewer notes, no
-    AI internals, no funding figures.
+    AI internals.
 
     Worth stating plainly: redaction catches patterns (phone numbers, IDs), not
     self-identification. "The house behind the temple" survives it. Before a
@@ -486,18 +484,16 @@ def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
         by_sector[r["sector"]] = by_sector.get(r["sector"], 0) + 1
         by_urgency[r["urgency"]] = by_urgency.get(r["urgency"], 0) + 1
 
-    blind = [r for r in scored if r["blind_spot"]]
+    unmet = [r for r in scored if r["unmet_need"]]
     silent = [r for r in scored if r["silent_district"]]
     return {
-        "country": pack.code, "country_name": pack.name, "currency": pack.currency,
+        "country": pack.code, "country_name": pack.name,
         "data_notice": pack.data_notice,
         "requests_total": len(rows),
         "requests_in_review": sum(1 for r in rows if r["status"] == "review"),
         "languages_seen": len(by_lang), "districts": len(pack.district_by_code),
         "regions": len(pack.regions),
-        "blind_spots": len(blind), "silent_districts": len(silent),
-        "unfunded_total": round(sum(r["unfunded"] for r in scored), 2),
-        "committed_total": round(sum(r["committed"] for r in scored), 2),
+        "unmet_needs": len(unmet), "silent_districts": len(silent),
         "mean_priority": round(sum(r["priority_index"] for r in scored) / max(len(scored), 1), 2),
         "top_district": districts[0] if districts else None,
         "by_language": dict(sorted(by_lang.items(), key=lambda kv: -kv[1])),
@@ -510,21 +506,20 @@ def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
 
 @app.get("/api/analytics/priorities", tags=["analytics"])
 def priorities(country: str = "IN", sector: str | None = None, region: str | None = None,
-               district: str | None = None, blind_spots_only: bool = False,
+               district: str | None = None, unmet_needs_only: bool = False,
                silent_only: bool = False, limit: int = Query(60, le=2000),
                demand: float | None = None, gap: float | None = None,
                people: float | None = None, severity: float | None = None,
                vulnerability: float | None = None,
-               discount_lambda: float = DEFAULT_LAMBDA,
                user: dict = Depends(auth.require_admin)):
-    """Ranked (district, sector) recommendations, each with its full derivation.
+    """Ranked (district, sector) needs, each with its full derivation.
 
-    Weights are query parameters so a policymaker can see how the ranking moves
-    when the policy changes — and so the ranking can never be presented as an
+    Weights are query parameters so a reader can see how the ranking moves when
+    the policy changes — and so the ranking can never be presented as an
     objective fact independent of the weights that produced it.
     """
     scored = get_scored(country, _weights_from_query(demand, gap, people, severity,
-                                                     vulnerability), discount_lambda)
+                                                     vulnerability))
     rows = scored
     if sector:
         rows = [r for r in rows if r["sector"] == sector]
@@ -532,8 +527,8 @@ def priorities(country: str = "IN", sector: str | None = None, region: str | Non
         rows = [r for r in rows if r["region_code"] == region]
     if district:
         rows = [r for r in rows if r["district_code"] == district]
-    if blind_spots_only:
-        rows = [r for r in rows if r["blind_spot"]]
+    if unmet_needs_only:
+        rows = [r for r in rows if r["unmet_need"]]
     if silent_only:
         rows = [r for r in rows if r["silent_district"]]
     return {"count": len(rows), "returned": min(len(rows), limit), "items": rows[:limit]}
@@ -558,39 +553,16 @@ def regions(country: str = "IN", user: dict = Depends(auth.require_admin)):
 @app.get("/api/analytics/cell/{district_code}/{sector}", tags=["analytics"])
 def cell_detail(district_code: str, sector: str, country: str = "IN",
                 user: dict = Depends(auth.require_admin)):
-    """Full derivation for one recommendation, plus the citizen requests behind
-    it and the existing projects that discounted it."""
+    """Full derivation for one ranked need, plus the citizen requests behind it."""
     match = next((r for r in get_scored(country)
                   if r["district_code"] == district_code and r["sector"] == sector), None)
     if match is None:
         raise HTTPException(404, "No such district/sector cell")
-    pack = load_pack(country)
     return {
         **match,
         "requests": db.list_requests(district=district_code, sector=sector, limit=200),
-        "projects": pack.projects_by_key.get((district_code, sector), []),
         "factor_labels": FACTOR_LABELS,
-        "currency": pack.currency,
     }
-
-
-@app.get("/api/analytics/budget", tags=["analytics"])
-def budget(country: str = "IN", envelope: float = 50000,
-           strategy: str = Query("priority", pattern="^(priority|value|blind_spots)$"),
-           limit: int = Query(80, le=1000),
-           user: dict = Depends(auth.require_admin)):
-    result = allocate(get_scored(country), envelope, strategy)
-    result["funded"] = result["funded"][:limit]
-    result["currency"] = load_pack(country).currency
-    result["strategies"] = STRATEGIES
-    return result
-
-
-@app.get("/api/analytics/budget/compare", tags=["analytics"])
-def budget_compare(country: str = "IN", envelope: float = 50000,
-                   user: dict = Depends(auth.require_admin)):
-    return {"envelope": envelope, "currency": load_pack(country).currency,
-            "results": compare_strategies(get_scored(country), envelope)}
 
 
 @app.get("/api/export/priorities.csv", tags=["analytics"])
@@ -600,8 +572,7 @@ def export_csv(country: str = "IN", limit: int = Query(2000, le=20000),
     buf = io.StringIO()
     cols = ["region_name", "district_name", "sector_name", "priority_index", "confidence",
             "population", "request_count", "critical_count", "infra_index", "gap_pct",
-            "committed", "required", "unfunded", "coverage", "blind_spot",
-            "silent_district", "rationale"]
+            "unmet_need", "silent_district", "rationale"]
     w = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
     w.writeheader()
     for r in rows:
@@ -646,7 +617,9 @@ def login_page():
 
 @app.get("/dashboard", include_in_schema=False)
 def dashboard(request: Request):
-    """Funding, analytics and the budget simulator. Administrators only."""
+    """The national picture: demand map, rankings and intake statistics.
+
+    Administrators only."""
     user = auth.current_user(request)
     if user is None:
         return RedirectResponse("/login?next=/dashboard", status_code=303)

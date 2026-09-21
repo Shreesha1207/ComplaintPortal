@@ -165,13 +165,11 @@ input[type=range]{accent-color:var(--accent); width:100%; min-width:120px}
   display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:var(--radius-sm);
   font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:uppercase;
 }
-.flag.blind{background:color-mix(in srgb,var(--status-critical) 15%,transparent);
+.flag.unmet{background:color-mix(in srgb,var(--status-critical) 15%,transparent);
   color:var(--status-critical); border:1px solid var(--status-critical)}
 .flag.silent{background:color-mix(in srgb,var(--status-warning) 18%,transparent);
   color:#8a6100; border:1px solid var(--status-warning)}
 :root[data-theme="dark"] .flag.silent,:root:not([data-theme="light"]) .flag.silent{color:var(--status-warning)}
-.flag.covered{background:color-mix(in srgb,var(--status-good) 14%,transparent);
-  color:var(--status-good); border:1px solid var(--status-good)}
 
 /* ---------- tables ---------- */
 .tablewrap{overflow-x:auto; -webkit-overflow-scrolling:touch}

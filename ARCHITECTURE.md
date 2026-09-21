@@ -19,8 +19,8 @@ complaint count answers the wrong question — it tells you who was loud, not
 who was underserved.
 
 This is not a complaint portal. It's a pipeline that turns citizen voices,
-in any language, through any channel, into a ranked, explainable, budget-aware
-list of *what a government should fund next and why* — and it goes out of its
+in any language, through any channel, into a ranked, explainable account of
+*where the need is greatest and why* — and it goes out of its
 way to surface the places that **never show up in complaint data at all**,
 because those are the places most likely to be genuinely forgotten.
 
@@ -32,10 +32,13 @@ because those are the people who *can* file a complaint. Fund the loudest
 districts and you fund the ones already best served, and you get to call it
 "data-driven." This platform corrects for it: it divides citizen demand by an
 *expected-participation index*, scores infrastructure deficit and vulnerability
-straight from administrative data (which needs nobody to speak), discounts
-priority where money is already committed (but never to zero, because an
-announced budget line isn't a finished road), and writes out the exact math
-behind every recommendation so it can be challenged, not just trusted.
+straight from administrative data (which needs nobody to speak), and writes out
+the exact math behind every ranking so it can be challenged, not just trusted.
+
+It stops there, deliberately. There is no budget, no committed-investment figure
+and no allocation anywhere in the system. It says where the need is; what a
+government spends on it is a separate decision this platform does not make and
+holds no data about.
 
 ## 3. Who uses it, and how
 
@@ -51,7 +54,7 @@ behind every recommendation so it can be challenged, not just trusted.
 ┌─────────────────────────────────────────────────────────────────────┐
 │  SYSTEM                                                               │
 │  Understands the request, strips personal information, classifies    │
-│  it, fuses it with population/infrastructure/budget data for that    │
+│  it, fuses it with population and infrastructure data for that       │
 │  exact district, and scores it against every other unmet need in     │
 │  the country — with the reasoning attached, not hidden.              │
 └──────────────────────────────┬────────────────────────────────────┘
@@ -59,10 +62,9 @@ behind every recommendation so it can be challenged, not just trusted.
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  POLICYMAKER                                                         │
-│  Opens a map, sees where need is highest and least funded, opens     │
-│  any recommendation to see exactly why it ranked there, adjusts the  │
-│  policy weights live, and simulates how a budget envelope would be   │
-│  spent under different strategies before committing real money.      │
+│  Opens a map, sees where need is highest, opens any ranked need to   │
+│  see exactly why it ranked there, and adjusts the ranking weights    │
+│  live to see how sensitive the order is to the policy behind it.     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -89,23 +91,22 @@ behind every recommendation so it can be challenged, not just trusted.
  │  COUNTRY PACK (per nation) │──────────▶│  FUSION                          │
  │  demographics               │           │  every (district × sector) cell, │
  │  infrastructure indices     │           │  even ones with zero requests —  │
- │  investment pipeline        │           │  silence must not disappear      │
- │  languages, sectors, map    │           └───────────────┬──────────────────┘
+ │  languages, sectors, map    │           │  silence must not disappear      │
+ │  (no budget, no currency)   │           └───────────────┬──────────────────┘
  └───────────────────────────┘                            │
                                                               ▼
                                             ┌─────────────────────────────────┐
                                             │  PRIORITISATION ENGINE           │
                                             │  equity-correct demand            │
                                             │  → weight 5 factors               │
-                                            │  → discount by committed money    │
-                                            │  → flag blind spots & silence     │
+                                            │  → flag unmet need & silence      │
                                             │  → attach the exact math          │
                                             └───────────────┬──────────────────┘
                                                               ▼
                                             ┌─────────────────────────────────┐
                                             │  DELIVERY                        │
-                                            │  Policy dashboard (map, ranking,  │
-                                            │  weights, budget simulator)       │
+                                            │  National dashboard (map,         │
+                                            │  ranking, ranking weights)        │
                                             │  Human review queue               │
                                             │  Open REST API (/api/docs)        │
                                             │  CSV export                       │
@@ -143,7 +144,7 @@ Every request goes through six steps, always in this order:
 5. **Estimate reach** — how many people this affects, from an explicit number
    in the text or inferred from the scale implied ("our village," "our ward").
 6. **Score confidence** — if the classification isn't confident enough, the
-   request is held for a human. It is never allowed to influence a funding
+   request is held for a human. It is never allowed to influence a published
    decision unsupervised.
 
 There are two interchangeable engines behind this, sharing one interface:
@@ -186,17 +187,20 @@ front door would undo the maths behind it.
 | Verification queue | ✓ | ✓ |
 | Read a stored request | ✓ | ✓ |
 | Priority rankings, demand map | — | ✓ |
-| **Funding: committed, unfunded, budget simulator** | — | ✓ |
-| Policy weights, CSV export | — | ✓ |
+| Full derivation of any ranked cell | — | ✓ |
+| Ranking weights, CSV export | — | ✓ |
 
-A block officer confirming a request is real should not be able to move a
-budget, and does not need to.
+A block officer confirming a request is real does not thereby get the national
+rankings, and does not need them.
 
-**The boundary is the data, not the screen.** Every analytics response carries
-committed and unfunded amounts per district, so those endpoints are admin-only
-even where a reviewer might find the rest of the payload useful. Drawing the
-line at pages would have left the numbers reachable over the API — which is
-where they would actually leak.
+**The boundary is the data, not the screen.** With money gone this is no longer
+a boundary around funding figures. It is a boundary around the national
+aggregate and, in `GET /api/analytics/cell/...`, the stored request rows behind
+a cell — which include `text_original`, the citizen's words *before* redaction.
+Drawing the line at pages would have left those rows reachable over the API —
+which is where they would actually leak. Anything published more widely than
+this needs a hand-picked projection, the way `/api/requests/public` already
+does it.
 
 Mechanically: PBKDF2-HMAC-SHA256 passwords, opaque session tokens stored only
 as SHA-256 hashes, httpOnly `SameSite=Lax` cookies, and lockout after repeated
@@ -219,9 +223,8 @@ This is where a citizen's request stops being an isolated data point. For the
 country it belongs to, the system loads a **country pack** — one JSON file per
 nation containing its administrative hierarchy (states/districts, or
 provinces/municipalities), demographic indices (literacy, urbanisation,
-poverty, smartphone penetration), per-sector infrastructure indices, and the
-existing public investment pipeline (what's already funded, planned, or
-completed).
+poverty, smartphone penetration) and per-sector infrastructure indices. It
+carries no budget, no currency and no investment pipeline.
 
 The fusion step builds a grid of **every district crossed with every
 sector** — not just the cells that received a request. A district that has
@@ -240,33 +243,30 @@ Each cell in that grid gets scored on five factors:
 | **Severity** | How urgent the requests received were |
 | **Vulnerability** | Poverty, low literacy, digital exclusion |
 
-These combine into a single **Need** score, which is then **discounted by
-how much public money is already committed** to that district and sector —
-but never fully to zero, because a budget line that's been announced is not
-a road that's been built. What's left after that discount is the priority
-index a policymaker actually sees.
+These combine into a single **Need** score, scaled to 0–100. That is the
+priority index a reader sees; nothing is added to it or subtracted from it
+afterwards.
 
 Two things get explicitly flagged:
 
-- **Blind spot** — real citizen demand, a severe deficit, and effectively no
-  money committed. This is the "act now" list.
+- **Unmet need** — real citizen demand against a severe deficit. This is the
+  "act now" list. It used to be called a *blind spot* and additionally required
+  that no public money was committed to the cell; that clause went when the
+  investment data did, so the flag now asserts only the half it can still see.
 - **Silent district** — a severe deficit and high vulnerability, but *zero*
   citizen requests received. This is the "go find out why nobody's talking
   to us" list — treated as an outreach failure, never as evidence of low need.
 
 Every number in the final score is attributable: the five factor
 contributions are written out per cell and **sum exactly to the priority
-index**, along with a plain-language rationale and a counterfactual ("if the
-committed money were fully spent, this score would fall to X"). Nothing is a
-black box.
+index**, along with a plain-language rationale. Nothing is a black box.
 
 ### Stage 6 — Delivery
 
-- **Policy dashboard** — a hex map of the country (equal-area tiles, so
-  colour reflects need rather than land area), a ranked list of
-  recommendations, a full breakdown of any recommendation's math, live-
-  adjustable policy weights, and a budget simulator that shows three
-  different spending strategies side by side rather than picking one for you.
+- **National dashboard** — a hex map of the country (equal-area tiles, so
+  colour reflects need rather than land area), a ranked list of unmet needs,
+  a full breakdown of any cell's math, and live-adjustable ranking weights, so
+  the politics behind the order is visible rather than asserted.
 - **Human review queue** — every request the AI wasn't confident about,
   waiting for a person to confirm, correct, or reject it.
 - **Open REST API** (`/api/docs`) — everything the dashboard shows is also a
@@ -280,7 +280,7 @@ Imagine two districts with an identical, genuine water crisis. District A is
 urban, literate, and everyone has a smartphone — 200 people file a complaint.
 District B is rural, has patchy literacy, and almost nobody has a smartphone
 — 3 people manage to file a complaint, probably by walking to the one place
-with signal. A volume-based system funds District A first and calls it
+with signal. A volume-based system ranks District A first and calls it
 data-driven decision-making. It isn't — it's measuring who could complain,
 not who needs help.
 
@@ -310,38 +310,36 @@ quietly scored low.
 | **SQLite** | Runs on one laptop with no setup. A ministry pilot shouldn't need a database administrator. The access layer is thin enough that moving to Postgres later is a connection-string change, not a rewrite. |
 | **No frontend build step** | No npm, no bundler, no CDN dependency. Every chart is hand-drawn SVG. This has to render behind a restrictive government network proxy and in a demo room with no internet — and it does. |
 | **Hex cartogram instead of a real map** | On a real geographic map, land area dominates what you see — a huge, sparsely populated district visually swamps a small, dense one. Equal-area tiles give every administrative unit the same visual weight, so colour reflects *need*, not geography. |
-| **A lexicon-based engine before an LLM** | Three reasons: a funding decision has to be reproducible the same way every time (an LLM call isn't guaranteed to be); rural intake has to keep working with no internet; and running every request in a country through a frontier model isn't a defensible line item at national scale. The LLM is an upgrade layered on top, not a dependency underneath. |
+| **A lexicon-based engine before an LLM** | Three reasons: a published statistic has to be reproducible the same way every time (an LLM call isn't guaranteed to be); rural intake has to keep working with no internet; and running every request in a country through a frontier model isn't a defensible line item at national scale. The LLM is an upgrade layered on top, not a dependency underneath. |
 
 ## 8. What's real data and what's synthetic
 
 First, a distinction that's easy to lose: **the code is not a simulation.**
 Every piece of logic here — language detection, classification, PII redaction,
-the scoring maths, the budget allocation — is real, production-shaped code
-doing real computation. Point it at real data tomorrow and it produces real
-answers, no rewrite.
+the scoring maths — is real, production-shaped code doing real computation.
+Point it at real data tomorrow and it produces real answers, no rewrite.
 
-What's standing in for reality is the **data**, and one deliberately named
-what-if tool:
+What's standing in for reality is the **data**:
 
 | Thing | Status |
 |---|---|
 | Classification, scoring, ranking, redaction, the API, the dashboard | **Real code.** Runs for real, tested, deterministic. |
 | Administrative names + populations (IN/BR/ZA) | **Real.** |
-| Infrastructure indices, demographics beyond population, investment records | **Synthetic.** Generated by `app/packs/build_packs.py`. |
+| Infrastructure indices, demographics beyond population | **Synthetic.** Generated by `app/packs/build_packs.py`. |
 | The 6,250 seeded citizen requests | **Synthetic.** Generated by `app/seed.py`, then run through the *same* intake pipeline a live request uses. |
-| The budget "simulator" | **Real maths, hypothetical input.** It's a what-if calculator — like a mortgage calculator, not like a video game. You give it an envelope; it computes what that envelope would actually fund against the current ranking. |
 
 **Real:** administrative names (states, districts, provinces, municipalities)
 and approximate population figures for India, Brazil, and South Africa.
 
-**Synthetic, generated for this demo:** every infrastructure index, every
-demographic percentage beyond population, and every investment/budget record.
-They're generated to be internally consistent and realistic in shape — for
-instance, investment is deliberately modelled as following *political
-salience* (urbanisation, literacy) rather than *need*, because that's the
-real-world pattern the blind-spot detector is built to catch — but they are
-demo data, labelled as such everywhere in the UI and the API, and must never
-be quoted as real statistics.
+**Synthetic, generated for this demo:** every infrastructure index and every
+demographic percentage beyond population. They're generated to be internally
+consistent and realistic in shape, but they are demo data and must never be
+quoted as real statistics.
+
+They are labelled as such in the API (`/api/countries/{code}` → `data_notice`),
+but in the UI that notice is rendered **only on the admin dashboard**. Anything
+that puts these figures in front of a wider audience has to carry the notice
+with them.
 
 This matters because it's the difference between "the platform works" and
 "the platform is lying about India." It works. It is not lying, because it
@@ -353,7 +351,8 @@ A prototype should say what it hasn't built, not just what it has:
 
 - **Authentication is in, but it is the simple kind.** Staff sign in with a
   username and password (PBKDF2, server-side sessions, lockout after repeated
-  failures) and roles separate funding from verification — see §5a. What it
+  failures) and roles separate national analytics from verification — see §5a.
+  What it
   does *not* have: single sign-on, 2FA, password-reset flow, or per-country
   scoping of staff accounts. A ministry will want all four.
 - **No duplicate or coordinated-submission detection.** A single actor could
@@ -380,8 +379,7 @@ app/
 │   └── groq_engine.py      Groq-powered engine (optional upgrade)
 ├── analysis/             The analytical core
 │   ├── fusion.py            joins requests to country data
-│   ├── priority.py          the scoring model (see docs/PRIORITIZATION.md)
-│   └── budget.py             budget-envelope simulator
+│   └── priority.py          the scoring model (see docs/PRIORITIZATION.md)
 ├── packs/                One JSON file per country — the "add a nation" seam
 │   ├── build_packs.py      generator (reproducible, documented assumptions)
 │   ├── IN.json / BR.json / ZA.json
@@ -420,5 +418,5 @@ python3 tests/test_app.py     # 41/41 — no test runner required
 
 ---
 
-*Administrative names and populations are real. Every index and investment
-figure in this deployment is synthetic demonstration data. See §8.*
+*Administrative names and populations are real. Every index in this deployment
+is synthetic demonstration data. See §8.*

@@ -30,8 +30,8 @@
           <select id="region"><option value="">All regions</option></select></div>
         <div class="field"><label for="lens">Lens</label>
           <select id="lens">
-            <option value="">All recommendations</option>
-            <option value="blind">Blind spots only</option>
+            <option value="">All needs</option>
+            <option value="unmet">Unmet needs only</option>
             <option value="silent">Silent districts only</option>
           </select></div>
         <button class="btn" id="reset">Reset</button>
@@ -65,7 +65,7 @@
 
     <div class="card">
       <div class="card-h">
-        <h2>Top recommendations</h2>
+        <h2>Greatest unmet need</h2>
         <span class="sub" id="recsub"></span>
       </div>
       <div class="tablewrap" style="max-height:540px;overflow-y:auto">
@@ -83,44 +83,20 @@
   <!-- the selected recommendation, fully derived -->
   <section class="card" id="detailcard">
     <div class="card-h">
-      <h2 id="dtitle">Select a recommendation</h2>
+      <h2 id="dtitle">Select a row</h2>
       <span class="sub" id="dsub"></span>
     </div>
     <div class="card-b" id="detail">
-      <div class="empty">Choose a row above to see exactly how its score was derived,
-        which citizen requests produced it, and what is already funded.</div>
+      <div class="empty">Choose a row above to see exactly how its score was derived
+        and which citizen requests produced it.</div>
     </div>
   </section>
 
-  <!-- policy weights + budget -->
-  <section class="cols half">
-    <div class="card">
-      <div class="card-h"><h2>Policy weights</h2>
-        <span class="sub">Ranking is a policy choice — make it visible</span></div>
-      <div class="card-b stack" id="weights"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-h"><h2>Budget simulator</h2>
-        <span class="sub" id="budgetsub"></span></div>
-      <div class="card-b stack">
-        <div class="field">
-          <label for="envelope">Envelope: <b id="envval" class="mono"></b></label>
-          <input type="range" id="envelope" min="1000" max="300000" step="1000" value="50000">
-        </div>
-        <div class="tablewrap"><table id="budgettable">
-          <thead><tr><th>Strategy</th><th class="num">Districts</th>
-            <th class="num">People reached</th><th class="num">Cost / person</th>
-            <th class="num">Blind spots</th></tr></thead>
-          <tbody id="budgetbody"></tbody>
-        </table></div>
-        <p class="xs muted" style="margin:0">
-          Worst-first and value-for-money genuinely disagree. Both are shown because the
-          trade-off between reaching the most acute need and reaching the most people is a
-          political judgement, not something the model should quietly settle.
-        </p>
-      </div>
-    </div>
+  <!-- ranking weights -->
+  <section class="card">
+    <div class="card-h"><h2>Ranking weights</h2>
+      <span class="sub">Ranking is a policy choice — make it visible</span></div>
+    <div class="card-b stack" id="weights"></div>
   </section>
 
   <!-- intake composition -->

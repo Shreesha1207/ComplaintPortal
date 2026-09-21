@@ -3,29 +3,28 @@ Country Pack builder.
 
 A Country Pack is the single pluggable unit that makes this platform portable
 across BRICS nations. It declares a country's administrative hierarchy, languages,
-map layout, demographic indicators, infrastructure indices and public
-investment pipeline. Adding a country == adding one JSON file. No code change.
+map layout, demographic indicators and infrastructure indices. Adding a country
+== adding one JSON file. No code change.
 
 DATA PROVENANCE  (read this before quoting any number)
 ------------------------------------------------------
 * Region/district NAMES and the administrative hierarchy are real.
 * POPULATION figures are approximate, rounded public-domain census-era values.
 * Every INDEX (literacy, urbanisation, poverty share, smartphone penetration,
-  per-sector infrastructure index) and every INVESTMENT record is SYNTHETIC
-  demo data, generated deterministically by this script. They are calibrated
-  to plausible ranges so the prototype behaves realistically, but they are
-  NOT official statistics and must not be cited as such.
+  per-sector infrastructure index) is SYNTHETIC demo data, generated
+  deterministically by this script. They are calibrated to plausible ranges so
+  the prototype behaves realistically, but they are NOT official statistics and
+  must not be cited as such.
 * In production these fields are populated by the source adapters described in
   docs/ARCHITECTURE.md (national census APIs, NITI Aayog NDAP / data.gov.in,
-  IBGE, Stats SA, budget portals). The schema is the contract; this generator
-  is a stand-in for the feed.
+  IBGE, Stats SA). The schema is the contract; this generator is a stand-in
+  for the feed.
 
-MODELLING ASSUMPTION WORTH NAMING
----------------------------------
-Investment allocation here is generated as a function of urbanisation and
-literacy -- i.e. of political salience -- NOT of need. That is a deliberate,
-documented model of a well-observed phenomenon: public capital tends to follow
-organised voice. It is what produces the "blind spots" this platform is built to find.
+NO MONEY LIVES HERE
+-------------------
+A pack carries no budget, no currency and no investment pipeline. The platform
+measures where need is greatest; what a government then spends, and where, is
+deliberately outside it.
 """
 from __future__ import annotations
 
@@ -41,16 +40,16 @@ OUT_DIR = Path(__file__).parent
 # and reuse of classifier lexicons is possible -- a DPG requirement.
 # --------------------------------------------------------------------------
 SECTORS = [
-    {"code": "water",       "name": "Water & Sanitation",     "icon": "droplet",  "benchmark": 80, "cost_weight": 0.84},
-    {"code": "roads",       "name": "Roads & Connectivity",   "icon": "road",     "benchmark": 75, "cost_weight": 1.30},
-    {"code": "health",      "name": "Healthcare",             "icon": "health",   "benchmark": 80, "cost_weight": 1.16},
-    {"code": "education",   "name": "Education",              "icon": "school",   "benchmark": 82, "cost_weight": 0.72},
-    {"code": "power",       "name": "Electricity & Energy",   "icon": "bolt",     "benchmark": 85, "cost_weight": 0.96},
-    {"code": "transport",   "name": "Public Transport",       "icon": "bus",      "benchmark": 70, "cost_weight": 1.44},
-    {"code": "housing",     "name": "Housing & Urban Dev",    "icon": "home",     "benchmark": 72, "cost_weight": 1.76},
-    {"code": "digital",     "name": "Digital & Telecom",      "icon": "signal",   "benchmark": 78, "cost_weight": 0.48},
-    {"code": "agriculture", "name": "Agriculture & Irrigation","icon": "sprout",  "benchmark": 70, "cost_weight": 0.78},
-    {"code": "jobs",        "name": "Livelihoods & Jobs",     "icon": "briefcase","benchmark": 68, "cost_weight": 0.62},
+    {"code": "water",       "name": "Water & Sanitation",     "icon": "droplet",  "benchmark": 80},
+    {"code": "roads",       "name": "Roads & Connectivity",   "icon": "road",     "benchmark": 75},
+    {"code": "health",      "name": "Healthcare",             "icon": "health",   "benchmark": 80},
+    {"code": "education",   "name": "Education",              "icon": "school",   "benchmark": 82},
+    {"code": "power",       "name": "Electricity & Energy",   "icon": "bolt",     "benchmark": 85},
+    {"code": "transport",   "name": "Public Transport",       "icon": "bus",      "benchmark": 70},
+    {"code": "housing",     "name": "Housing & Urban Dev",    "icon": "home",     "benchmark": 72},
+    {"code": "digital",     "name": "Digital & Telecom",      "icon": "signal",   "benchmark": 78},
+    {"code": "agriculture", "name": "Agriculture & Irrigation","icon": "sprout",  "benchmark": 70},
+    {"code": "jobs",        "name": "Livelihoods & Jobs",     "icon": "briefcase","benchmark": 68},
 ]
 
 # --------------------------------------------------------------------------
@@ -266,20 +265,26 @@ def _rand(*key) -> float:
     return int(h[:12], 16) / float(16 ** 12)
 
 
+def _digest(*key) -> int:
+    """Stable integer digest of a key, identical across runs and machines."""
+    h = hashlib.sha256("|".join(str(k) for k in key).encode()).hexdigest()
+    return int(h[:12], 16)
+
+
 def _clamp(v, lo, hi):
     return max(lo, min(hi, v))
 
 
-def build_country(code, name, currency, admin_levels, regions, langs, map_dims, notes,
+def build_country(code, name, admin_levels, regions, langs, map_dims, notes,
                   link_language="en"):
-    """Derive indices + investment pipeline from the structural facts above."""
+    """Derive the demographic and infrastructure indices from the structural
+    facts above."""
     # Country means, used to z-score each region against its own country.
     lit_m = sum(r[5] for r in regions) / len(regions)
     urb_m = sum(r[6] for r in regions) / len(regions)
     pov_m = sum(r[7] for r in regions) / len(regions)
 
-    out_regions, investments = [], []
-    inv_seq = 0
+    out_regions = []
 
     for (rcode, rname, hx, hy, pop, lit, urb, pov, phone, districts) in regions:
         # A region's "development headroom" -- higher = better served already.
@@ -303,7 +308,11 @@ def build_country(code, name, currency, admin_levels, regions, langs, map_dims, 
                 d_infra[s["code"]] = round(_clamp(r_infra[s["code"]] + shift + noise, 4.0, 97.0), 1)
 
             d_out.append({
-                "code": f"{rcode}-{abs(hash(dname)) % 9973:04d}",
+                # sha256, not the built-in hash(): hash() is salted per process,
+                # so the same district came out with a different code on every
+                # run and regenerating a pack silently orphaned every stored
+                # request that referenced the old one.
+                "code": f"{rcode}-{_digest(dname) % 9973:04d}",
                 "name": dname,
                 "population": dpop,
                 "deprivation": depriv,
@@ -324,33 +333,8 @@ def build_country(code, name, currency, admin_levels, regions, langs, map_dims, 
             "districts": d_out,
         })
 
-        # ---- Investment pipeline -------------------------------------------
-        # Modelled as a function of political salience (urbanisation, literacy),
-        # NOT of need. See module docstring.
-        salience = _clamp(0.30 + 0.5 * (urb / 100.0) + 0.3 * (lit / 100.0), 0.0, 1.0)
-        for s in SECTORS:
-            for d in d_out:
-                p = salience * (1.0 - 0.70 * d["deprivation"])
-                if _rand(code, "inv", rcode, d["name"], s["code"]) < p * 0.42:
-                    inv_seq += 1
-                    # Project SIZE also tracks salience, not need: better-off
-                    # districts attract both more projects and larger ones.
-                    size_factor = 0.5 + 1.0 * (1.0 - d["deprivation"])
-                    per_capita = (200 + _rand(code, "amt", rcode, d["name"], s["code"]) * 800) * size_factor
-                    budget = round(d["population"] * per_capita / currency["unit_value"], 2)
-                    roll = _rand(code, "st", rcode, d["name"], s["code"])
-                    status = "ongoing" if roll < 0.42 else ("planned" if roll < 0.88 else "completed")
-                    investments.append({
-                        "id": f"{code}-INV-{inv_seq:05d}",
-                        "region": rcode, "district": d["code"], "sector": s["code"],
-                        "title": f"{s['name']} programme — {d['name']}",
-                        "budget": budget, "status": status,
-                        "start_year": 2023 + int(_rand(code, "yr", rcode, d["name"], s["code"]) * 4),
-                        "source": "synthetic-demo",
-                    })
-
     return {
-        "code": code, "name": name, "currency": currency,
+        "code": code, "name": name,
         "admin_levels": admin_levels,
         # English is the cross-country pivot, so a Tamil and a Zulu request can
         # be compared at all. `link_language` is what the country's own
@@ -363,7 +347,6 @@ def build_country(code, name, currency, admin_levels, regions, langs, map_dims, 
         "map": {"type": "hex-cartogram", "cols": map_dims[0], "rows": map_dims[1]},
         "data_notice": notes,
         "regions": out_regions,
-        "investments": investments,
     }
 
 
@@ -371,29 +354,23 @@ def main():
     packs = [
         build_country(
             "IN", "India",
-            {"code": "INR", "symbol": "₹", "unit": "crore", "unit_value": 10_000_000,
-             "capex_per_capita": 5000},
             ["Country", "State / UT", "District"], IN_REGIONS, IN_LANGS, (12, 11),
             "Region and district names and approximate populations are real. All indices "
-            "and investment records are synthetic demo data generated by build_packs.py.",
+            "are synthetic demo data generated by build_packs.py.",
             link_language="hi",
         ),
         build_country(
             "BR", "Brazil",
-            {"code": "BRL", "symbol": "R$", "unit": "million", "unit_value": 1_000_000,
-             "capex_per_capita": 900},
             ["Country", "State", "Municipality"], BR_REGIONS, BR_LANGS, (11, 9),
             "State and municipality names and approximate populations are real. All indices "
-            "and investment records are synthetic demo data generated by build_packs.py.",
+            "are synthetic demo data generated by build_packs.py.",
             link_language="pt",
         ),
         build_country(
             "ZA", "South Africa",
-            {"code": "ZAR", "symbol": "R", "unit": "million", "unit_value": 1_000_000,
-             "capex_per_capita": 2500},
             ["Country", "Province", "District Municipality"], ZA_REGIONS, ZA_LANGS, (7, 5),
             "Province and district-municipality names and approximate populations are real. "
-            "All indices and investment records are synthetic demo data generated by build_packs.py.",
+            "All indices are synthetic demo data generated by build_packs.py.",
             link_language="en",
         ),
     ]
@@ -401,8 +378,8 @@ def main():
         path = OUT_DIR / f"{p['code']}.json"
         path.write_text(json.dumps(p, ensure_ascii=False, indent=1), encoding="utf-8")
         nd = sum(len(r["districts"]) for r in p["regions"])
-        print(f"{p['code']}: {len(p['regions'])} regions, {nd} districts, "
-              f"{len(p['investments'])} investments -> {path.name}")
+        print(f"{p['code']}: {len(p['regions'])} regions, {nd} districts "
+              f"-> {path.name}")
 
 
 if __name__ == "__main__":

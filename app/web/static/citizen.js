@@ -399,8 +399,9 @@ function showResult(r) {
         <p class="xs sec" style="margin:0 0 8px"><b>Routed to:</b>
           ${r.district_name}, ${r.region_name}</p>
         <p class="xs muted" style="margin:0">${escapeHtml(r.ai_rationale)}</p>
-        ${held ? '<p class="xs sec" style="margin:9px 0 0">This request will not influence a '
-               + 'funding recommendation until a person confirms it. That is by design.</p>' : ''}
+        ${held ? '<p class="xs sec" style="margin:9px 0 0">This request will not count '
+               + 'toward the published statistics until a person confirms it. That is by '
+               + 'design.</p>' : ''}
       </div>
     </div></div>`;
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

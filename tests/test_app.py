@@ -24,7 +24,6 @@ os.environ.setdefault("APP_DB", os.path.join(tempfile.gettempdir(), "app_test.db
 
 from app.ai.heuristic import HeuristicEngine
 from app.ai.groq_engine import GroqEngine, get_engine
-from app.analysis.budget import allocate, compare_strategies
 from app.analysis.fusion import build_matrix, load_pack
 from app.analysis.priority import (DEFAULT_WEIGHTS, rollup_districts,
                                    rollup_regions, score_cells)
@@ -343,7 +342,12 @@ def test_every_country_pack_loads_and_is_well_formed():
     for code in ("IN", "BR", "ZA"):
         p = load_pack(code)
         assert p.regions and p.sectors and p.languages
-        assert "capex_per_capita" in p.currency
+        # No money lives in a pack. A reintroduced currency block or investment
+        # pipeline is what this is here to catch.
+        assert not hasattr(p, "currency")
+        assert "investments" not in p.raw and "currency" not in p.raw
+        for s_ in p.sectors.values():
+            assert "cost_weight" not in s_
         for r in p.regions:
             assert len(r["hex"]) == 2
             for d in r["districts"]:
@@ -359,33 +363,62 @@ def test_matrix_covers_every_district_sector_pair():
 # ------------------------------------------------- the load-bearing claims
 def test_contributions_sum_exactly_to_the_priority_index():
     """Explainability is only real if the decomposition is exact."""
-    scored = score_cells(build_matrix(PACK, []), PACK)
+    scored = score_cells(build_matrix(PACK, []))
     for r in scored[:250]:
         assert abs(sum(r["contributions"].values()) - r["priority_index"]) < 0.05, r["district_name"]
 
 
-def test_investment_coverage_discounts_priority_but_never_to_zero_by_default():
-    cells = build_matrix(PACK, [])
-    base = {(r["district_code"], r["sector"]): r for r in score_cells(cells, PACK, None, 0.0)}
-    disc = {(r["district_code"], r["sector"]): r for r in score_cells(cells, PACK, None, 0.6)}
-    covered = [k for k, v in base.items() if disc[k]["coverage"] > 0.9]
-    assert covered, "fixture should contain fully covered cells"
-    for k in covered[:40]:
-        assert disc[k]["priority_index"] < base[k]["priority_index"]
-        # λ=0.6, so 40% of need survives full funding: a budget line is not
-        # delivered infrastructure.
-        assert disc[k]["priority_index"] > 0
+MONEY_KEYS = {"committed", "required", "unfunded", "coverage", "well_covered",
+              "counterfactual", "project_count", "currency", "budget", "envelope",
+              "allocated", "blind_spot"}
+
+
+def test_no_scored_cell_carries_a_money_field():
+    """The platform measures need and does not allocate money. An exact key
+    check, not a spot check: a reintroduced funding figure must fail here rather
+    than quietly reappear in an API response."""
+    scored = score_cells(build_matrix(PACK, []))
+    for r in scored[:200]:
+        leaked = MONEY_KEYS & set(r)
+        assert not leaked, f"{r['district_name']}/{r['sector']} carries {sorted(leaked)}"
+
+
+def test_no_money_survives_anywhere_in_the_scored_payload():
+    """Serialise a cell and grep it. Catches money smuggled inside `factors`,
+    `contributions` or the rationale string, which a top-level key check misses."""
+    scored = score_cells(build_matrix(PACK, []))
+    blob = json.dumps(scored[:200]).lower()
+    for word in ("committed", "unfunded", "coverage", "crore", "capex", "envelope",
+                 "₹", "r$", "budget"):
+        assert word not in blob, f"the scored payload still mentions {word!r}"
+
+
+def _synthetic_corpus(n: int = 4200) -> list[dict]:
+    """The demo corpus, classified offline, built in-process.
+
+    This used to read whatever happened to be in the developer's database and
+    `return` silently when it held fewer than 200 rows -- so on a fresh checkout
+    the project's single load-bearing claim was asserting nothing at all. It
+    takes about a second to build the corpus honestly.
+    """
+    from app.seed import generate
+    rows = []
+    for sub in generate("IN", n):
+        a = ENGINE.analyse(sub["text"], country="IN")
+        rows.append({"district_code": sub["district_code"], "sector": a.sector,
+                     "urgency_score": a.urgency_score, "urgency": a.urgency,
+                     "ai_confidence": a.confidence, "language": a.language,
+                     "channel": sub["channel"],
+                     "status": "review" if a.needs_review else "new"})
+    return rows
 
 
 def test_equity_correction_inverts_participation_bias():
     """The core claim. Raw demand favours districts that can complain; after
     correction that advantage must be removed, not merely reduced."""
-    from app import db
-    db.init_db()
-    rows = db.list_requests(country="IN", limit=10 ** 6)
-    if len(rows) < 200:
-        return  # seeded DB not present; covered by the API-level check instead
-    scored = score_cells(build_matrix(PACK, rows), PACK)
+    rows = _synthetic_corpus()
+    assert len(rows) >= 200, "the corpus generator produced too little to test on"
+    scored = score_cells(build_matrix(PACK, rows))
     pool = [r for r in scored if r["request_count"] >= 3]
     pool.sort(key=lambda r: r["participation_index"])
     n = max(1, len(pool) // 4)
@@ -398,7 +431,7 @@ def test_equity_correction_inverts_participation_bias():
 
 def test_silent_districts_still_surface_without_any_citizen_signal():
     """A district that sends nothing must still be scoreable and flagged."""
-    scored = score_cells(build_matrix(PACK, []), PACK)   # zero requests
+    scored = score_cells(build_matrix(PACK, []))   # zero requests
     assert all(r["request_count"] == 0 for r in scored)
     assert max(r["priority_index"] for r in scored) > 30, "admin data alone must rank"
     assert any(r["silent_district"] for r in scored), "silence must be flagged"
@@ -407,8 +440,8 @@ def test_silent_districts_still_surface_without_any_citizen_signal():
 def test_weights_actually_move_the_ranking():
     cells = build_matrix(PACK, [])
     heavy = lambda k: {kk: (0.9 if kk == k else 0.025) for kk in DEFAULT_WEIGHTS}
-    gap_top = score_cells(cells, PACK, heavy("gap"))[0]
-    ppl_top = score_cells(cells, PACK, heavy("people"))[0]
+    gap_top = score_cells(cells, heavy("gap"))[0]
+    ppl_top = score_cells(cells, heavy("people"))[0]
     assert gap_top["district_code"] != ppl_top["district_code"]
     # people-heavy must pick a far larger district than gap-heavy
     assert ppl_top["population"] > gap_top["population"]
@@ -417,12 +450,12 @@ def test_weights_actually_move_the_ranking():
 def test_weights_are_renormalised():
     """Arbitrary weights must not inflate scores past 100."""
     cells = build_matrix(PACK, [])
-    s = score_cells(cells, PACK, {k: 5.0 for k in DEFAULT_WEIGHTS})
+    s = score_cells(cells, {k: 5.0 for k in DEFAULT_WEIGHTS})
     assert all(0 <= r["priority_index"] <= 100 for r in s)
 
 
 def test_rollups_are_consistent():
-    scored = score_cells(build_matrix(PACK, []), PACK)
+    scored = score_cells(build_matrix(PACK, []))
     d = rollup_districts(scored)
     r = rollup_regions(d)
     assert len(d) == len(PACK.district_by_code)
@@ -431,26 +464,21 @@ def test_rollups_are_consistent():
                for x, y in zip(d, d[1:])), "districts must be sorted"
 
 
-# ---------------------------------------------------------------- budget
-def test_budget_never_overspends_and_reaches_more_people_on_value_strategy():
-    scored = score_cells(build_matrix(PACK, []), PACK)
-    res = compare_strategies(scored, 50_000)
-    for k, v in res.items():
-        assert v["allocated"] <= v["envelope"] + 0.01, k
-    assert res["value"]["population_reached"] > res["priority"]["population_reached"], \
-        "value-for-money must reach more people — that is the whole trade-off"
+# ----------------------------------------------------------------- flags
+def test_unmet_need_flag_still_fires_without_investment_data():
+    """`blind_spot` used to mean "loud demand, severe deficit, and no money
+    committed". With investment data out of the platform the money clause is
+    gone, so the flag is `unmet_need` and says only what it can still see.
 
-
-def test_budget_counts_each_district_population_once():
-    scored = score_cells(build_matrix(PACK, []), PACK)
-    r = allocate(scored, 200_000, "priority")
-    districts = {f["district_code"] for f in r["funded"]}
-    assert r["districts_covered"] == len(districts)
-    # A district funded in several sectors must contribute its population once,
-    # or reach is silently multiplied by the number of sectors funded.
-    expected = sum(PACK.district_by_code[c][1]["population"] for c in districts)
-    assert r["population_reached"] == expected
-    assert len(r["funded"]) > len(districts), "fixture should fund multi-sector districts"
+    The flag must not have been quietly emptied by the removal: on the demo
+    corpus the old rule fired on 36 of 1,460 cells and this one fires on 38 --
+    the two extra are cells the old rule suppressed because money was committed
+    there."""
+    scored = score_cells(build_matrix(PACK, _synthetic_corpus()))
+    flagged = [r for r in scored if r["unmet_need"]]
+    assert 25 <= len(flagged) <= 60, f"{len(flagged)} flagged — the rule has drifted"
+    for r in flagged:
+        assert r["factors"]["demand"] >= 0.60 and r["factors"]["gap"] >= 0.50
 
 
 # ----------------------------------------------------------- app + guards
@@ -486,16 +514,28 @@ def _api_routes():
             yield path, sorted(getattr(r, "methods", []) or []), _guards(r)
 
 
-def test_funding_routes_require_admin():
-    """The boundary is the data, not the screen: anything carrying committed or
-    unfunded figures is admin-only, so a new endpoint cannot leak by omission."""
-    checked = 0
+def test_analytics_routes_require_admin():
+    """The boundary is the data, not the screen. It is no longer a boundary
+    around money -- there is none -- but around the national aggregate and, in
+    /api/analytics/cell, the stored request rows including `text_original`, the
+    citizen's words before redaction.
+
+    An exact set of (path, method) pairs, not a floor: a floor passes while a
+    new endpoint goes unguarded."""
+    expected = {("/api/analytics/summary", "GET"),
+                ("/api/analytics/priorities", "GET"),
+                ("/api/analytics/districts", "GET"),
+                ("/api/analytics/regions", "GET"),
+                ("/api/analytics/cell/{district_code}/{sector}", "GET"),
+                ("/api/export/priorities.csv", "GET")}
+    seen = set()
     for path, methods, guards in _api_routes():
         if path.startswith("/api/analytics") or path.startswith("/api/export"):
-            checked += 1
-            assert "require_admin" in guards, \
-                f"{' '.join(methods)} {path} returns funding data without require_admin"
-    assert checked >= 8, f"expected the funding surface to be larger than {checked} routes"
+            for m in methods:
+                seen.add((path, m))
+                assert "require_admin" in guards, \
+                    f"{m} {path} is on the analytics surface without require_admin"
+    assert seen == expected, f"analytics surface changed: {seen ^ expected}"
 
 
 def test_review_routes_require_a_signed_in_staff_member():

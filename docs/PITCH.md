@@ -12,8 +12,8 @@ offline. Say the word "complaint" once, to reject it.
 > **where to build**.
 >
 > The difference we built for is this: a complaint portal ranks by volume.
-> Volume measures **who is able to complain**. If you fund the loudest districts,
-> you fund the ones that already have smartphones, literacy and roads — and you
+> Volume measures **who is able to complain**. If you rank the loudest districts
+> first, you serve the ones that already have smartphones, literacy and roads — and you
 > call it evidence-based. That's not a neutral system. It launders inequality."
 
 ## 0:45 — Intake, in the citizen's language (75s)
@@ -60,15 +60,14 @@ Point at the stacked bar.
 > 22 points, infrastructure deficit 18. Two citizen requests in Hindi, one
 > critical — they're listed below, in the citizen's own words.
 >
-> And the line that makes this decision intelligence: **no public investment is
-> committed here.** Where money *is* committed, we discount priority — but only by
-> 60%, never 100%, because a budget line is not delivered infrastructure. If λ
-> were 1, announcing a project would remove a district from the queue. That's the
-> failure we're built to catch."
+> Nothing is added to that number and nothing is subtracted from it. This
+> platform measures need. It holds no budget and makes no funding decision —
+> that is deliberately somebody else's job, and keeping it out is what lets
+> anyone audit the ranking without arguing about money."
 
 Then the two flags:
 
-> "**36 blind spots** — loud demand, severe deficit, no money.
+> "**38 unmet needs** — loud demand against a severe deficit.
 > **47 silent districts** — severe deficit, and we have heard *nothing*. Those
 > aren't low priority. Those are an outreach gap. The system says 'go find out',
 > not 'nobody complained'."
@@ -88,19 +87,16 @@ Then the two flags:
 > Turn citizen data off entirely and the engine still surfaces Araria, Sitamarhi
 > and Sukma — three of India's most deprived districts. That's a test in the suite."
 
-## 5:15 — Weights and budget (45s)
+## 5:15 — Weights (45s)
 
 Drag a weight slider; the ranking recomputes live.
 
 > "Weights are API parameters. They ship with every response. A ranking that hides
-> its weights is claiming its politics are arithmetic."
-
-Drag the budget envelope.
-
-> "₹50,000 crore. Worst-first reaches 93 million people at ₹5,390 each.
-> Value-for-money reaches 222 million at ₹2,257 — and skips the hardest cases.
-> We show both. That trade-off is a political judgement and the model shouldn't
-> quietly settle it."
+> its weights is claiming its politics are arithmetic.
+>
+> Push demand to 90% and the loud districts float up. Push vulnerability to 90%
+> and they sink. Neither ordering is objective, and the platform says so instead
+> of picking one and calling it optimal."
 
 ## 6:00 — Close (20s)
 
@@ -115,9 +111,9 @@ Drag the budget envelope.
 ## Questions you will get
 
 **"Is the data real?"**
-Administrative names and populations, yes. Every index and investment record is
+Administrative names and populations, yes. Every index is
 synthetic and labelled as such in the UI and the API. The schema is the contract —
-production adapters for census, NDAP, IBGE, Stats SA and budget portals are
+production adapters for census, NDAP, IBGE and Stats SA are
 specified in `ARCHITECTURE.md`. We chose to be obvious about it rather than let
 you assume.
 
@@ -129,7 +125,7 @@ signal. Note the equity correction cuts both ways: brigading from a
 high-participation district is *divided down*.
 
 **"Why not just use an LLM for everything?"**
-Determinism — a funding decision must reproduce at appeal. Availability — rural
+Determinism — a published statistic must reproduce at appeal. Availability — rural
 intake on a bad uplink. Cost — tens of millions of requests a year through a
 frontier model is not a defensible budget line. So the lexicon is the floor and
 Groq is the enhancement; and when both run and disagree, that disagreement
@@ -137,14 +133,14 @@ escalates to a human.
 
 **"How is this different from a grievance redressal system?"**
 A grievance system closes tickets. This one never closes a ticket — it aggregates
-into *where should the next project go*, fuses with infrastructure and budget data,
-and tells you what is **not** being funded.
+into *where is the need greatest*, fuses with infrastructure and demographic
+data, and tells you where nobody has even heard a complaint from.
 
 **"What's genuinely novel?"**
 Three things: the participation correction (measured, inverting), treating silence
-as a flagged signal rather than an absence, and the investment-coverage discount
-that turns a demand ranking into an unmet-need ranking.
+as a flagged signal rather than an absence, and writing out a decomposition that
+sums exactly to the score so the ranking can be argued with rather than believed.
 
 **"Could another country actually use it?"**
 Brazil and South Africa are in the repo now, with different administrative
-vocabularies and currencies, and no branches in the code.
+vocabularies and languages, and no branches in the code.

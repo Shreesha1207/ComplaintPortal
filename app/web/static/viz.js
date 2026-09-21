@@ -22,13 +22,6 @@ export const fmt = {
     if (a >= 1e3) return (v / 1e3).toFixed(a >= 1e4 ? 0 : 1) + 'k';
     return String(Math.round(v ?? 0));
   },
-  money: (v, cur) => {
-    const a = Math.abs(v ?? 0);
-    const n = a >= 1000 ? Math.round(v).toLocaleString()
-            : a >= 1 ? (v).toLocaleString(undefined, { maximumFractionDigits: 1 })
-            : (v ?? 0).toFixed(2);
-    return `${cur?.symbol ?? ''}${n} ${cur?.unit ?? ''}`.trim();
-  },
   pct: (v, d = 0) => `${(v ?? 0).toFixed(d)}%`,
 };
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Data fusion: join citizen demand to demographic, infrastructure and investment
-data, producing one row per (district, sector) -- the unit of analysis the
-prioritisation engine scores and the unit a government actually funds.
+Data fusion: join citizen demand to demographic and infrastructure data,
+producing one row per (district, sector) -- the unit of analysis the
+prioritisation engine scores.
 """
 from __future__ import annotations
 
@@ -43,11 +43,6 @@ class Cell:
     poverty_share: float = 0.0
     smartphone_pen: float = 0.0
 
-    # investment
-    committed: float = 0.0            # currency units (crore / million)
-    project_count: int = 0
-    cost_weight: float = 1.0
-
 
 class CountryPack:
     """Loads and indexes one country pack."""
@@ -56,7 +51,6 @@ class CountryPack:
         self.raw = json.loads(path.read_text(encoding="utf-8"))
         self.code = self.raw["code"]
         self.name = self.raw["name"]
-        self.currency = self.raw["currency"]
         self.sectors = {s["code"]: s for s in self.raw["sectors"]}
         self.languages = self.raw["languages"]
         self.admin_levels = self.raw["admin_levels"]
@@ -69,19 +63,6 @@ class CountryPack:
             self.region_by_code[r["code"]] = r
             for d in r["districts"]:
                 self.district_by_code[d["code"]] = (r, d)
-
-        # Only planned and ongoing money reduces an unmet gap. Completed
-        # projects are already reflected in the infrastructure index -- counting
-        # them again would discount the same spend twice.
-        self.investments = self.raw["investments"]
-        self.committed_by_key: dict[tuple[str, str], float] = {}
-        self.projects_by_key: dict[tuple[str, str], list] = {}
-        for inv in self.investments:
-            if inv["status"] == "completed":
-                continue
-            key = (inv["district"], inv["sector"])
-            self.committed_by_key[key] = self.committed_by_key.get(key, 0.0) + inv["budget"]
-            self.projects_by_key.setdefault(key, []).append(inv)
 
     def districts(self):
         for r in self.regions:
@@ -127,13 +108,10 @@ def build_matrix(pack: CountryPack, requests: list[dict]) -> list[Cell]:
                 population=district["population"],
                 infra_index=district["infra"][scode],
                 benchmark=sector["benchmark"],
-                cost_weight=sector.get("cost_weight", 1.0),
                 literacy=district["demographics"]["literacy"],
                 urbanization=district["demographics"]["urbanization"],
                 poverty_share=district["demographics"]["poverty_share"],
                 smartphone_pen=district["demographics"]["smartphone_pen"],
-                committed=pack.committed_by_key.get((district["code"], scode), 0.0),
-                project_count=len(pack.projects_by_key.get((district["code"], scode), [])),
             )
 
     for r in requests:
