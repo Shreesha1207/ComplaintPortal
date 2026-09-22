@@ -34,8 +34,8 @@
 
 <main class="loginwrap">
   <div class="card"><div class="card-b">
-    <h1>Staff sign-in</h1>
-    <p class="sub">For government officials and verification staff. Funding data
+    <h1 id="head">Staff sign-in</h1>
+    <p class="sub" id="sub">For government officials and verification staff. Funding data
       and the policy dashboard are restricted to administrators.</p>
 
     <div id="err" class="err" hidden role="alert"></div>
@@ -50,6 +50,11 @@
         <label for="password">Password</label>
         <input type="password" id="password" name="password"
                autocomplete="current-password" required>
+      </div>
+      <div class="field-lg" id="confirmwrap" hidden>
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" name="confirm"
+               autocomplete="new-password">
       </div>
       <button class="btn primary lg" id="submit" type="submit"
               style="width:100%">Sign in</button>
@@ -72,30 +77,80 @@
   const next = params.get('next') || '';
   const err = document.getElementById('err');
   const btn = document.getElementById('submit');
+  const $ = (id) => document.getElementById(id);
 
   const showError = (msg) => { err.textContent = msg; err.hidden = false; };
+
+  // ?next= decides where a signed-in staff member lands, so it is attacker
+  // input: a link to our own login page can carry someone else's destination.
+  // Testing for a leading "/" is not enough. A browser normalises backslashes
+  // to forward slashes while resolving a URL, so "/\\evil.example" is read as
+  // "//evil.example" -- a protocol-relative URL to another origin that passes
+  // any check looking only at the first character. Normalise first, then let
+  // the URL parser settle the question of origin rather than guessing at it
+  // with string tests.
+  function safeNext(raw) {
+    if (!raw) return '';
+    const candidate = raw.replace(/\\/g, '/').trim();
+    if (!candidate.startsWith('/') || candidate.startsWith('//')) return '';
+    try {
+      const u = new URL(candidate, location.origin);
+      return u.origin === location.origin ? u.pathname + u.search + u.hash : '';
+    } catch {
+      return '';                       // unparseable is not somewhere we go
+    }
+  }
+
+  // First run: with no staff account in the database, this page asks you to
+  // create the administrator instead of asking you to sign in to nothing.
+  // The server decides -- the page never assumes it from the absence of a
+  // cookie, and the endpoint refuses once an account exists either way.
+  let setup = false;
+  try {
+    const me = await (await fetch('/api/auth/me',
+                                  { headers: { Accept: 'application/json' } })).json();
+    setup = !!me.setup_required;
+  } catch { /* leave it as a sign-in form; the endpoint is the real check */ }
+
+  if (setup) {
+    document.title = 'Create the administrator';
+    $('head').textContent = 'Create the administrator';
+    $('sub').textContent = 'No staff account exists yet. Choose the username and '
+      + 'password for the first administrator. Nothing is stored in plain text, '
+      + 'and you will be signed in straight away.';
+    $('username').setAttribute('autocomplete', 'username');
+    $('password').setAttribute('autocomplete', 'new-password');
+    $('confirmwrap').hidden = false;
+    $('confirm').required = true;
+    btn.textContent = 'Create administrator';
+  }
 
   document.getElementById('form').addEventListener('submit', async (e) => {
     e.preventDefault();
     err.hidden = true;
+    if (setup && $('password').value !== $('confirm').value) {
+      showError('The two passwords do not match.');
+      return;
+    }
     btn.disabled = true;
-    btn.textContent = 'Signing in…';
+    btn.textContent = setup ? 'Creating…' : 'Signing in…';
     try {
-      const r = await apiPost('/api/auth/login', {
+      const r = await apiPost(setup ? '/api/auth/setup' : '/api/auth/login', {
         username: document.getElementById('username').value,
         password: document.getElementById('password').value,
       });
       // Only an administrator can open the dashboard; send a reviewer somewhere
       // they can actually work rather than bouncing them off a 403.
       const fallback = r.user.role === 'admin' ? '/dashboard' : '/review';
-      const target = next.startsWith('/') && !next.startsWith('//') ? next : fallback;
+      const target = safeNext(next) || fallback;
       location.href = (r.user.role !== 'admin' && target === '/dashboard')
         ? '/review' : target;
     } catch (ex) {
       showError(ex.message);
       btn.disabled = false;
-      btn.textContent = 'Sign in';
+      btn.textContent = setup ? 'Create administrator' : 'Sign in';
       document.getElementById('password').value = '';
+      if (setup) $('confirm').value = '';
     }
   });
 </script>

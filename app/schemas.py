@@ -62,6 +62,16 @@ class RequestOut(BaseModel):
     reviewer_note: Optional[str] = None
 
 
+class LoginIn(BaseModel):
+    """Staff sign-in credentials.
+
+    Citizens never send this: intake is anonymous by design, so the only
+    accounts on the platform are the two staff roles.
+    """
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=200)
+
+
 class ReviewIn(BaseModel):
     """A human correcting or confirming the AI. Every field is optional except
     the decision, so a reviewer can accept a classification without restating it."""

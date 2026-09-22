@@ -35,6 +35,43 @@
   .ex{font:500 12.5px var(--sans);padding:5px 10px;border-radius:999px;cursor:pointer;
     border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text-secondary)}
   .ex:hover{border-color:var(--accent);color:var(--text-primary)}
+
+  /* Acknowledgement screen. Shown over everything after a citizen submits, so
+     the only thing on screen is confirmation that their complaint was received.
+     A classification card, a queue position or an AI confidence score is not
+     what someone needs at that moment; they need to know it landed. */
+  .ack{position:fixed;inset:0;z-index:100;background:var(--surface-1);
+    display:none;place-items:center;padding:24px;text-align:center}
+  .ack[data-open="true"]{display:grid}
+  .ack-in{display:flex;flex-direction:column;align-items:center;gap:18px;max-width:420px}
+  .ack-mark{width:112px;height:112px;border-radius:50%;background:var(--status-good);
+    display:grid;place-items:center;box-shadow:0 0 0 0 rgba(12,163,12,.35);
+    animation:ackpop .42s cubic-bezier(.2,.9,.3,1.3) both}
+  .ack-mark svg{width:64px;height:64px}
+  /* The dash length must exceed the path's own length (~81 units) or the tail
+     of the tick stays clipped once the stroke is fully drawn. */
+  .ack-mark path{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;
+    stroke-linejoin:round;stroke-dasharray:90;stroke-dashoffset:90;
+    animation:ackdraw .34s .28s ease-out forwards}
+  @keyframes ackpop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes ackdraw{to{stroke-dashoffset:0}}
+  .ack h1{margin:0;font-size:25px;line-height:1.3;color:var(--text-primary)}
+  .ack p{margin:0;color:var(--text-secondary);font-size:14.5px;line-height:1.6}
+  .ack .ref{font-family:var(--mono);font-size:13px;color:var(--text-muted);
+    border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:7px 12px;background:var(--surface-3)}
+  @media (prefers-reduced-motion:reduce){
+    .ack-mark{animation:none}
+    .ack-mark path{animation:none;stroke-dashoffset:0}
+  }
+
+  /* The staff entrance. Deliberately quiet and at the very bottom: a citizen
+     should never be prompted to sign in to report a problem, and should not
+     have to wonder whether the page is asking them for an account. */
+  .staffbar{max-width:1080px;margin:0 auto;padding:26px 16px 40px;text-align:center}
+  .staffbar a{color:var(--text-muted);font-size:12.5px;text-decoration:none;
+    border-bottom:1px solid transparent}
+  .staffbar a:hover{color:var(--text-secondary);border-bottom-color:var(--border-strong)}
 </style>
 </head>
 <body>
@@ -147,6 +184,26 @@
     </div>
   </div>
 </main>
+<footer class="staffbar" id="staffbar">
+  <a href="/login">Staff sign-in</a>
+</footer>
+
+<!-- Acknowledgement screen: blank, with a check mark. Hidden until a request
+     is accepted; citizen.js opens it and fills in the reference. -->
+<div class="ack" id="ack" data-open="false" role="alertdialog" aria-modal="true"
+     aria-labelledby="ackhead" aria-describedby="ackbody" hidden>
+  <div class="ack-in">
+    <div class="ack-mark" aria-hidden="true">
+      <svg viewBox="0 0 100 100" focusable="false"><path d="M22 52 L42 71 L78 31"/></svg>
+    </div>
+    <h1 id="ackhead">Your complaint has been received</h1>
+    <p id="ackbody">Thank you. It has been recorded and will be looked at by the
+      officials responsible for your area. You do not need to do anything else.</p>
+    <p class="ref" id="ackref" hidden></p>
+    <button class="btn primary lg" id="ackdone">Submit another complaint</button>
+  </div>
+</div>
+
 <script type="module" src="/static/citizen.js"></script>
 </body>
 </html>

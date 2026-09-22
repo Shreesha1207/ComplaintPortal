@@ -39,16 +39,21 @@ pip install -r requirements.txt
 Open <http://127.0.0.1:8000>. The database seeds itself on first run with ~6,250
 synthetic multilingual requests across India, Brazil and South Africa (~8s).
 
+The app opens in citizen mode. Staff sign in from the link at the foot of that
+page, or by going to `/login` directly; a citizen is never shown either.
+
 | Page | What it is |
 |---|---|
-| `/` | Overview |
-| `/citizen` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels |
-| `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator |
-| `/review` | Human review queue for low-confidence classifications |
+| `/` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels. No account needed |
+| `/citizen` | The same page, under its own name |
+| `/login` | Staff sign-in — the only way into the two pages below |
+| `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator. Admin only |
+| `/review` | Human review queue for low-confidence classifications. Any staff member |
+| `/about` | Overview of the platform and its entrances |
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 32 tests, no test runner required
+python3 tests/test_app.py   # 41 tests, no test runner required
 ```
 
 ---
@@ -190,12 +195,30 @@ shared-phone population the equity correction exists to serve.
 | Priority rankings and demand map | — | ✓ |
 | **Funding, budget simulator, exports** | — | ✓ |
 
-On first run an administrator account is created and the password printed once
-to the log. Choose your own instead:
+The first time you open `/login`, the page asks you to create the administrator
+account: pick a username and password there and you are signed in straight
+away. Nothing needs to be set in the environment, and no password is ever
+printed to a log. Once that account exists the page becomes an ordinary
+sign-in form, and the setup endpoint refuses to run again.
+
+For an unattended deployment, where nobody is at a browser to complete that
+screen, set the account in the environment instead and it is created on
+startup:
 
 ```bash
 export ADMIN_USERNAME=admin ADMIN_PASSWORD='choose-something-real'
 ./run.sh
+```
+
+### Configuration with `.env`
+
+Put settings in a `.env` file in the project root and they are loaded at
+startup — no extra package needed, and a real environment variable always wins
+over a line in the file. `.env.example` lists everything you can set; copy it
+to `.env` to begin. `.env` is gitignored.
+
+```bash
+cp .env.example .env     # then edit, e.g. GROQ_API_KEY=gsk_...
 ```
 
 Add a verification officer:
@@ -208,7 +231,17 @@ python3 -c "from app import db, auth; db.init_db(); \
 The boundary is drawn at **money, not pages**: every analytics response carries
 committed and unfunded figures, so those endpoints are admin-only even over the
 API. A test parses the route table and fails if any funding route is missing its
-guard, so a new endpoint cannot leak by omission.
+guard, so a new endpoint cannot leak by omission. The same test pins the other
+half of the split: citizen intake must keep working with no account.
+
+That guard covers the funding surface, which is sound: every analytics and
+export route is admin-only today, and the test now holds it that way. Two
+other routes are a different matter -- they carry no guard at all, by
+omission rather than by design, and are open to anyone who can reach the
+server: `GET /api/ai/models`, which reveals which model is configured, and
+`POST /api/translate/backfill`, which spends translation API credits. The
+unauthenticated examples above use them as-is. Guard both before any real
+deployment.
 
 ## Adding a country
 

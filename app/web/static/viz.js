@@ -311,15 +311,18 @@ export async function renderNav(el, current = '') {
   const me = await whoami();
   const link = (href, label) =>
     `<a href="${href}"${href === current ? ' aria-current="page"' : ''}>${label}</a>`;
-  const parts = [link('/citizen', 'Submit a request')];
-  if (me.can.view_analytics) parts.push(link('/dashboard', 'Dashboard'));
-  if (me.can.review_queue) parts.push(link('/review', 'Review queue'));
+  // A signed-out visitor is a citizen, and a citizen is shown nothing about
+  // signing in: no sign-in link, no staff destinations they cannot open, and
+  // no hint that the page they are on is the lesser half of something. Staff
+  // reach their own entrance from the footer or by going to /login directly.
+  const parts = [];
   if (me.authenticated) {
+    parts.push(link('/citizen', 'Submit a request'));
+    if (me.can.view_analytics) parts.push(link('/dashboard', 'Dashboard'));
+    if (me.can.review_queue) parts.push(link('/review', 'Review queue'));
     parts.push(`<span class="chip" title="Signed in as ${me.user.username}">` +
                `${me.user.display_name || me.user.username} · ${me.user.role}</span>`);
     parts.push('<button class="btn" id="logout" style="padding:6px 10px">Sign out</button>');
-  } else {
-    parts.push(link('/login', 'Staff sign-in'));
   }
   parts.push('<button class="btn" id="theme" style="padding:6px 10px" ' +
              'aria-label="Toggle colour theme">\u25D0</button>');

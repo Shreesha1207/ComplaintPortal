@@ -453,6 +453,235 @@ def test_budget_counts_each_district_population_once():
     assert len(r["funded"]) > len(districts), "fixture should fund multi-sector districts"
 
 
+# ----------------------------------------------------------- app + guards
+# These are the tests that were missing when a merge conflict resolution
+# dropped `from . import auth` and the LoginIn model: every test below passed
+# green while the server could not start at all, because nothing here imported
+# app.main. Importing it is the point.
+def _load_app():
+    """Import the FastAPI app, with seeding off so this stays fast."""
+    os.environ["APP_NO_SEED"] = "1"
+    from app.main import app
+    return app
+
+
+def test_app_imports_and_starts():
+    """The server module imports. A NameError here means the app cannot boot,
+    which is invisible to every other test in this file."""
+    app = _load_app()
+    paths = {getattr(r, "path", "") for r in app.routes}
+    assert "/api/health" in paths, "health route missing from the route table"
+
+
+def _guards(route) -> set[str]:
+    """Names of the auth dependencies a route carries."""
+    deps = getattr(getattr(route, "dependant", None), "dependencies", [])
+    return {getattr(d.call, "__name__", "") for d in deps}
+
+
+def _api_routes():
+    for r in _load_app().routes:
+        path = getattr(r, "path", "")
+        if path.startswith("/api") and path not in ("/api/docs", "/api/openapi.json"):
+            yield path, sorted(getattr(r, "methods", []) or []), _guards(r)
+
+
+def test_funding_routes_require_admin():
+    """The boundary is the data, not the screen: anything carrying committed or
+    unfunded figures is admin-only, so a new endpoint cannot leak by omission."""
+    checked = 0
+    for path, methods, guards in _api_routes():
+        if path.startswith("/api/analytics") or path.startswith("/api/export"):
+            checked += 1
+            assert "require_admin" in guards, \
+                f"{' '.join(methods)} {path} returns funding data without require_admin"
+    assert checked >= 8, f"expected the funding surface to be larger than {checked} routes"
+
+
+def test_review_routes_require_a_signed_in_staff_member():
+    """Named by (path, method), not by path alone: /api/requests is a staff read
+    and an anonymous write on the same path, and the verification POST is the
+    one that changes a request's status and writes the audit entry."""
+    staff_routes = {("/api/requests", "GET"),
+                    ("/api/requests/{rid}", "GET"),
+                    ("/api/review/queue", "GET"),
+                    ("/api/requests/{rid}/review", "POST")}
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in staff_routes:
+                seen.add((path, m))
+                assert guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} is reachable without a sign-in guard"
+    # An exact match, not a floor: a floor of 3 was satisfied by the three read
+    # routes alone, which let the verification POST go unchecked.
+    assert seen == staff_routes, f"routes missing from the table: {staff_routes - seen}"
+
+
+def test_citizen_intake_stays_anonymous():
+    """Requiring a login to report a broken handpump would silence exactly the
+    people this platform exists to hear. Intake carries no guard, on purpose."""
+    open_routes = {("/api/requests", "POST"), ("/api/requests/public", "GET"),
+                   ("/api/countries", "GET"), ("/api/health", "GET")}
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in open_routes:
+                seen.add((path, m))
+                assert not guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} must not require an account: {sorted(guards)}"
+    assert seen == open_routes, f"routes missing from the table: {open_routes - seen}"
+
+
+# --------------------------------------------------------- setup and .env
+def test_dotenv_is_read_and_never_overrides_the_real_environment():
+    """A .env value fills a gap; it does not replace what the shell exported."""
+    import tempfile as _tf
+    from app import load_env
+    with _tf.TemporaryDirectory() as d:
+        f = pathlib_Path(d) / ".env"
+        f.write_text("# a comment\n\n"
+                     "APP_TEST_PLAIN=one\n"
+                     'APP_TEST_QUOTED="two words"\n'
+                     "export APP_TEST_EXPORTED=three\n"
+                     "APP_TEST_ALREADY_SET=from-file\n"
+                     "not a pair\n", encoding="utf-8")
+        os.environ["APP_TEST_ALREADY_SET"] = "from-shell"
+        for k in ("APP_TEST_PLAIN", "APP_TEST_QUOTED", "APP_TEST_EXPORTED"):
+            os.environ.pop(k, None)
+        load_env(f)
+
+    assert os.environ["APP_TEST_PLAIN"] == "one"
+    assert os.environ["APP_TEST_QUOTED"] == "two words", "quotes should be stripped"
+    assert os.environ["APP_TEST_EXPORTED"] == "three", "'export ' prefix should be tolerated"
+    assert os.environ["APP_TEST_ALREADY_SET"] == "from-shell", \
+        "a real environment variable must win over the file"
+
+
+def test_a_missing_or_broken_env_file_does_not_stop_startup():
+    from app import load_env
+    assert load_env(pathlib_Path("/nonexistent/nowhere/.env")) == []
+
+
+def test_first_admin_is_created_once_and_only_once():
+    """The setup flow's whole security is that it closes after the first use.
+
+    Runs against the real table and puts back whatever was there. Repointing
+    db.DB_PATH would also work -- connect() reads the global each call, and a
+    new thread has no cached connection -- but restoring the rows needs no
+    such arrangement, and leaves nothing to unwind if an assertion fails.
+    """
+    from app import db as _db, auth as _auth
+    _db.init_db()
+    conn = _db.connect()
+    saved = [dict(r) for r in conn.execute("SELECT * FROM users")]
+    conn.execute("DELETE FROM sessions")
+    conn.execute("DELETE FROM users")
+    conn.commit()
+    try:
+        assert _auth.needs_setup(), "with no rows, the site must ask for an account"
+
+        # Too short is refused, and a refused attempt must leave nothing behind.
+        try:
+            _auth.create_first_admin("admin", "short")
+            raise AssertionError("a short password should have been refused")
+        except _auth.AuthError:
+            pass
+        assert _auth.needs_setup(), "a refused attempt must not create an account"
+
+        user = _auth.create_first_admin("admin", "a-real-password")
+        assert user["role"] == "admin"
+        assert not _auth.needs_setup()
+        assert _auth.authenticate("admin", "a-real-password")["role"] == "admin"
+
+        # The second caller must not be able to mint themselves an admin.
+        try:
+            _auth.create_first_admin("intruder", "another-password")
+            raise AssertionError("setup should be closed once an account exists")
+        except _auth.AuthError:
+            pass
+        assert [u["username"] for u in _auth.list_users()] == ["admin"]
+    finally:
+        conn.execute("DELETE FROM sessions")
+        conn.execute("DELETE FROM users")
+        for row in saved:
+            cols = ",".join(row)
+            marks = ",".join("?" * len(row))
+            conn.execute(f"INSERT INTO users ({cols}) VALUES ({marks})",
+                         tuple(row.values()))
+        conn.commit()
+
+
+def test_concurrent_setup_can_only_ever_create_one_administrator():
+    """Six callers racing a fresh install must yield one admin, not six.
+
+    This is the reason the emptiness test and the insert are a single
+    statement. When they were two, every caller passed the check while the
+    others were still hashing, and every caller then inserted: a fresh
+    deployment handed out six administrator accounts, none of which had to
+    sign in to anything. Threads, not coroutines, because the connection is
+    thread-local and the real server is a threaded worker pool.
+    """
+    import threading
+    from app import db as _db, auth as _auth
+    _db.init_db()
+    conn = _db.connect()
+    saved = [dict(r) for r in conn.execute("SELECT * FROM users")]
+    conn.execute("DELETE FROM sessions")
+    conn.execute("DELETE FROM users")
+    conn.commit()
+    try:
+        assert _auth.needs_setup()
+        created, refused = [], []
+        start = threading.Barrier(6)
+
+        def attempt(i):
+            start.wait()                      # all six leave the gate together
+            try:
+                created.append(_auth.create_first_admin(f"claimant{i}",
+                                                        f"a-real-password-{i}"))
+            except _auth.AuthError:
+                refused.append(i)
+
+        threads = [threading.Thread(target=attempt, args=(i,)) for i in range(6)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        accounts = _auth.list_users()
+        assert len(accounts) == 1, \
+            f"expected exactly one administrator, got {[a['username'] for a in accounts]}"
+        assert len(created) == 1, f"{len(created)} callers were told they succeeded"
+        assert len(refused) == 5, f"{len(refused)} callers were refused, expected 5"
+        # The winner must be a usable account, not a half-written row.
+        winner = created[0]["username"]
+        assert accounts[0]["username"] == winner
+        assert _auth.authenticate(winner, f"a-real-password-{winner[-1]}")["role"] == "admin"
+    finally:
+        conn.execute("DELETE FROM sessions")
+        conn.execute("DELETE FROM users")
+        for row in saved:
+            cols = ",".join(row)
+            marks = ",".join("?" * len(row))
+            conn.execute(f"INSERT INTO users ({cols}) VALUES ({marks})",
+                         tuple(row.values()))
+        conn.commit()
+
+
+def test_setup_and_login_routes_need_no_account_to_reach():
+    """Both are the way in, so neither can sit behind a sign-in guard."""
+    open_auth = {("/api/auth/setup", "POST"), ("/api/auth/login", "POST")}
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in open_auth:
+                seen.add((path, m))
+                assert not guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} must be reachable without an account"
+    assert seen == open_auth, f"routes missing from the table: {open_auth - seen}"
+
+
 # ------------------------------------------------------------------ main
 def _run_standalone() -> int:
     fns = [(n, f) for n, f in sorted(globals().items())
