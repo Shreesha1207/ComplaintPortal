@@ -454,7 +454,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_app.py       50 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       52 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it

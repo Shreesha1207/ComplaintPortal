@@ -39,6 +39,12 @@ pip install -r requirements.txt
 Open <http://127.0.0.1:8000>. The database seeds itself on first run with ~6,250
 synthetic multilingual requests across India, Brazil and South Africa (~8s).
 
+It is written to **`var/data.db`**, which is git-ignored as a whole directory —
+nothing about the database is or ever has been in the repository. Delete `var/`
+whenever you want a clean slate; the next start rebuilds and reseeds it. Point
+it somewhere else with `APP_DB=/path/to/app.db`, which always wins over the
+default.
+
 The app opens in citizen mode. Staff sign in from the link at the foot of that
 page, or by going to `/login` directly; a citizen is never shown either.
 
@@ -46,6 +52,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 |---|---|
 | `/` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels. No account needed |
 | `/citizen` | The same page, under its own name |
+| `/statistics` | National statistics and the country map. No account needed |
 | `/login` | Staff sign-in — the only way into the two pages below |
 | `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator. Admin only |
 | `/review` | Human review queue for low-confidence classifications. Any staff member |
@@ -53,7 +60,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 50 tests, no test runner required
+python3 tests/test_app.py   # 52 tests, no test runner required
 ```
 
 ---

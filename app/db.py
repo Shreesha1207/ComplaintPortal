@@ -18,7 +18,24 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path(os.getenv("APP_DB", Path(__file__).resolve().parent.parent / "data.db"))
+# The database lives in `var/`, not the project root.
+#
+# It used to be written as `data.db` beside README.md and run.sh, where it is
+# the only non-source file in the listing and reads like something that belongs
+# in the repository. It never was -- `.gitignore` has excluded `*.db` since the
+# first commit that carried any code, and no database file has ever been
+# committed on any branch, which was checked rather than assumed -- but a binary
+# sitting among the source invites someone to commit it, and invites everyone
+# else to wonder whether it already is.
+#
+# `var/` is the conventional place for state a program writes about itself, and
+# it keeps the `-wal` and `-shm` sidecars together with it rather than
+# scattering three files across the root. The directory is ignored whole.
+#
+# APP_DB still wins, absolutely: a deployment that wants the database on another
+# volume sets it and nothing here interferes. Tests set it to a temporary file.
+DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "var" / "data.db"
+DB_PATH = Path(os.getenv("APP_DB") or DEFAULT_DB_PATH)
 _local = threading.local()
 
 SCHEMA = """
@@ -103,6 +120,10 @@ def connect() -> sqlite3.Connection:
     """One connection per thread; uvicorn's worker pool is threaded."""
     conn = getattr(_local, "conn", None)
     if conn is None:
+        # sqlite3 creates the file but not the directory above it, and the
+        # default path now has one. Created here rather than at import, so
+        # importing app.db never writes to disk as a side effect.
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")

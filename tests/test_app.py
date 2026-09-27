@@ -728,6 +728,52 @@ def test_the_capability_map_names_the_split_the_ui_renders_from():
     assert set(out["roles"]) == {"citizen", "reviewer", "admin"}
 
 
+# --------------------------------------------------------------- where state
+def test_the_database_is_written_under_var_not_the_project_root():
+    """The SQLite file used to land beside README.md and run.sh, the only
+    non-source file in the listing, which reads like something that belongs in
+    the repository. It never was committed, but a binary among the source
+    invites the mistake. This pins the default and pins `APP_DB` still winning,
+    because a deployment on another volume depends on that."""
+    import importlib
+    from app import db as _db
+
+    root = pathlib_Path(_db.__file__).resolve().parent.parent
+    assert _db.DEFAULT_DB_PATH == root / "var" / "data.db"
+    assert _db.DEFAULT_DB_PATH.parent.name == "var"
+
+    saved = os.environ.get("APP_DB")
+    try:
+        os.environ["APP_DB"] = "/tmp/some-other-place.db"
+        importlib.reload(_db)
+        assert str(_db.DB_PATH) == "/tmp/some-other-place.db", \
+            "APP_DB must still override the default"
+    finally:
+        if saved is None:
+            os.environ.pop("APP_DB", None)
+        else:
+            os.environ["APP_DB"] = saved
+        importlib.reload(_db)
+
+
+def test_no_database_file_is_tracked_by_git():
+    """`var/` is ignored as a directory, and `*.db` before it. Asserted against
+    the index rather than the working tree, because the failure this guards
+    against is someone committing a 6MB seeded database, not one existing on
+    disk -- it is supposed to exist on disk."""
+    import subprocess
+    root = pathlib_Path(__file__).resolve().parent.parent
+    try:
+        tracked = subprocess.run(["git", "ls-files"], cwd=root, check=True,
+                                 capture_output=True, text=True).stdout.split()
+    except (OSError, subprocess.CalledProcessError):
+        return  # not a git checkout (tarball, vendored copy) -- nothing to check
+    offenders = [f for f in tracked
+                 if f.endswith((".db", ".db-wal", ".db-shm", ".sqlite", ".sqlite3"))
+                 or f.startswith("var/")]
+    assert not offenders, f"database files are committed: {offenders}"
+
+
 # ------------------------------------------------------------- map geometry
 def test_every_region_in_every_pack_has_a_map_outline():
     """A region with no outline renders as a hole, and a reader will read a hole
