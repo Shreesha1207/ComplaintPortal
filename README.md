@@ -53,7 +53,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 41 tests, no test runner required
+python3 tests/test_app.py   # 50 tests, no test runner required
 ```
 
 ---
@@ -187,13 +187,33 @@ Every AI decision and human override is written to an append-only audit log.
 account to report a broken handpump would filter out exactly the low-literacy,
 shared-phone population the equity correction exists to serve.
 
+**Citizens do see the statistics.** `/statistics` is open to everyone: a
+colour-coded map of the country, districts ranked by unmet need, which sectors
+each one's worst needs are in, and the intake breakdowns. Signing in is for
+*acting on* requests, not for reading what the country asked for.
+
 **Staff sign in at `/login`**, in two roles:
 
-| | `reviewer` | `admin` |
-|---|---|---|
-| Verification queue | ✓ | ✓ |
-| Priority rankings and demand map | — | ✓ |
-| **Funding, budget simulator, exports** | — | ✓ |
+| | citizen | `reviewer` | `admin` |
+|---|---|---|---|
+| Submit a request | ✓ | ✓ | ✓ |
+| District & region statistics, the map | ✓ | ✓ | ✓ |
+| Verification queue | — | ✓ | ✓ |
+| Read a stored request | — | ✓ | ✓ |
+| Full derivation of one recommendation | — | — | ✓ |
+| Policy weights, CSV export | — | — | ✓ |
+| **Funding, budget simulator** | — | — | ✓ |
+
+The public statistics are a separate, hand-picked API surface
+(`/api/analytics/public/*`), not `/api/analytics` with the guard removed.
+Three things are why: the district and region rollups carry `unfunded`;
+district×sector counts are close to identifying, since 39% of India's 1,460
+cells hold one or two requests and `/api/requests/public` already publishes
+district, sector, urgency and timestamp to link against; and
+`/api/analytics/cell` embeds a `SELECT *` that carries `text_original`, the
+citizen's words *before* redaction. The published grain stops at the district,
+and the tests name both surfaces as exact `(path, method)` sets so a new route
+cannot land on neither list.
 
 The first time you open `/login`, the page asks you to create the administrator
 account: pick a username and password there and you are signed in straight
@@ -289,6 +309,37 @@ One modelling assumption is deliberate and documented: investment is generated a
 a function of urbanisation and literacy — of political salience — rather than of
 need. That reproduces a well-observed pattern, and it is what creates the blind
 spots the platform is built to find.
+
+## The map
+
+`/statistics` and `/dashboard` both draw the country two ways, one toggle apart.
+
+**Geographic** is a choropleth of real `admin-1` outlines — 36 states and union
+territories for India, 27 states for Brazil, 9 provinces for South Africa — so a
+reader can find where they live. **Equal-area** is the hex cartogram, which
+gives every region the same visual weight so colour tracks the measure rather
+than land area; without it a vast, thinly-populated region shouts and a dense
+small one vanishes. Neither replaces the other.
+
+Outlines come from **Natural Earth 1:10m Admin 1**, which is in the public
+domain — no attribution obligation and no share-alike clause to attach to this
+repository, which is why it was chosen over the finer Census-derived district
+datasets. To rebuild them:
+
+```bash
+curl -O https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
+python3 -m app.packs.build_geo ne_10m_admin_1_states_provinces.geojson
+```
+
+That writes `app/packs/<CODE>.geo.json` — simplified to ~110m precision, about
+83KB for India — and touches no country pack, which matters because the packs
+cannot be regenerated (see `build_packs.py`). Geometry is served from
+`/api/countries/{code}/geometry` rather than inside the pack, since every page
+loads the pack and the geometry is two orders of magnitude larger.
+
+There is deliberately **no district-boundary map**. The packs carry a sample of
+districts — 146 of India's ~780 — so district polygons would draw a map full of
+holes, and a reader would read a hole as "nobody here reported anything".
 
 ## Documentation
 

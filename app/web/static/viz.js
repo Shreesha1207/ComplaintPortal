@@ -302,8 +302,9 @@ export async function whoami() {
     return await api('/api/auth/me');
   } catch {
     return { authenticated: false, user: null,
-             can: { submit_requests: true, review_queue: false,
-                    view_analytics: false, view_funding: false, export_data: false } };
+             can: { submit_requests: true, view_statistics: true,
+                    review_queue: false, view_analytics: false,
+                    view_funding: false, export_data: false } };
   }
 }
 
@@ -315,9 +316,16 @@ export async function renderNav(el, current = '') {
   // signing in: no sign-in link, no staff destinations they cannot open, and
   // no hint that the page they are on is the lesser half of something. Staff
   // reach their own entrance from the footer or by going to /login directly.
+  //
+  // The two citizen destinations are shown to everyone, signed in or not,
+  // because both are open to everyone: report something, and see what the
+  // country asked for. That is the citizen half of the role split, and hiding
+  // the statistics from a signed-out visitor would be hiding them from the
+  // people they are published for.
   const parts = [];
+  if (me.can.submit_requests) parts.push(link('/citizen', 'Submit a request'));
+  if (me.can.view_statistics) parts.push(link('/statistics', 'Statistics'));
   if (me.authenticated) {
-    parts.push(link('/citizen', 'Submit a request'));
     if (me.can.view_analytics) parts.push(link('/dashboard', 'Dashboard'));
     if (me.can.review_queue) parts.push(link('/review', 'Review queue'));
     parts.push(`<span class="chip" title="Signed in as ${me.user.username}">` +

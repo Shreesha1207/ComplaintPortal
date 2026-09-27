@@ -261,3 +261,65 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .stack{display:flex; flex-direction:column; gap:14px}
 .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
 .spread{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+
+/* ---------- geographic choropleth ----------
+   Transitions are on opacity and stroke only. A map that animates its
+   geometry on every filter change is a map that is hard to read while it
+   moves, and this one redraws whenever the measure changes. */
+.geomap{width:100%; height:auto; display:block; overflow:visible}
+.geo{cursor:pointer}
+.geo .geo-fill{transition:opacity .14s ease, stroke-width .14s ease}
+.geo:hover .geo-fill{stroke:var(--text-primary); stroke-width:1.6}
+.geo.sel .geo-fill{stroke:var(--text-primary); stroke-width:2.2}
+/* Unselected regions recede rather than disappear: the shape of the country has
+   to survive a filter, or the reader loses their bearings. */
+.geo.dim .geo-fill{opacity:.42}
+.geo.dim:hover .geo-fill{opacity:.8}
+.geo:focus{outline:none}
+.geo:focus-visible .geo-fill{stroke:var(--accent); stroke-width:2.6}
+.geo-label{font:620 8.5px var(--mono); letter-spacing:.02em;
+  pointer-events:none; user-select:none}
+.map-toolbar{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  padding:0 0 12px; border-bottom:1px solid var(--border); margin-bottom:13px}
+.map-toolbar .spacer{margin-left:auto}
+/* Segmented control: one visible group, not a row of loose buttons. */
+.seg{display:inline-flex; border:1px solid var(--border-strong);
+  border-radius:var(--radius-sm); overflow:hidden; background:var(--surface-2)}
+.seg button{font:600 12.5px var(--sans); cursor:pointer; border:0; padding:6px 11px;
+  background:transparent; color:var(--text-secondary); border-left:1px solid var(--border)}
+.seg button:first-child{border-left:0}
+.seg button:hover{background:var(--surface-3); color:var(--text-primary)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.legend .lg-label{font-weight:620; color:var(--text-secondary)}
+.legend .lg-ramp{display:inline-flex; align-items:center; gap:7px}
+.legend .lg-end{color:var(--text-secondary)}
+.legend .lg-nodata{display:inline-flex; align-items:center; gap:6px; margin-left:4px}
+.legend .sw.hatch{border:1px solid var(--border-strong); border-radius:2px;
+  background:repeating-linear-gradient(45deg,var(--seq-0) 0 3px,
+    var(--border-strong) 3px 4px)}
+
+/* ---------- public statistics page ---------- */
+.hero{padding:26px 20px 22px}
+.hero h1{font-size:clamp(23px,3.4vw,33px); max-width:22ch}
+.hero p{margin:9px 0 0; color:var(--text-secondary); font-size:15px; max-width:62ch}
+.rankrow{display:flex; align-items:center; gap:11px; padding:9px 11px;
+  border-bottom:1px solid var(--border); cursor:pointer}
+.rankrow:hover{background:var(--surface-3)}
+.rankrow.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.rankrow:last-child{border-bottom:0}
+.rankrow .n{font:600 11.5px var(--mono); color:var(--text-muted); width:22px; flex:none}
+.rankrow .nm{min-width:0; flex:1}
+.rankrow .nm b{display:block; font-size:13.5px; font-weight:620;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rankrow .nm span{font-size:11.5px; color:var(--text-muted)}
+.sectorlist{display:flex; gap:5px; flex-wrap:wrap; margin-top:4px}
+.footnote{border-top:1px solid var(--border); margin-top:6px; padding-top:14px;
+  font-size:12px; color:var(--text-muted); line-height:1.6}
+.footnote p{margin:0 0 7px}
+.staffline{text-align:center; padding:22px 0 0; font-size:12px; color:var(--text-muted)}
+
+/* A card in a two-column row stretches to its neighbour's height. Without this
+   the shorter card's body stops halfway and leaves a band of empty surface that
+   reads as a rendering failure. */
+.card.fill{display:flex; flex-direction:column}
+.card.fill .scrollfill{flex:1 1 auto; min-height:320px; max-height:74vh; overflow-y:auto}

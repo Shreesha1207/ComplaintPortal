@@ -39,7 +39,10 @@
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
 ┌── DELIVERY ── app/main.py, app/web/ ───────────────────────────────┐
-│  FastAPI + OpenAPI · dashboard · review queue · CSV export             │
+│  FastAPI + OpenAPI                                                     │
+│    public   /statistics  choropleth + district rollups, no account     │
+│    staff    /review      verification queue                            │
+│    admin    /dashboard   funding, budget simulator, weights, CSV       │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -117,18 +120,32 @@ per country and per sector with no coordination.
 
 - **Roles separate money from verification.** Staff authenticate with
   PBKDF2-hashed passwords and server-side sessions. `admin` sees funding,
-  analytics, the budget simulator and exports; `reviewer` sees only the
-  verification queue. Citizens never authenticate — intake is deliberately
-  anonymous, because a login requirement would filter out the low-literacy,
-  shared-phone population the equity correction exists to serve.
-- **The boundary is the data, not the screen.** Every analytics response
+  the per-recommendation derivation, the budget simulator, the policy weights
+  and exports; `reviewer` sees only the verification queue. Citizens never
+  authenticate — intake is deliberately anonymous, because a login requirement
+  would filter out the low-literacy, shared-phone population the equity
+  correction exists to serve, and they see the district and region statistics
+  without one, because a platform that collects reports and shows nothing back
+  is asking for unpaid labour.
+- **The boundary is the data, not the screen.** Every admin analytics response
   carries committed and unfunded amounts, so those endpoints are admin-only
-  even where another role might want the rest of the payload. A test walks the
-  live route table and asserts every `/api/analytics` and `/api/export` route
-  carries the admin dependency, that the review routes require a signed-in
-  staff member, and that citizen intake requires no account at all -- so
-  neither a leak nor a sign-in wall can arrive by omission. The model-list and
-  backfill routes are not yet guarded; see the note in the README.
+  even where another role might want the rest of the payload.
+- **Public statistics are a projection, not an unlocked guard.**
+  `/api/analytics/public/*` republishes a hand-picked key set, because the
+  admin payload carries three things that must not be public: money
+  (`unfunded`, `committed`, `coverage`); district×sector grain, where 39% of
+  India's 1,460 cells hold one or two requests and `/api/requests/public`
+  already publishes enough to link against; and, in `/api/analytics/cell`,
+  `text_original` — the citizen's words **before** PII redaction, reached via a
+  `SELECT *`. The published grain stops at the district.
+- **Three tests walk the live route table.** The admin surface and the public
+  statistics surface are each named as an exact `(path, method)` set, a third
+  test fails if any `/api/analytics` or `/api/export` route is on neither list,
+  and two more serialise the public projections and grep them for money fields
+  and for citizen text. A prefix rule would not have survived
+  `/api/analytics/public/*`; naming both sets means a new route fails here until
+  its author says which side it is on. The model-list and backfill routes are
+  not yet guarded; see the note in the README.
 
 Not yet built, and needed before any real deployment: SSO/2FA and a
 password-reset flow, per-country scoping of staff accounts, rate limiting on
@@ -141,13 +158,15 @@ data-retention policy.
 app/
   ai/        base.py · lexicon.py · heuristic.py · groq_engine.py
   analysis/  fusion.py · priority.py · budget.py
-  packs/     build_packs.py · IN.json · BR.json · ZA.json
-  web/       index · citizen · dashboard · review  + static/{app.css,viz.js,…}
+  packs/     build_packs.py · build_geo.py
+             IN/BR/ZA .json (packs) · IN/BR/ZA .geo.json (region outlines)
+  web/       index · citizen · statistics · dashboard · review
+             + static/{app.css, viz.js, geomap.js, …}
   auth.py    staff accounts, sessions, role guards
   main.py    FastAPI app and REST API
   db.py      SQLite schema and access
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_app.py  (41 tests, runs with or without pytest)
+tests/       test_app.py  (50 tests, runs with or without pytest)
 ```

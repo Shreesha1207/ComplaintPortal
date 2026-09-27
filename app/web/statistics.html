@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>National Statistics</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23184f95%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none">
+    <span class="mark"></span>
+    <span>Citizen development requests → national priority</span>
+  </a>
+  <nav class="navlinks" id="nav"></nav>
+</header>
+
+<main class="wrap stack" style="max-width:1320px">
+
+  <section class="card">
+    <div class="card-b hero">
+      <h1 id="herotitle">What the country has asked for</h1>
+      <p id="herolead">
+        Every request citizens send through this platform — by voice, text,
+        WhatsApp or SMS — is classified, joined to what is known about the area
+        it came from, and scored. These are the results, in full, with no account
+        needed.
+      </p>
+      <div class="row" style="margin-top:15px">
+        <div class="field"><label for="country">Country</label>
+          <select id="country"></select></div>
+        <span id="busy" class="muted xs" hidden><span class="spinner"></span> loading…</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="notice" class="notice"></div>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="cols map-side">
+    <div class="card">
+      <div class="card-h">
+        <h2 id="maptitle">Where the need is</h2>
+        <span class="sub" id="mapsub"></span>
+      </div>
+      <div class="card-b">
+        <div class="map-toolbar">
+          <div class="field" style="min-width:210px">
+            <label for="measure">Colour by</label>
+            <select id="measure"></select>
+          </div>
+          <div class="spacer"></div>
+          <div class="seg" role="group" aria-label="Map view">
+            <button id="v-geo" aria-pressed="true">Geographic</button>
+            <button id="v-hex" aria-pressed="false">Equal-area</button>
+          </div>
+          <button class="btn" id="clearsel" hidden style="padding:7px 11px">Clear selection</button>
+        </div>
+        <div class="mapwrap" id="map"></div>
+        <div class="legend" id="maplegend"></div>
+        <p class="xs muted" id="mapnote" style="margin:11px 0 0"></p>
+      </div>
+    </div>
+
+    <div class="card fill">
+      <div class="card-h">
+        <h2 id="ranktitle">Districts by need</h2>
+        <span class="sub" id="ranksub"></span>
+      </div>
+      <div id="ranklist" class="scrollfill"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h">
+      <h2 id="dtitle">Select a district</h2>
+      <span class="sub" id="dsub"></span>
+    </div>
+    <div class="card-b" id="detail">
+      <div class="empty">Choose a district from the list to see which sectors its
+        greatest needs are in.</div>
+    </div>
+  </section>
+
+  <section class="cols third">
+    <div class="card"><div class="card-h"><h2>Requests by sector</h2></div>
+      <div class="card-b"><div class="chart" id="chSect"></div></div></div>
+    <div class="card"><div class="card-h"><h2>Requests by language</h2>
+      <span class="sub">Nobody had to switch language to be heard</span></div>
+      <div class="card-b"><div class="chart" id="chLang"></div></div></div>
+    <div class="card"><div class="card-h"><h2>Requests by channel</h2></div>
+      <div class="card-b"><div class="chart" id="chChan"></div></div></div>
+  </section>
+
+  <!-- What these numbers do not say. Published with the figures rather than
+       buried, because a statistics page that only explains its strengths is
+       advocacy. -->
+  <section class="card">
+    <div class="card-h"><h2>How to read these figures</h2></div>
+    <div class="card-b footnote" id="caveats"></div>
+  </section>
+
+  <p class="staffline" id="staffline"></p>
+</main>
+
+<script type="module" src="/static/statistics.js"></script>
+</body>
+</html>

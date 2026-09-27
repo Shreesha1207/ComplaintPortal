@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import tempfile
+from functools import lru_cache
 from pathlib import Path as pathlib_Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -377,14 +378,33 @@ def test_investment_coverage_discounts_priority_but_never_to_zero_by_default():
         assert disc[k]["priority_index"] > 0
 
 
+@lru_cache(maxsize=1)
+def _synthetic_corpus(n: int = 4200) -> tuple[dict, ...]:
+    """The demo corpus, classified offline, built in-process.
+
+    Built here rather than read from whatever happens to be in the developer's
+    database, because the test below used to `return` silently when it found
+    fewer than 200 rows -- so on a fresh checkout the project's single
+    load-bearing claim asserted nothing at all. Cached, because four tests want
+    it and generating it costs about a second.
+    """
+    from app.seed import generate
+    rows = []
+    for sub in generate("IN", n):
+        a = ENGINE.analyse(sub["text"], country="IN")
+        rows.append({"district_code": sub["district_code"], "sector": a.sector,
+                     "urgency_score": a.urgency_score, "urgency": a.urgency,
+                     "ai_confidence": a.confidence, "language": a.language,
+                     "channel": sub["channel"],
+                     "status": "review" if a.needs_review else "new"})
+    return tuple(rows)
+
+
 def test_equity_correction_inverts_participation_bias():
     """The core claim. Raw demand favours districts that can complain; after
     correction that advantage must be removed, not merely reduced."""
-    from app import db
-    db.init_db()
-    rows = db.list_requests(country="IN", limit=10 ** 6)
-    if len(rows) < 200:
-        return  # seeded DB not present; covered by the API-level check instead
+    rows = list(_synthetic_corpus())
+    assert len(rows) >= 200, "the corpus generator produced too little to test on"
     scored = score_cells(build_matrix(PACK, rows), PACK)
     pool = [r for r in scored if r["request_count"] >= 3]
     pool.sort(key=lambda r: r["participation_index"])
@@ -402,6 +422,31 @@ def test_silent_districts_still_surface_without_any_citizen_signal():
     assert all(r["request_count"] == 0 for r in scored)
     assert max(r["priority_index"] for r in scored) > 30, "admin data alone must rank"
     assert any(r["silent_district"] for r in scored), "silence must be flagged"
+
+
+def test_unclassified_requests_are_accounted_for_not_silently_dropped():
+    """A request the classifier cannot place gets sector "other", which is not
+    one of the pack's ten sectors, so `build_matrix` has no cell for it and it
+    reaches no district or region count.
+
+    On the demo corpus that is 421 of 4,200 requests -- 10%. Published as-is, a
+    statistics page would show "4,200 requests received" above district counts
+    summing to 3,779, with nothing explaining the gap. The summary reports the
+    difference, and this pins the arithmetic so the two can never drift apart
+    unexplained again.
+
+    Carried over from the shelved funding-removal branch, where it was written.
+    """
+    rows = list(_synthetic_corpus())
+    unclassified = [r for r in rows if r["sector"] not in PACK.sectors]
+    assert unclassified, "fixture should contain requests the classifier cannot place"
+    assert all(r["sector"] == "other" for r in unclassified)
+
+    counted = sum(d["request_count"] for d in
+                  rollup_districts(score_cells(build_matrix(PACK, rows), PACK)))
+    assert counted + len(unclassified) == len(rows), (
+        f"{len(rows)} requests, {counted} reach a district count, "
+        f"{len(unclassified)} unclassified -- the three must reconcile exactly")
 
 
 def test_weights_actually_move_the_ranking():
@@ -486,16 +531,121 @@ def _api_routes():
             yield path, sorted(getattr(r, "methods", []) or []), _guards(r)
 
 
+# The complete map of the admin boundary, as (path, method) pairs.
+#
+# Stated exhaustively rather than by prefix. The previous version of this test
+# asserted "every /api/analytics route carries require_admin", which was true
+# and became wrong the moment /api/analytics/public/* existed -- a prefix rule
+# cannot express "these carry money and those do not", so it either fails on a
+# legitimate public route or gets loosened into uselessness. Naming both sets
+# means adding a route to either surface fails here until it is named, which is
+# the only version of this test that catches a leak by omission.
+ADMIN_ONLY_ROUTES = {
+    ("/api/analytics/summary", "GET"),
+    ("/api/analytics/priorities", "GET"),
+    ("/api/analytics/districts", "GET"),
+    ("/api/analytics/regions", "GET"),
+    ("/api/analytics/cell/{district_code}/{sector}", "GET"),
+    ("/api/analytics/budget", "GET"),
+    ("/api/analytics/budget/compare", "GET"),
+    ("/api/export/priorities.csv", "GET"),
+}
+PUBLIC_STATISTICS_ROUTES = {
+    ("/api/analytics/public/summary", "GET"),
+    ("/api/analytics/public/regions", "GET"),
+    ("/api/analytics/public/districts", "GET"),
+}
+
+
 def test_funding_routes_require_admin():
     """The boundary is the data, not the screen: anything carrying committed or
     unfunded figures is admin-only, so a new endpoint cannot leak by omission."""
-    checked = 0
+    seen = set()
     for path, methods, guards in _api_routes():
-        if path.startswith("/api/analytics") or path.startswith("/api/export"):
-            checked += 1
-            assert "require_admin" in guards, \
-                f"{' '.join(methods)} {path} returns funding data without require_admin"
-    assert checked >= 8, f"expected the funding surface to be larger than {checked} routes"
+        for m in methods:
+            if (path, m) in ADMIN_ONLY_ROUTES:
+                seen.add((path, m))
+                assert "require_admin" in guards, \
+                    f"{m} {path} returns funding data without require_admin"
+    assert seen == ADMIN_ONLY_ROUTES, \
+        f"routes missing from the table: {ADMIN_ONLY_ROUTES - seen}"
+
+
+def test_every_analytics_route_is_named_on_exactly_one_side_of_the_boundary():
+    """No analytics or export route may exist unclassified.
+
+    This is what the exhaustive tables buy: a new /api/analytics route lands here
+    as a failure naming itself, and the author has to decide which side of the
+    funding boundary it is on rather than inheriting whichever default the
+    decorator happened to have."""
+    named = ADMIN_ONLY_ROUTES | PUBLIC_STATISTICS_ROUTES
+    found = {(path, m) for path, methods, _ in _api_routes() for m in methods
+             if path.startswith("/api/analytics") or path.startswith("/api/export")}
+    assert found == named, (
+        f"unclassified analytics routes: {sorted(found - named)}; "
+        f"table lists routes that no longer exist: {sorted(named - found)}")
+
+
+def test_public_statistics_carry_no_auth_guard_and_no_money():
+    """Statistics are visible to citizens; funding is not. Both halves matter.
+
+    The projections are checked by key, not by eyeballing a response, because
+    the leak this guards against is a field added to `rollup_districts` later
+    and inherited silently by whatever passes the rollup through."""
+    from app.main import (PUBLIC_DISTRICT_FIELDS, PUBLIC_REGION_FIELDS,
+                          public_district, public_region)
+
+    seen = set()
+    for path, methods, guards in _api_routes():
+        for m in methods:
+            if (path, m) in PUBLIC_STATISTICS_ROUTES:
+                seen.add((path, m))
+                assert not guards & {"require_staff", "require_admin"}, \
+                    f"{m} {path} must not require an account: {sorted(guards)}"
+    assert seen == PUBLIC_STATISTICS_ROUTES, \
+        f"routes missing from the table: {PUBLIC_STATISTICS_ROUTES - seen}"
+
+    scored = score_cells(build_matrix(PACK, _synthetic_corpus()), PACK)
+    districts = rollup_districts(scored)
+    regions = rollup_regions(districts)
+    assert districts and regions
+
+    # Every money field the admin rollups carry, by name, so this fails if one is
+    # renamed rather than quietly passing against a field that no longer exists.
+    money = {"unfunded", "committed", "required", "coverage", "well_covered",
+             "counterfactual", "currency", "envelope", "allocated", "budget"}
+    assert money & set(districts[0]), \
+        "fixture is not exercising the leak: the admin rollup carries no money field"
+
+    for row, allowed in ((public_district(districts[0]), set(PUBLIC_DISTRICT_FIELDS)),
+                         (public_region(regions[0]), set(PUBLIC_REGION_FIELDS))):
+        extra = set(row) - allowed - {"top_sectors"}
+        assert not extra, f"published keys not on the allow-list: {sorted(extra)}"
+        assert not money & set(row), \
+            f"a money field reached the public projection: {sorted(money & set(row))}"
+        # Serialise and grep, so money smuggled into a nested structure -- a
+        # sector entry, a name -- still fails.
+        blob = json.dumps(row)
+        for k in money:
+            assert f'"{k}"' not in blob, f"{k} survives inside the public payload"
+
+
+def test_public_statistics_never_expose_the_citizens_own_words():
+    """`/api/analytics/cell` embeds `db.list_requests`, a SELECT *, so it carries
+    `text_original` -- what the citizen typed before PII redaction. That is the
+    single most important reason the public statistics are a projection rather
+    than the admin payload with the guard removed, and it is worth a test of its
+    own because the failure mode is silent."""
+    from app.main import public_district, public_region
+
+    scored = score_cells(build_matrix(PACK, _synthetic_corpus()), PACK)
+    districts = rollup_districts(scored)
+    rows = [public_district(d) for d in districts[:40]]
+    rows += [public_region(r) for r in rollup_regions(districts)[:20]]
+    blob = json.dumps(rows)
+    for leak in ("text_original", "text_redacted", "text_en", "text_local",
+                 "reviewer_note", "pii_types", "entities", "requests"):
+        assert leak not in blob, f"{leak} reached a public statistics payload"
 
 
 def test_review_routes_require_a_signed_in_staff_member():
@@ -531,6 +681,105 @@ def test_citizen_intake_stays_anonymous():
                 assert not guards & {"require_staff", "require_admin"}, \
                     f"{m} {path} must not require an account: {sorted(guards)}"
     assert seen == open_routes, f"routes missing from the table: {open_routes - seen}"
+
+
+def test_the_citizen_pages_are_reachable_without_an_account():
+    """Two pages are open to everyone and two are not, and which is which is the
+    whole of the citizen/admin split as a reader experiences it.
+
+    Checked against the route table rather than over HTTP, because the project
+    depends on three packages and pulling in a test client to assert a redirect
+    is not a trade worth making. `/dashboard` and `/review` do their own
+    redirecting inside the handler, so what is asserted here is that the open
+    pages exist and carry no dependency guard, and that the staff pages are not
+    served by the plain `FileResponse` the open ones use."""
+    import inspect
+    from app import main as m
+
+    for name, fn in (("/", m.index), ("/citizen", m.citizen),
+                     ("/statistics", m.statistics), ("/about", m.about)):
+        src = inspect.getsource(fn)
+        assert "Request" not in inspect.signature(fn).parameters, \
+            f"{name} inspects the request, so it is not unconditionally open"
+        assert "RedirectResponse" not in src, f"{name} redirects somewhere"
+
+    for name, fn in (("/dashboard", m.dashboard), ("/review", m.review)):
+        src = inspect.getsource(fn)
+        assert "current_user" in src and "RedirectResponse" in src, \
+            f"{name} does not send a signed-out visitor to the login page"
+    assert 'user["role"] != "admin"' in inspect.getsource(m.dashboard), \
+        "/dashboard does not keep a reviewer out of the funding screen"
+
+
+def test_the_capability_map_names_the_split_the_ui_renders_from():
+    """The nav renders from capabilities, not roles, so the two that are true for
+    everyone are the citizen half of the split and have to stay that way."""
+    from app.main import me as me_route
+
+    class _Req:
+        cookies: dict = {}
+
+    out = me_route(_Req())
+    assert out["authenticated"] is False
+    assert out["can"]["submit_requests"] is True
+    assert out["can"]["view_statistics"] is True
+    for locked in ("review_queue", "view_analytics", "view_funding", "export_data"):
+        assert out["can"][locked] is False, f"{locked} is open to a signed-out visitor"
+    assert set(out["roles"]) == {"citizen", "reviewer", "admin"}
+
+
+# ------------------------------------------------------------- map geometry
+def test_every_region_in_every_pack_has_a_map_outline():
+    """A region with no outline renders as a hole, and a reader will read a hole
+    as "nothing was reported here" rather than "we have no boundary for this".
+    So the choropleth is only honest if the geometry is complete at the level it
+    draws, and that is checked per pack rather than for India alone."""
+    from app.analysis.fusion import PACK_DIR
+    for code in ("IN", "BR", "ZA"):
+        path = PACK_DIR / f"{code}.geo.json"
+        assert path.exists(), f"{code} has no map geometry"
+        geo = json.loads(path.read_text(encoding="utf-8"))
+        pack = load_pack(code)
+        drawn = {r["code"] for r in geo["regions"]}
+        expected = {r["code"] for r in pack.regions}
+        assert drawn == expected, (
+            f"{code}: outlines missing for {sorted(expected - drawn)}; "
+            f"outlines for regions not in the pack: {sorted(drawn - expected)}")
+        for region in geo["regions"]:
+            assert region["rings"], f"{code}/{region['name']} has no ring"
+            for ring in region["rings"]:
+                # A polygon needs three distinct vertices plus the repeated
+                # closing point to enclose anything at all.
+                assert len(ring) >= 4, f"{code}/{region['name']}: degenerate ring"
+                assert ring[0] == ring[-1], f"{code}/{region['name']}: unclosed ring"
+        w, so, e, n = geo["bounds"]
+        assert w < e and so < n, f"{code}: bounds are inverted"
+
+
+def test_geometry_files_are_not_mistaken_for_country_packs():
+    """`available_countries` globbed `*.json` in the packs directory, so adding
+    `IN.geo.json` beside `IN.json` took the whole country list down with a
+    FileNotFoundError for a pack called "IN.geo". Discovery is by pack code now,
+    and this is the regression."""
+    from app.analysis.fusion import PACK_DIR, available_countries
+    assert list(PACK_DIR.glob("*.geo.json")), "fixture: no geometry files present"
+    codes = {c["code"] for c in available_countries()}
+    assert codes == {"IN", "BR", "ZA"}, codes
+
+
+def test_geometry_endpoint_refuses_anything_that_is_not_a_pack_code():
+    """`code` is interpolated into a filesystem path, so it is validated before
+    the path is built rather than trusted because the file happened to exist."""
+    from fastapi import HTTPException
+    from app.main import country_geometry
+    for bad in ("../app", "..", "IN/../IN", "I", "INX", "in.geo", ""):
+        try:
+            country_geometry(bad)
+        except HTTPException as exc:
+            assert exc.status_code == 404
+        else:
+            raise AssertionError(f"{bad!r} was accepted as a pack code")
+    assert country_geometry("in").body, "a real code, in any case, must still work"
 
 
 # --------------------------------------------------------- setup and .env

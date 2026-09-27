@@ -7,6 +7,7 @@ prioritisation engine scores and the unit a government actually funds.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -97,9 +98,18 @@ def load_pack(code: str) -> CountryPack:
     return CountryPack(path)
 
 
+# A pack file is named for its ISO 3166-1 alpha-2 code and nothing else. The
+# packs directory also holds `<CODE>.geo.json` map geometry, which is not a pack
+# and must not be loaded as one -- discovering packs by a bare `*.json` glob
+# picked those up and took the country list down with a FileNotFoundError.
+PACK_FILE_RE = re.compile(r"^[A-Z]{2}$")
+
+
 def available_countries() -> list[dict]:
     out = []
     for p in sorted(PACK_DIR.glob("*.json")):
+        if not PACK_FILE_RE.match(p.stem):
+            continue
         pack = load_pack(p.stem)
         out.append({"code": pack.code, "name": pack.name,
                     "regions": len(pack.regions),
