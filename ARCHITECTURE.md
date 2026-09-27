@@ -236,7 +236,11 @@ nav grants nothing.
 ### Stage 3 — Storage
 
 Every request and every human decision on it is written to SQLite — one table
-for requests, one **append-only** audit log. Nothing is ever deleted or
+for requests, one **append-only** audit log. The database lives at
+`var/data.db`, or, with `APP_DB=:memory:`, entirely in the process and nowhere
+on disk, which is what makes this deployable to a host with a read-only or
+ephemeral filesystem. The trade in that mode is the obvious one: requests
+submitted after startup do not survive a restart. Nothing is ever deleted or
 silently overwritten; a reviewer's correction is recorded next to the
 original AI classification, so a disputed recommendation can always be traced
 back to who changed what and when.
@@ -454,7 +458,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_app.py       52 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       53 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it

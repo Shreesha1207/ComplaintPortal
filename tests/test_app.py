@@ -774,6 +774,67 @@ def test_no_database_file_is_tracked_by_git():
     assert not offenders, f"database files are committed: {offenders}"
 
 
+def test_memory_mode_runs_with_nothing_on_disk_and_is_shared_across_threads():
+    """`APP_DB=:memory:` is the deployment mode for a host with no writable
+    disk, so two properties have to hold together.
+
+    One: nothing is written. Two -- the one that is easy to get wrong and
+    silent when you do -- every thread sees the *same* database. A plain
+    ":memory:" is private to the connection that opened it, and this module
+    opens one per thread, so without the shared-cache URI each uvicorn worker
+    would get its own empty database and a citizen's submission would vanish
+    between two requests of the same session. This writes in one thread and
+    counts in another, which is the only way to catch that."""
+    import importlib
+    import threading
+    from app import db as _db
+
+    saved = os.environ.get("APP_DB")
+    tmp = pathlib_Path(tempfile.mkdtemp())
+    try:
+        os.environ["APP_DB"] = ":memory:"
+        importlib.reload(_db)
+        assert _db.IN_MEMORY and _db.DB_PATH == ":memory:"
+        _db.init_db()
+
+        before = set(tmp.rglob("*"))
+        rec = {
+            "country": "IN", "region_code": "LA", "district_code": "LA-7219",
+            "channel": "web", "language": "en", "language_confidence": 1.0,
+            "text_original": "x", "text_redacted": "x", "text_en": "x",
+            "text_local": "x", "translated": 0, "sector": "water",
+            "sector_confidence": 1.0, "urgency": "high", "urgency_score": 0.8,
+            "affected_population": 10, "ai_confidence": 0.9,
+            "ai_engine": "heuristic", "ai_rationale": "r", "pii_types": [],
+            "entities": {}, "status": "new", "reviewer_note": None,
+        }
+        wrote = []
+        t = threading.Thread(target=lambda: wrote.append(
+            _db.insert_request(rec, actor="test")))
+        t.start(); t.join()
+        assert wrote, "the writing thread did not complete"
+
+        seen = []
+        r = threading.Thread(target=lambda: seen.append(_db.counts()["total"]))
+        r.start(); r.join()
+        assert seen[0] == 1, (
+            "a request written in one thread was invisible in another -- the "
+            "in-memory database is not shared, so each worker has its own")
+
+        # The audit log is a separate table written in the same transaction;
+        # if only the request crossed the thread boundary the store is torn.
+        assert _db.get_audit(wrote[0]), "no audit entry for the stored request"
+        assert set(tmp.rglob("*")) == before, "memory mode wrote to disk"
+    finally:
+        if saved is None:
+            os.environ.pop("APP_DB", None)
+        else:
+            os.environ["APP_DB"] = saved
+        importlib.reload(_db)
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 # ------------------------------------------------------------- map geometry
 def test_every_region_in_every_pack_has_a_map_outline():
     """A region with no outline renders as a hole, and a reader will read a hole

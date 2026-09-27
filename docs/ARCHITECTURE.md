@@ -25,7 +25,8 @@
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼  Unified Request Envelope
 ┌── STORE ── app/db.py ────────────────────────────────────────────────┐
-│  SQLite (WAL). requests + append-only audit_log.                        │
+│  SQLite (WAL) at var/data.db. requests + append-only audit_log.        │
+│  APP_DB=:memory: runs the same schema in-process, nothing on disk.     │
 └───────────────────────────────┬────────────────────────────────────────┘
                                 ▼
 ┌── FUSION ── app/analysis/fusion.py ────────────────────────────────────┐
@@ -168,5 +169,5 @@ app/
   schemas.py Unified Request Envelope
   seed.py    synthetic multilingual corpus generator
 docs/        ARCHITECTURE · PRIORITIZATION · DPG_COMPLIANCE · PITCH
-tests/       test_app.py  (52 tests, runs with or without pytest)
+tests/       test_app.py  (53 tests, runs with or without pytest)
 ```
