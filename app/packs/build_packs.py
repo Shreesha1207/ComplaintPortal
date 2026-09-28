@@ -266,6 +266,12 @@ def _rand(*key) -> float:
     return int(h[:12], 16) / float(16 ** 12)
 
 
+def _digest(*key) -> int:
+    """Stable integer digest of a key, identical across runs and machines."""
+    h = hashlib.sha256("|".join(str(k) for k in key).encode()).hexdigest()
+    return int(h[:12], 16)
+
+
 def _clamp(v, lo, hi):
     return max(lo, min(hi, v))
 
@@ -303,7 +309,11 @@ def build_country(code, name, currency, admin_levels, regions, langs, map_dims, 
                 d_infra[s["code"]] = round(_clamp(r_infra[s["code"]] + shift + noise, 4.0, 97.0), 1)
 
             d_out.append({
-                "code": f"{rcode}-{abs(hash(dname)) % 9973:04d}",
+                # sha256, not the built-in hash(): hash() is salted per
+                # process, so the same district came out with a different code
+                # on every run, and regenerating a pack silently orphaned every
+                # stored request that referenced the old one.
+                "code": f"{rcode}-{_digest(dname) % 9973:04d}",
                 "name": dname,
                 "population": dpop,
                 "deprivation": depriv,
