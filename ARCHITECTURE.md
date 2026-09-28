@@ -179,15 +179,23 @@ to report a broken handpump would filter out precisely the low-literacy,
 shared-phone, no-email population the equity correction exists to serve — the
 front door would undo the maths behind it.
 
+**Citizens do see the statistics.** `/statistics` is open to everyone: the
+national and district picture, the choropleth, and the intake breakdowns. A
+platform that asks people to report problems and then shows them nothing is
+asking for unpaid labour. Signing in is for *acting on* requests, not for
+reading what the country asked for.
+
 **Staff sign in, in two roles:**
 
-| | `reviewer` | `admin` |
-|---|---|---|
-| Verification queue | ✓ | ✓ |
-| Read a stored request | ✓ | ✓ |
-| Priority rankings, demand map | — | ✓ |
-| **Funding: committed, unfunded, budget simulator** | — | ✓ |
-| Policy weights, CSV export | — | ✓ |
+| | citizen | `reviewer` | `admin` |
+|---|---|---|---|
+| Submit a request | ✓ | ✓ | ✓ |
+| District & region statistics | ✓ | ✓ | ✓ |
+| Verification queue | — | ✓ | ✓ |
+| Read a stored request | — | ✓ | ✓ |
+| Full derivation of one recommendation | — | — | ✓ |
+| Policy weights, CSV export | — | — | ✓ |
+| **Funding: committed, unfunded, budget simulator** | — | — | ✓ |
 
 A block officer confirming a request is real should not be able to move a
 budget, and does not need to.
@@ -197,6 +205,26 @@ committed and unfunded amounts per district, so those endpoints are admin-only
 even where a reviewer might find the rest of the payload useful. Drawing the
 line at pages would have left the numbers reachable over the API — which is
 where they would actually leak.
+
+**Which is why the public statistics are a projection, not an unlocked guard.**
+`/api/analytics/public/*` is a separate, hand-picked surface. Three things stop
+it being `/api/analytics` with `require_admin` deleted:
+
+- *Money.* District and region rollups both carry `unfunded`, and cells carry
+  `committed`, `required` and `coverage`. Publishing the rollup object publishes
+  the figures the boundary exists to hold.
+- *Grain.* 39% of the 1,460 India district×sector cells hold one or two
+  requests, and `/api/requests/public` already publishes district, sector,
+  urgency, timestamp and redacted text — so cell-grain counts are linkable
+  against it. The public grain stops at the district.
+- *The citizen's own words.* `/api/analytics/cell` embeds `db.list_requests`,
+  which is a `SELECT *` and therefore carries `text_original` — the text
+  **before** PII redaction. Nothing citizen-facing reads that endpoint.
+
+`tests/test_app.py` names both surfaces as exact `(path, method)` sets, and a
+third test fails if any `/api/analytics` or `/api/export` route is on neither
+list. A new endpoint cannot inherit a default; its author has to say which side
+of the funding boundary it is on.
 
 Mechanically: PBKDF2-HMAC-SHA256 passwords, opaque session tokens stored only
 as SHA-256 hashes, httpOnly `SameSite=Lax` cookies, and lockout after repeated
@@ -208,7 +236,11 @@ nav grants nothing.
 ### Stage 3 — Storage
 
 Every request and every human decision on it is written to SQLite — one table
-for requests, one **append-only** audit log. Nothing is ever deleted or
+for requests, one **append-only** audit log. The database lives at
+`var/data.db`, or, with `APP_DB=:memory:`, entirely in the process and nowhere
+on disk, which is what makes this deployable to a host with a read-only or
+ephemeral filesystem. The trade in that mode is the obvious one: requests
+submitted after startup do not survive a restart. Nothing is ever deleted or
 silently overwritten; a reviewer's correction is recorded next to the
 original AI classification, so a disputed recommendation can always be traced
 back to who changed what and when.
@@ -262,13 +294,36 @@ black box.
 
 ### Stage 6 — Delivery
 
-- **Policy dashboard** — a hex map of the country (equal-area tiles, so
-  colour reflects need rather than land area), a ranked list of
+- **Public statistics page** (`/statistics`, no account) — the choropleth, the
+  districts ranked by unmet need, which sectors each one's worst needs are in,
+  and the intake breakdowns by sector, language and channel. No money, nothing
+  finer than a district.
+- **Policy dashboard** (administrators) — the same map, plus a ranked list of
   recommendations, a full breakdown of any recommendation's math, live-
   adjustable policy weights, and a budget simulator that shows three
   different spending strategies side by side rather than picking one for you.
 - **Human review queue** — every request the AI wasn't confident about,
   waiting for a person to confirm, correct, or reject it.
+
+**Two maps, because they answer two questions.** The geographic choropleth
+draws real `admin-1` outlines — states and union territories for India,
+provinces for South Africa — so a reader can find where they live. The
+equal-area cartogram gives every region the same visual weight, so colour
+tracks need rather than land area, which is what stops a vast thinly-populated
+region from shouting and a dense small one from vanishing. Both are one
+toggle apart on both pages; neither is a substitute for the other.
+
+The outlines come from **Natural Earth 1:10m Admin 1**, which is in the public
+domain — no attribution obligation and no share-alike clause to attach to this
+repository, which is the whole reason it was chosen over the finer
+Census-derived district datasets. `app/packs/build_geo.py` simplifies them to
+~110m precision and writes one `<CODE>.geo.json` per pack, served from
+`/api/countries/{code}/geometry` rather than inside the pack, because every
+page loads the pack and the geometry is two orders of magnitude larger.
+
+There is deliberately **no district-boundary map**. The packs carry a sample of
+districts — 146 of India's ~780 — so district polygons would draw a map full of
+holes, and a reader would read a hole as "nobody here reported anything".
 - **Open REST API** (`/api/docs`) — everything the dashboard shows is also a
   documented API response. A civil-society group or another ministry system
   can pull the exact same numbers without adopting this dashboard.
@@ -384,10 +439,13 @@ app/
 │   └── budget.py             budget-envelope simulator
 ├── packs/                One JSON file per country — the "add a nation" seam
 │   ├── build_packs.py      generator (reproducible, documented assumptions)
+│   ├── build_geo.py        map-outline generator (Natural Earth, public domain)
 │   ├── IN.json / BR.json / ZA.json
+│   ├── IN.geo.json / BR.geo.json / ZA.geo.json    region outlines, lon/lat
 ├── web/                  No-build-step frontend
-│   ├── index / citizen / dashboard / review .html
-│   └── static/              app.css, viz.js (hand-rolled SVG charts), page scripts
+│   ├── index / citizen / statistics / dashboard / review .html
+│   └── static/              app.css, viz.js (hand-rolled SVG charts),
+│                            geomap.js (the choropleth), page scripts
 ├── auth.py               staff accounts, sessions, role guards
 ├── main.py               FastAPI app — every route the system exposes
 ├── db.py                 SQLite schema + access (requests, audit_log)
@@ -400,7 +458,7 @@ docs/
 ├── DPG_COMPLIANCE.md      Digital Public Good standard, checked honestly
 └── PITCH.md                six-minute demo script
 
-tests/test_app.py       41 tests — the load-bearing claims, not just CRUD
+tests/test_app.py       53 tests — the load-bearing claims, not just CRUD
 ```
 
 ## 11. Running it

@@ -48,6 +48,9 @@ languages, with no country-specific branches in the code.
 What a new country supplies: administrative hierarchy and populations, language
 list with BCP-47 tags, hex-map coordinates, demographic and infrastructure
 indices, investment pipeline, sector benchmarks, and per-language lexicon entries.
+Geographic outlines are optional and separate — `app/packs/build_geo.py` derives
+a `<CODE>.geo.json` from Natural Earth, which is public domain, and a pack
+without one simply opens on the equal-area cartogram instead.
 Lexicons are data maintained by a national language team, which is what makes the
 platform genuinely forkable rather than nominally open-source.
 

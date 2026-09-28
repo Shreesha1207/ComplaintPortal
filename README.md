@@ -39,6 +39,14 @@ pip install -r requirements.txt
 Open <http://127.0.0.1:8000>. The database seeds itself on first run with ~6,250
 synthetic multilingual requests across India, Brazil and South Africa (~8s).
 
+It is written to **`var/data.db`**, which is git-ignored as a whole directory —
+nothing about the database is or ever has been in the repository. Delete `var/`
+whenever you want a clean slate; the next start rebuilds and reseeds it. Point
+it somewhere else with `APP_DB=/path/to/app.db`, which always wins over the
+default.
+
+Or run it with **no disk at all** — see [Hosting it](#hosting-it).
+
 The app opens in citizen mode. Staff sign in from the link at the foot of that
 page, or by going to `/login` directly; a citizen is never shown either.
 
@@ -46,6 +54,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 |---|---|
 | `/` | Citizen intake — voice, text, WhatsApp and SMS/IVR channels. No account needed |
 | `/citizen` | The same page, under its own name |
+| `/statistics` | National statistics and the country map. No account needed |
 | `/login` | Staff sign-in — the only way into the two pages below |
 | `/dashboard` | Policy dashboard — map, recommendations, weights, budget simulator. Admin only |
 | `/review` | Human review queue for low-confidence classifications. Any staff member |
@@ -53,7 +62,7 @@ page, or by going to `/login` directly; a citizen is never shown either.
 | `/api/docs` | Interactive OpenAPI documentation |
 
 ```bash
-python3 tests/test_app.py   # 41 tests, no test runner required
+python3 tests/test_app.py   # 53 tests, no test runner required
 ```
 
 ---
@@ -187,13 +196,33 @@ Every AI decision and human override is written to an append-only audit log.
 account to report a broken handpump would filter out exactly the low-literacy,
 shared-phone population the equity correction exists to serve.
 
+**Citizens do see the statistics.** `/statistics` is open to everyone: a
+colour-coded map of the country, districts ranked by unmet need, which sectors
+each one's worst needs are in, and the intake breakdowns. Signing in is for
+*acting on* requests, not for reading what the country asked for.
+
 **Staff sign in at `/login`**, in two roles:
 
-| | `reviewer` | `admin` |
-|---|---|---|
-| Verification queue | ✓ | ✓ |
-| Priority rankings and demand map | — | ✓ |
-| **Funding, budget simulator, exports** | — | ✓ |
+| | citizen | `reviewer` | `admin` |
+|---|---|---|---|
+| Submit a request | ✓ | ✓ | ✓ |
+| District & region statistics, the map | ✓ | ✓ | ✓ |
+| Verification queue | — | ✓ | ✓ |
+| Read a stored request | — | ✓ | ✓ |
+| Full derivation of one recommendation | — | — | ✓ |
+| Policy weights, CSV export | — | — | ✓ |
+| **Funding, budget simulator** | — | — | ✓ |
+
+The public statistics are a separate, hand-picked API surface
+(`/api/analytics/public/*`), not `/api/analytics` with the guard removed.
+Three things are why: the district and region rollups carry `unfunded`;
+district×sector counts are close to identifying, since 39% of India's 1,460
+cells hold one or two requests and `/api/requests/public` already publishes
+district, sector, urgency and timestamp to link against; and
+`/api/analytics/cell` embeds a `SELECT *` that carries `text_original`, the
+citizen's words *before* redaction. The published grain stops at the district,
+and the tests name both surfaces as exact `(path, method)` sets so a new route
+cannot land on neither list.
 
 The first time you open `/login`, the page asks you to create the administrator
 account: pick a username and password there and you are signed in straight
@@ -289,6 +318,72 @@ One modelling assumption is deliberate and documented: investment is generated a
 a function of urbanisation and literacy — of political salience — rather than of
 need. That reproduces a well-observed pattern, and it is what creates the blind
 spots the platform is built to find.
+
+## Hosting it
+
+```bash
+APP_DB=:memory: ./run.sh
+```
+
+That runs the whole platform with **nothing on disk**. The synthetic corpus is
+seeded into memory at startup, citizens submit normally and get their reference
+number, the public feed shows their request straight away, and the statistics,
+the map and the dashboard are all fully live. Nothing is written anywhere.
+
+This exists because a database file is the one thing that makes a small service
+like this annoying to host. Most cheap places to run Python give you a
+filesystem that is read-only, or wiped on every deploy, or not shared between
+instances — and a file needs none of those things to be true.
+
+**The cost, stated plainly:** requests submitted after startup live until the
+process restarts. For a demonstration deployment, whose stored corpus is
+synthetic anyway, that is usually the right trade. For a real deployment, give
+it a disk (`APP_DB=/data/app.db` on a mounted volume) or move to Postgres — the
+schema is plain SQL and the access layer is thin, so that is a connection-string
+change and a migration, not a rewrite.
+
+**Why not "just write it to a JSON file"?** It has exactly the same problem. A
+JSON file is still a file: it still needs a writable disk that survives a
+restart, and it is not shared between instances either. It would additionally
+give up the append-only audit log, the indexes the analytics run on, and safe
+concurrent writes — more work, and strictly worse. The fix for hosting is
+removing the *disk*, not changing the file format.
+
+**One thing to check about where you host it.** This is a Python web server, not
+a static site, so it needs somewhere that runs a process — Render, Railway,
+Fly.io, a container, Hugging Face Spaces, or any VM. Static hosts that build
+from a repository and serve files will not run it, whatever the database does.
+
+## The map
+
+`/statistics` and `/dashboard` both draw the country two ways, one toggle apart.
+
+**Geographic** is a choropleth of real `admin-1` outlines — 36 states and union
+territories for India, 27 states for Brazil, 9 provinces for South Africa — so a
+reader can find where they live. **Equal-area** is the hex cartogram, which
+gives every region the same visual weight so colour tracks the measure rather
+than land area; without it a vast, thinly-populated region shouts and a dense
+small one vanishes. Neither replaces the other.
+
+Outlines come from **Natural Earth 1:10m Admin 1**, which is in the public
+domain — no attribution obligation and no share-alike clause to attach to this
+repository, which is why it was chosen over the finer Census-derived district
+datasets. To rebuild them:
+
+```bash
+curl -O https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
+python3 -m app.packs.build_geo ne_10m_admin_1_states_provinces.geojson
+```
+
+That writes `app/packs/<CODE>.geo.json` — simplified to ~110m precision, about
+83KB for India — and touches no country pack, which matters because the packs
+cannot be regenerated (see `build_packs.py`). Geometry is served from
+`/api/countries/{code}/geometry` rather than inside the pack, since every page
+loads the pack and the geometry is two orders of magnitude larger.
+
+There is deliberately **no district-boundary map**. The packs carry a sample of
+districts — 146 of India's ~780 — so district polygons would draw a map full of
+holes, and a reader would read a hole as "nobody here reported anything".
 
 ## Documentation
 

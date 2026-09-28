@@ -9,3 +9,8 @@ venv/
 .env
 *.db-wal
 *.db-shm
+
+# Runtime state the app writes about itself: the SQLite database and its
+# WAL sidecars. Ignored as a directory so nothing in it can be committed by
+# accident, whatever it is called.
+var/

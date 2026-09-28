@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import logging
 import os
+import re
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
@@ -24,7 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from . import auth, db
 from .ai.groq_engine import get_engine
 from .analysis.budget import STRATEGIES, allocate, compare_strategies
-from .analysis.fusion import available_countries, build_matrix, load_pack
+from .analysis.fusion import PACK_DIR, available_countries, build_matrix, load_pack
 from .analysis.priority import (DEFAULT_LAMBDA, DEFAULT_WEIGHTS, FACTOR_LABELS,
                               rollup_districts, rollup_regions, score_cells)
 from .ai.speech import MAX_AUDIO_BYTES as SPEECH_MAX_BYTES
@@ -219,11 +221,28 @@ def me(request: Request):
         "setup_required": auth.needs_setup(),
         "can": {
             # Capabilities, not roles: the UI should never hard-code the rule.
+            #
+            # Two of these are true for everyone, and that is the citizen half of
+            # the role split rather than an oversight. Anyone may report a
+            # problem, and anyone may see what the country asked for. What needs
+            # an account is acting on a request; what needs an administrator is
+            # money -- the funding figures, the budget simulator, the per-cell
+            # derivation and the export.
             "submit_requests": True,          # always public, by design
+            "view_statistics": True,          # district and region rollups
             "review_queue": bool(user),
             "view_analytics": bool(user and user["role"] == "admin"),
             "view_funding": bool(user and user["role"] == "admin"),
             "export_data": bool(user and user["role"] == "admin"),
+        },
+        "roles": {
+            "citizen": "Submit a request, and see the national statistics. "
+                       "No account, by design.",
+            "reviewer": "Confirm or correct requests the AI was not confident "
+                        "enough to act on alone.",
+            "admin": "Everything a reviewer sees, plus funding: committed and "
+                     "unfunded figures, the budget simulator, the full "
+                     "derivation of each recommendation, and the export.",
         },
     }
 
@@ -368,7 +387,27 @@ def country_detail(code: str):
         ],
         "weight_defaults": {**DEFAULT_WEIGHTS, "discount_lambda": DEFAULT_LAMBDA},
         "factor_labels": FACTOR_LABELS,
+        "has_geometry": (PACK_DIR / f"{pack.code}.geo.json").exists(),
     }
+
+
+@app.get("/api/countries/{code}/geometry", tags=["meta"])
+def country_geometry(code: str):
+    """Region outlines for the choropleth: public domain Natural Earth, built
+    by `app/packs/build_geo.py`.
+
+    Served separately from the pack rather than inside it, because every page
+    fetches the pack on load and the geometry is two orders of magnitude larger.
+    This way a browser caches it once. It is public for the same reason the map
+    is: geography is not the part of this platform that needs guarding.
+    """
+    path = PACK_DIR / f"{code.strip().upper()}.geo.json"
+    # Refuse anything that is not a plain pack code before touching the path, so
+    # `code` can never walk out of the packs directory.
+    if not re.fullmatch(r"[A-Z]{2}", code.strip().upper()) or not path.exists():
+        raise HTTPException(404, f"No map geometry for '{code}'")
+    return JSONResponse(json.loads(path.read_text(encoding="utf-8")),
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 
 # ==========================================================================
@@ -488,11 +527,22 @@ def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
 
     blind = [r for r in scored if r["blind_spot"]]
     silent = [r for r in scored if r["silent_district"]]
+
+    # A request the classifier could not place lands in sector "other", which is
+    # not one of the pack's sectors, so `build_matrix` has no cell for it and it
+    # reaches no district or region count. It is still a request the platform
+    # received, and `requests_total` counts it. Reporting the difference is the
+    # only thing that stops `requests_total` and the sum of the district counts
+    # from disagreeing by a silent 10%.
+    unclassified = sum(1 for r in rows if r["sector"] not in pack.sectors)
+
     return {
         "country": pack.code, "country_name": pack.name, "currency": pack.currency,
         "data_notice": pack.data_notice,
         "requests_total": len(rows),
         "requests_in_review": sum(1 for r in rows if r["status"] == "review"),
+        "requests_unclassified": unclassified,
+        "requests_counted_in_rollups": len(rows) - unclassified,
         "languages_seen": len(by_lang), "districts": len(pack.district_by_code),
         "regions": len(pack.regions),
         "blind_spots": len(blind), "silent_districts": len(silent),
@@ -506,6 +556,116 @@ def summary(country: str = "IN", user: dict = Depends(auth.require_admin)):
         "by_urgency": by_urgency,
         "sector_names": {c: s["name"] for c, s in pack.sectors.items()},
     }
+
+
+# --------------------------------------------------------------------------
+# Public statistics.
+#
+# Citizens see statistics without signing in; administrators see funding. That
+# is the boundary, and these three endpoints are the citizen side of it.
+#
+# They are hand-picked projections, not the admin payload with the guard taken
+# off, for three reasons that were each found the hard way:
+#
+#   Money. Every district and region rollup carries `unfunded`, and every cell
+#   carries `committed`, `required` and `coverage`. Publishing the rollup object
+#   publishes the funding figures the admin boundary exists to hold.
+#
+#   Grain. 39% of this country's district x sector cells hold one or two
+#   requests, and the public feed at /api/requests/public already publishes
+#   district, sector, urgency, timestamp and redacted text. Cell-grain counts
+#   are linkable against it, so the public grain stops at the district.
+#
+#   Citizen words. /api/analytics/cell embeds db.list_requests, which is a
+#   SELECT * and therefore carries `text_original` -- what the citizen typed
+#   before PII redaction. Nothing here reads that endpoint.
+#
+# The projections are functions rather than inline dict literals so the test
+# suite can assert the exact published key set, which is what stops a field
+# added to a rollup later from quietly appearing in public.
+# --------------------------------------------------------------------------
+PUBLIC_DISTRICT_FIELDS = ("district_code", "district_name", "region_code",
+                          "region_name", "population", "priority_index",
+                          "request_count", "silent")
+PUBLIC_REGION_FIELDS = ("region_code", "region_name", "population",
+                        "priority_index", "districts", "request_count",
+                        "silent", "top_district")
+
+
+def public_district(row: dict) -> dict:
+    out = {k: row[k] for k in PUBLIC_DISTRICT_FIELDS}
+    # Which sectors this district's worst needs are in, with their scores. No
+    # request counts at sector grain -- the score is a composite of demand,
+    # infrastructure and demographics, so it does not disclose "one person
+    # asked", which a raw count at this grain would.
+    out["top_sectors"] = [{"sector": s["sector"], "sector_name": s["sector_name"],
+                           "priority_index": s["priority_index"]}
+                          for s in row["top_sectors"]]
+    return out
+
+
+def public_region(row: dict) -> dict:
+    return {k: row[k] for k in PUBLIC_REGION_FIELDS}
+
+
+@app.get("/api/analytics/public/summary", tags=["public statistics"])
+def public_summary(country: str = "IN"):
+    """Headline figures, open to everyone. No funding, no cell grain."""
+    scored = get_scored(country)
+    pack = load_pack(country)
+    rows = db.list_requests(country=country.upper(), limit=1_000_000)
+    districts = rollup_districts(scored)
+
+    by_lang, by_channel, by_sector, by_urgency = {}, {}, {}, {}
+    for r in rows:
+        by_lang[r["language"]] = by_lang.get(r["language"], 0) + 1
+        by_channel[r["channel"]] = by_channel.get(r["channel"], 0) + 1
+        by_sector[r["sector"]] = by_sector.get(r["sector"], 0) + 1
+        by_urgency[r["urgency"]] = by_urgency.get(r["urgency"], 0) + 1
+
+    unclassified = sum(1 for r in rows if r["sector"] not in pack.sectors)
+    return {
+        "country": pack.code, "country_name": pack.name,
+        # The synthetic-data notice travels with the figures. It used to be
+        # rendered only by the admin dashboard, which would have made it vanish
+        # at exactly the moment these numbers became the public product.
+        "data_notice": pack.data_notice,
+        "requests_total": len(rows),
+        "requests_in_review": sum(1 for r in rows if r["status"] == "review"),
+        "requests_unclassified": unclassified,
+        "requests_counted_in_rollups": len(rows) - unclassified,
+        "languages_seen": len(by_lang),
+        "districts": len(pack.district_by_code), "regions": len(pack.regions),
+        "silent_districts": sum(1 for r in scored if r["silent_district"]),
+        "mean_priority": round(sum(r["priority_index"] for r in scored)
+                               / max(len(scored), 1), 2),
+        "top_district": public_district(districts[0]) if districts else None,
+        "by_language": dict(sorted(by_lang.items(), key=lambda kv: -kv[1])),
+        "by_channel": dict(sorted(by_channel.items(), key=lambda kv: -kv[1])),
+        "by_sector": dict(sorted(by_sector.items(), key=lambda kv: -kv[1])),
+        "by_urgency": by_urgency,
+        "sector_names": {c: s["name"] for c, s in pack.sectors.items()},
+        "language_names": {l["code"]: l.get("native") or l["name"]
+                           for l in pack.languages},
+    }
+
+
+@app.get("/api/analytics/public/regions", tags=["public statistics"])
+def public_regions(country: str = "IN"):
+    """Region rollups — the grain the choropleth draws."""
+    rows = rollup_regions(rollup_districts(get_scored(country)))
+    return {"count": len(rows), "items": [public_region(r) for r in rows]}
+
+
+@app.get("/api/analytics/public/districts", tags=["public statistics"])
+def public_districts(country: str = "IN", region: str | None = None,
+                     limit: int = Query(200, le=2000)):
+    """District rollups, optionally within one region."""
+    rows = rollup_districts(get_scored(country))
+    if region:
+        rows = [r for r in rows if r["region_code"] == region]
+    return {"count": len(rows),
+            "items": [public_district(r) for r in rows[:limit]]}
 
 
 @app.get("/api/analytics/priorities", tags=["analytics"])
@@ -637,6 +797,18 @@ def about():
     anyone evaluating it, but it is no longer what a citizen is shown first.
     """
     return FileResponse(WEB_DIR / "index.html")
+
+
+@app.get("/statistics", include_in_schema=False)
+def statistics():
+    """What the country has asked for. Open to everyone, no account.
+
+    This is the citizen half of the role split. It reads only
+    /api/analytics/public/*, which carries no funding figure and stops at the
+    district, so making it public needed a projection rather than an unlocked
+    guard.
+    """
+    return FileResponse(WEB_DIR / "statistics.html")
 
 
 @app.get("/login", include_in_schema=False)

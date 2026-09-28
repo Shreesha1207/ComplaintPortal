@@ -2,11 +2,12 @@ import {
   api, fmt, hbar, hexMap, hideTip, pluralize, priorityPill, seqLegend, stackedBar,
   renderNav, urgencyChip, CAT,
 } from './viz.js';
+import { choroLegend, choropleth, domainOf } from './geomap.js';
 
 const $ = (id) => document.getElementById(id);
 const state = {
   country: 'IN', sector: '', region: '', lens: '',
-  selectedCell: null, pack: null, summary: null,
+  selectedCell: null, pack: null, summary: null, geo: null, view: 'geo',
   weights: { demand: 0.30, gap: 0.25, people: 0.15, severity: 0.15, vulnerability: 0.15 },
   lambda: 0.60, envelope: 50000,
 };
@@ -58,6 +59,9 @@ async function boot() {
     clearTimeout(window._bt); window._bt = setTimeout(loadBudget, 220);
   };
 
+  $('v-geo').onclick = () => setView('geo');
+  $('v-hex').onclick = () => setView('hex');
+
   await loadPack();
   buildWeightControls();
   refreshAll();
@@ -66,8 +70,26 @@ async function boot() {
   }).catch(() => {});
 }
 
+function setView(v) {
+  state.view = v;
+  $('v-geo').setAttribute('aria-pressed', String(v === 'geo'));
+  $('v-hex').setAttribute('aria-pressed', String(v === 'hex'));
+  loadMap();
+}
+
 async function loadPack() {
   state.pack = await api(`/api/countries/${state.country}`);
+  // Geometry is optional per pack: without a `.geo.json` the dashboard opens on
+  // the cartogram rather than offering a view it cannot draw.
+  state.geo = null;
+  if (state.pack.has_geometry) {
+    try { state.geo = await api(`/api/countries/${state.country}/geometry`); }
+    catch { state.geo = null; }
+  }
+  $('v-geo').disabled = !state.geo;
+  state.view = state.geo ? state.view : 'hex';
+  $('v-geo').setAttribute('aria-pressed', String(state.view === 'geo'));
+  $('v-hex').setAttribute('aria-pressed', String(state.view === 'hex'));
   $('sector').innerHTML = '<option value="">All sectors</option>' +
     state.pack.sectors.map(s => `<option value="${s.code}">${s.name}</option>`).join('');
   $('region').innerHTML = '<option value="">All regions</option>' +
@@ -99,6 +121,10 @@ async function loadSummary() {
     ['Silent districts', fmt.n(s.silent_districts), 'Severe deficit, no citizen signal received', 'warn'],
     ['Unfunded need', fmt.money(s.unfunded_total, cur), `vs ${fmt.money(s.committed_total, cur)} committed`, ''],
     ['Awaiting human review', fmt.n(s.requests_in_review), 'AI confidence below threshold', ''],
+    // Without this tile, `requests_total` and the sum of the district counts
+    // below disagree by 10% with nothing on the page explaining the gap.
+    ['Unclassified', fmt.n(s.requests_unclassified),
+     `not in any sector, so outside the ${fmt.n(s.requests_counted_in_rollups)} counted above`, ''],
   ].map(([k, v, d, cls]) =>
     `<div class="stat ${cls}"><div class="k">${k}</div><div class="v">${v}</div>
      <div class="d">${d}</div></div>`).join('');
@@ -136,26 +162,49 @@ async function loadMap() {
   const hi = vals.length ? Math.ceil(Math.max(...vals)) : 100;
   $('mapsub').textContent = `${rows.length} ${pluralize(state.pack.admin_levels[1])}`;
 
-  hexMap($('map'), rows, {
-    size: rows.length > 30 ? 24 : 32, max: hi, min: lo, selected: state.region,
-    ariaLabel: `${state.pack.name}: development priority by region`,
-    onSelect: (code) => {
-      state.region = code || ''; $('region').value = state.region;
-      state.selectedCell = null; refreshAll();
-    },
-    tooltip: (r) => {
-      const m = r.meta;
-      if (!m) return `<b>${r.name}</b><div class="row"><span>No data</span><span>—</span></div>`;
-      return `<b>${r.name}</b>
-        <div class="row"><span>Priority index</span><span>${fmt.n1(m.priority_index)}</span></div>
-        <div class="row"><span>Population</span><span>${fmt.compact(m.population)}</span></div>
-        <div class="row"><span>Citizen requests</span><span>${fmt.n(m.request_count)}</span></div>
-        <div class="row"><span>Blind spots</span><span>${m.blind_spots}</span></div>
-        <div class="row"><span>Unfunded</span><span>${fmt.money(m.unfunded, state.pack.currency)}</span></div>
-        <div class="row"><span>Worst district</span><span>${m.top_district}</span></div>`;
-    },
-  });
-  seqLegend($('maplegend'), { max: hi, min: lo, label: 'Priority index' });
+  const select = (code) => {
+    state.region = code || ''; $('region').value = state.region;
+    state.selectedCell = null; refreshAll();
+  };
+  const tip = (name, m) => {
+    if (!m) return `<b>${name}</b><div class="row"><span>No data</span><span>—</span></div>`;
+    return `<b>${m.region_name}</b>
+      <div class="row"><span>Priority index</span><span>${fmt.n1(m.priority_index)}</span></div>
+      <div class="row"><span>Population</span><span>${fmt.compact(m.population)}</span></div>
+      <div class="row"><span>Citizen requests</span><span>${fmt.n(m.request_count)}</span></div>
+      <div class="row"><span>Blind spots</span><span>${m.blind_spots}</span></div>
+      <div class="row"><span>Unfunded</span><span>${fmt.money(m.unfunded, state.pack.currency)}</span></div>
+      <div class="row"><span>Worst district</span><span>${m.top_district}</span></div>`;
+  };
+  const level = state.pack.admin_levels[1].toLowerCase();
+
+  if (state.view === 'geo' && state.geo) {
+    choropleth($('map'), state.geo, byCode, {
+      valueKey: 'priority_index', min: lo, max: hi, selected: state.region,
+      onSelect: select,
+      ariaLabel: `${state.pack.name}: development priority by ${level}`,
+      tooltip: (region, m) => tip(region.name, m),
+      noDataLabel: 'no data',
+    });
+    choroLegend($('maplegend'), { max: hi, min: lo, label: 'Priority index',
+                                 unit: '0–100' });
+    $('mapnote').textContent =
+      `${state.geo.level} boundaries from Natural Earth, which is in the public domain. ` +
+      `Click a ${level} to filter; click again to clear. Read it against the ` +
+      `equal-area view: on a true map a vast, thinly populated ${level} dominates the ` +
+      `eye and a dense small one disappears.`;
+  } else {
+    hexMap($('map'), rows, {
+      size: rows.length > 30 ? 24 : 32, max: hi, min: lo, selected: state.region,
+      ariaLabel: `${state.pack.name}: development priority by ${level}, equal-area tiles`,
+      onSelect: select,
+      tooltip: (r) => tip(r.name, r.meta),
+    });
+    seqLegend($('maplegend'), { max: hi, min: lo, label: 'Priority index' });
+    $('mapnote').textContent =
+      `Equal-area tiles: every ${level} gets the same visual weight, so colour reflects ` +
+      `priority rather than land area. Click a tile to filter; click again to clear.`;
+  }
   $('maptitle').textContent = state.region
     ? `${byCode[state.region]?.region_name || state.region} selected`
     : 'Demand & deficit by region';

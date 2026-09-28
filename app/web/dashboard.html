@@ -54,12 +54,15 @@
         <span class="sub" id="mapsub"></span>
       </div>
       <div class="card-b">
+        <div class="map-toolbar">
+          <div class="seg" role="group" aria-label="Map view">
+            <button id="v-geo" aria-pressed="true">Geographic</button>
+            <button id="v-hex" aria-pressed="false">Equal-area</button>
+          </div>
+        </div>
         <div class="mapwrap" id="map"></div>
         <div class="legend" id="maplegend"></div>
-        <p class="xs muted" style="margin:10px 0 0">
-          Equal-area tiles: every region gets the same visual weight, so colour reflects
-          priority rather than land area. Click a tile to filter; click again to clear.
-        </p>
+        <p class="xs muted" id="mapnote" style="margin:11px 0 0"></p>
       </div>
     </div>
 

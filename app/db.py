@@ -18,7 +18,70 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path(os.getenv("APP_DB", Path(__file__).resolve().parent.parent / "data.db"))
+# The database lives in `var/`, not the project root.
+#
+# It used to be written as `data.db` beside README.md and run.sh, where it is
+# the only non-source file in the listing and reads like something that belongs
+# in the repository. It never was -- `.gitignore` has excluded `*.db` since the
+# first commit that carried any code, and no database file has ever been
+# committed on any branch, which was checked rather than assumed -- but a binary
+# sitting among the source invites someone to commit it, and invites everyone
+# else to wonder whether it already is.
+#
+# `var/` is the conventional place for state a program writes about itself, and
+# it keeps the `-wal` and `-shm` sidecars together with it rather than
+# scattering three files across the root. The directory is ignored whole.
+#
+# APP_DB still wins, absolutely: a deployment that wants the database on another
+# volume sets it and nothing here interferes. Tests set it to a temporary file.
+DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "var" / "data.db"
+
+# APP_DB=:memory: runs the whole platform with nothing on disk at all.
+#
+# This is the deployment mode, and it exists because of a real constraint rather
+# than a preference. Most places you can cheaply host a small Python service
+# give you a filesystem that is read-only, or one that is wiped on every deploy
+# and not shared between instances. A database file needs none of those things
+# to be true, so it is the single thing that makes this app annoying to host.
+#
+# Worth being blunt about the alternative, because it is the obvious idea and it
+# does not work: writing requests to a JSON file instead has *exactly* the same
+# problem. It is still a file, it still needs a writable disk that survives a
+# restart, and it additionally gives up the append-only audit log, the indexes
+# the analytics run on, and safe concurrent writes. It would be more work and
+# strictly worse.
+#
+# So the diskless mode keeps SQLite and every line of SQL above it, and moves
+# the database into the process. Seeding on startup fills it, submissions work
+# normally, the statistics and the map are fully live -- and nothing is written
+# anywhere. The cost, stated plainly wherever it is offered: requests submitted
+# after startup live until the process restarts. For a demonstration deployment
+# of a platform whose stored corpus is synthetic anyway, that is the right
+# trade. For a real deployment, give it a disk or a Postgres.
+MEMORY = ":memory:"
+
+
+def _configured_db() -> str:
+    raw = (os.getenv("APP_DB") or "").strip()
+    if raw.lower() in (":memory:", "memory"):
+        return MEMORY
+    return raw or str(DEFAULT_DB_PATH)
+
+
+DB_PATH = _configured_db()
+IN_MEMORY = DB_PATH == MEMORY
+
+# A plain ":memory:" database is private to the connection that opened it, and
+# this module opens one per thread, so every uvicorn worker would get its own
+# empty database and a citizen's request would vanish between two requests of
+# the same session. The shared-cache URI is what makes one in-memory database
+# that all the threads see.
+#
+# It lives only as long as at least one connection to it is open, so a keepalive
+# connection is held for the life of the process. Without it the database is
+# destroyed the moment a worker thread happens to finish.
+_MEMORY_URI = "file:complaintportal?mode=memory&cache=shared"
+_keepalive: sqlite3.Connection | None = None
 _local = threading.local()
 
 SCHEMA = """
@@ -99,14 +162,40 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _open() -> sqlite3.Connection:
+    """Open one connection to the configured database, on disk or in memory."""
+    if IN_MEMORY:
+        conn = sqlite3.connect(_MEMORY_URI, uri=True, check_same_thread=False)
+    else:
+        # sqlite3 creates the file but not the directory above it, and the
+        # default path has one. Created here rather than at import, so importing
+        # app.db never writes to disk as a side effect.
+        Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    # WAL is a file-based journal and means nothing to an in-memory database;
+    # SQLite silently keeps "memory" journalling there, so asking for it is a
+    # no-op rather than an error, but there is no reason to ask.
+    if not IN_MEMORY:
+        conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    # Shared-cache in-memory databases lock at the table level, so two threads
+    # writing at once can meet SQLITE_LOCKED rather than waiting. A busy timeout
+    # turns that into a short wait, which is what the caller expects.
+    conn.execute("PRAGMA busy_timeout=5000")
+    return conn
+
+
 def connect() -> sqlite3.Connection:
     """One connection per thread; uvicorn's worker pool is threaded."""
+    global _keepalive
     conn = getattr(_local, "conn", None)
     if conn is None:
-        conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA foreign_keys=ON")
+        if IN_MEMORY and _keepalive is None:
+            # Opened before any per-thread connection, and never closed: it is
+            # what keeps the shared in-memory database alive between requests.
+            _keepalive = _open()
+        conn = _open()
         _local.conn = conn
     return conn
 
