@@ -1,0 +1,11 @@
+services:
+  complaint-portal:
+    build: .
+    container_name: complaint-portal
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data.db:/app/data.db
+    restart: unless-stopped

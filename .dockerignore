@@ -1,0 +1,12 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+*.db-shm
+*.db-wal
+docs/
+tests/
+.env.example
+ARCHITECTURE.md
+LICENSE
+README.md

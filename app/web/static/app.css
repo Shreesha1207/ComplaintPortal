@@ -10,12 +10,12 @@
   --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#86857f;
   --border:#e2e1dc; --border-strong:#cfcec8;
 
-  /* Sequential ramp — priority index. Light surface: pale = low, deep = high. */
-  --seq-1:#cde2fb; --seq-2:#9ec5f4; --seq-3:#6da7ec; --seq-4:#3987e5;
-  --seq-5:#256abf; --seq-6:#184f95; --seq-7:#0d366b;
+  /* Sequential ramp — priority index. Yellow (low) → Orange (mid) → Red (high). */
+  --seq-1:#fff3b0; --seq-2:#ffe066; --seq-3:#ffc933; --seq-4:#ffa726;
+  --seq-5:#f57c00; --seq-6:#e53935; --seq-7:#b71c1c;
   --seq-0:#eceae5;                      /* no data */
-  --seq-ink-light:#0b0b0b;              /* label ink on steps 0–3 */
-  --seq-ink-dark:#ffffff;               /* label ink on steps 4–7 */
+  --seq-ink-light:#0b0b0b;              /* label ink on steps 0–4 */
+  --seq-ink-dark:#ffffff;               /* label ink on steps 5–7 */
 
   /* Categorical slots 1–5 (factor contributions only). */
   --cat-1:#2a78d6; --cat-2:#eb6834; --cat-3:#1baf7a; --cat-4:#eda100; --cat-5:#e87ba4;
@@ -24,7 +24,7 @@
   --status-good:#0ca30c; --status-warning:#fab219;
   --status-serious:#ec835a; --status-critical:#d03b3b;
 
-  --accent:#184f95; --accent-ink:#ffffff;
+  --accent:#e53935; --accent-ink:#ffffff;
   --radius:10px; --radius-sm:6px;
   --shadow:0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -39,12 +39,12 @@
     --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322; --surface-3:#2b2b29;
     --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a8a80;
     --border:#33332f; --border-strong:#45453f;
-    /* Dark surface: the ramp is re-selected, not flipped — deep = low, bright = high. */
-    --seq-1:#104281; --seq-2:#184f95; --seq-3:#256abf; --seq-4:#3987e5;
-    --seq-5:#5598e7; --seq-6:#86b6ef; --seq-7:#b7d3f6;
+    /* Dark surface: Yellow (low) → Orange (mid) → Red (high). */
+    --seq-1:#4a3000; --seq-2:#6d4500; --seq-3:#b36a00; --seq-4:#f57c00;
+    --seq-5:#ff9800; --seq-6:#ffb74d; --seq-7:#ffe082;
     --seq-0:#26262400; --seq-ink-light:#ffffff; --seq-ink-dark:#0b0b0b;
     --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500; --cat-5:#d55181;
-    --accent:#3987e5; --accent-ink:#0b0b0b;
+    --accent:#ff5722; --accent-ink:#ffffff;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
   }
 }
@@ -53,11 +53,11 @@
   --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322; --surface-3:#2b2b29;
   --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8a8a80;
   --border:#33332f; --border-strong:#45453f;
-  --seq-1:#104281; --seq-2:#184f95; --seq-3:#256abf; --seq-4:#3987e5;
-  --seq-5:#5598e7; --seq-6:#86b6ef; --seq-7:#b7d3f6;
+  --seq-1:#4a3000; --seq-2:#6d4500; --seq-3:#b36a00; --seq-4:#f57c00;
+  --seq-5:#ff9800; --seq-6:#ffb74d; --seq-7:#ffe082;
   --seq-0:#26262400; --seq-ink-light:#ffffff; --seq-ink-dark:#0b0b0b;
   --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500; --cat-5:#d55181;
-  --accent:#3987e5; --accent-ink:#0b0b0b;
+  --accent:#ff5722; --accent-ink:#ffffff;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
 }
 
