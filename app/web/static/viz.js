@@ -58,7 +58,7 @@ export function seqBucket(value, max = 100, min = 0) {
 export const seqVar = (b) => (b === 0 ? 'var(--seq-0)' : `var(--seq-${b})`);
 // Steps 1–3 are pale on light / deep on dark; 4–7 the reverse. Label ink flips
 // with the step so text never sits at low contrast on its own fill.
-export const seqInk = (b) => (b >= 4 ? 'var(--seq-ink-dark)' : 'var(--seq-ink-light)');
+export const seqInk = (b) => (b >= 5 ? 'var(--seq-ink-dark)' : 'var(--seq-ink-light)');
 
 /* ---- shared tooltip --------------------------------------------------- */
 let tipEl = null;
@@ -323,7 +323,7 @@ export async function renderNav(el, current = '') {
   // the statistics from a signed-out visitor would be hiding them from the
   // people they are published for.
   const parts = [];
-  if (me.can.submit_requests) parts.push(link('/citizen', 'Submit a request'));
+  if (me.can.submit_requests && !me.authenticated) parts.push(link('/citizen', 'Submit a request'));
   if (me.can.view_statistics) parts.push(link('/statistics', 'Statistics'));
   if (me.authenticated) {
     if (me.can.view_analytics) parts.push(link('/dashboard', 'Dashboard'));

@@ -399,3 +399,7 @@ holes, and a reader would read a hole as "nobody here reported anything".
 ## Licence
 
 MIT — a Digital Public Good has to be forkable by any government that wants it.
+
+admin dashboard cred:
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin@123
