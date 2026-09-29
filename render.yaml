@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: complaint-portal
+    env: python
+    pythonVersion: 3.10
+    buildCommand: pip install -r requirements.txt
+    startCommand: APP_DB=:memory: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    port: 8000
+    envVars:
+      - key: GROQ_API_KEY
+        scope: build,runtime
