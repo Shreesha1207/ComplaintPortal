@@ -320,9 +320,41 @@ def test_multipart_body_is_well_formed():
     assert b'name="model"' in body and b'name="language"' in body
     assert b'name="skipme"' not in body           # None fields are dropped
     assert b'filename="audio.webm"' in body
-    assert b"Content-Type: video/webm" in body or b"Content-Type: audio/webm" in body
+    assert b"Content-Type: audio/webm" in body
     assert b"AUDIOBYTES" in body
     assert body.endswith(f"--{boundary}--\r\n".encode())
+    mp4_body, _ = _multipart({}, "audio.mp4", b"AUDIOBYTES")
+    assert b"Content-Type: audio/mp4" in mp4_body
+
+
+def test_groq_transcription_request_uses_app_user_agent(monkeypatch):
+    from app.ai.speech import GroqWhisper
+
+    monkeypatch.setenv("GROQ_API_KEY", "k")
+    captured = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def read(self):
+            return b'{"text":"ok","language":"en"}'
+
+    def fake_urlopen(request, timeout):
+        captured["request"] = request
+        return Response()
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    result = GroqWhisper().transcribe(b"audio", "audio.webm")
+
+    request = captured["request"]
+    assert request.full_url.endswith("/audio/transcriptions")
+    assert request.get_header("User-agent") == "ComplaintPortal/0.1"
+    assert request.get_header("Content-type").startswith("multipart/form-data;")
+    assert result["text"] == "ok"
 
 
 def test_transcription_failure_is_reported_not_swallowed():

@@ -62,6 +62,17 @@ TIMEOUT = float(os.getenv("SPEECH_TIMEOUT", "45"))
 # Groq accepts flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm.
 # Browsers record webm/opus (Chrome, Firefox) or mp4/m4a (Safari).
 MAX_AUDIO_BYTES = int(os.getenv("SPEECH_MAX_BYTES", str(24 * 1024 * 1024)))
+_AUDIO_CONTENT_TYPES = {
+    ".flac": "audio/flac",
+    ".m4a": "audio/mp4",
+    ".mp3": "audio/mpeg",
+    ".mp4": "audio/mp4",
+    ".mpeg": "audio/mpeg",
+    ".mpga": "audio/mpeg",
+    ".ogg": "audio/ogg",
+    ".wav": "audio/wav",
+    ".webm": "audio/webm",
+}
 
 
 class SpeechError(RuntimeError):
@@ -85,7 +96,10 @@ def _multipart(fields: dict[str, str], filename: str, content: bytes,
         parts += [sep,
                   f'Content-Disposition: form-data; name="{key}"'.encode(),
                   b"", str(value).encode("utf-8")]
-    ctype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    extension = os.path.splitext(filename)[1].lower()
+    ctype = (_AUDIO_CONTENT_TYPES.get(extension)
+             or mimetypes.guess_type(filename)[0]
+             or "application/octet-stream")
     parts += [sep,
               f'Content-Disposition: form-data; name="{file_field}"; '
               f'filename="{filename}"'.encode(),
@@ -142,7 +156,8 @@ class GroqWhisper(SpeechProvider):
             filename, audio)
         req = urllib.request.Request(
             f"{GROQ_BASE_URL}/audio/transcriptions", data=body,
-            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": ctype},
+            headers={"Authorization": f"Bearer {self.api_key}",
+                     "Content-Type": ctype, "User-Agent": "ComplaintPortal/0.1"},
             method="POST")
         try:
             with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
